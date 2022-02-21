@@ -3,7 +3,8 @@ void FlyOnPluginStart() {
 	RegConsoleCmd("sm_go", FlyCommand);
 	RegConsoleCmd("sm_fly", FlyCommand);
 	RegConsoleCmd("sm_efly", FlyCommand);
-	RegConsoleCmd("player_ping", AimFly);
+	AddCommandListener(AimFly, "chatwheel_ping");
+	AddCommandListener(AimFly, "player_ping");
 }
 
 Action FlyCommand(int client, int args) {
