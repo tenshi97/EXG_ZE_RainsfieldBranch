@@ -10,31 +10,34 @@ def print_hi(name):
 import time;
 import json;
 import sqlite3;
-sql = 'INSERT INTO ZEMAPS (ID,NAME,CN_NAME,COOLDOWN,LAST_RUN_TIME,AVAILABLE,COST,HEAT,DIFFICULTY,TAG,ROUND,WINS,TRANSLATED,DOWNLOAD) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
-db = sqlite3.connect('E:/csgo_db/exg_csgo.db')
-map_names = open ("mapcycle.txt",'r',encoding='utf-8-sig',errors='ignore')
-map_config = open("mapconfig.json", 'w', encoding='utf-8', errors='ignore')
-map_name_translation = open("map_name.json",'w',encoding='utf-8',errors='ignore');
-id = 0;
-key =0;
-map_L=[];
-map_T=[];
-map_info_load=[];
+# sql = 'INSERT INTO ZEMAPS (ID,NAME,CN_NAME,COOLDOWN,LAST_RUN_TIME,AVAILABLE,COST,HEAT,DIFFICULTY,TAG,ROUND,WINS,TRANSLATED,DOWNLOAD) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+#sql = 'INSERT INTO ZEMAPS (ID,NAME) VALUES(NULL,"ze_ponchermonkey_shooter_csgo1")'
+sql = 'UPDATE '
+db = sqlite3.connect('E:/csgo_db/exg_csgo_ry.sq3')
+# map_names = open ("mapcycle.txt",'r',encoding='utf-8-sig',errors='ignore')
+# map_config = open("mapconfig.json", 'w', encoding='utf-8', errors='ignore')
+# map_name_translation = open("map_name.json",'w',encoding='utf-8',errors='ignore');
+# id = 0;
+# key =0;
+# map_L=[];
+# map_T=[];
+# map_info_load=[];
 # 按间距中的绿色按钮以运行脚本。
-for lines in map_names:
-    id+=1;
-    map_property = {'id':id,'original':lines.rstrip(),'translation':'','cd':720,'last_run_time':int(time.time()),'available':1,'cost':0,'heat':0,'difficulty':0,'tag':0,'round':0,'wins':0,'translated':0,'download':0}
-    map_translation = {'key':id,'original':lines.rstrip()}
-    map_L.append(map_property);
-    map_T.append(map_translation);
-map_L_data = json.dumps(map_L,indent=4,ensure_ascii=False);
-map_T_data = json.dumps(map_T,indent=4,ensure_ascii=False);
-map_config.write(map_L_data);
-map_name_translation.write(map_T_data);
+# for lines in map_names:
+#     id+=1;
+#     map_property = {'id':id,'original':lines.rstrip(),'translation':'','cd':720,'last_run_time':int(time.time()),'available':1,'cost':0,'heat':0,'difficulty':0,'tag':0,'round':0,'wins':0,'translated':0,'download':0}
+#     map_translation = {'key':id,'original':lines.rstrip()}
+#     map_L.append(map_property);
+#     map_T.append(map_translation);
+# map_L_data = json.dumps(map_L,indent=4,ensure_ascii=False);
+# map_T_data = json.dumps(map_T,indent=4,ensure_ascii=False);
+# map_config.write(map_L_data);
+# map_name_translation.write(map_T_data);
 dbc = db.cursor();
-for ele in map_L:
-    map_info = list(ele.values());
-    print(map_info);
-    dbc.execute(sql,map_info);
+# for ele in map_L:
+#     map_info = list(ele.values());
+#     print(map_info);
+#     dbc.execute(sql,map_info);
+db.execute(sql);
 db.commit();
 # 访问 https://www.jetbrains.com/help/pycharm/ 获取 PyCharm 帮助

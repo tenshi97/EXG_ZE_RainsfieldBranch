@@ -18,8 +18,8 @@ Action FlyCommand(int client, int args) {
 	FlyTarget(client, FindTarget(client, arg, true, false));
 	return Plugin_Handled;
 }
-
-Action AimFly(int client, int args)	{
+public Action AimFly(int client, const char[] command, int argc)
+{
 	if (Round.Infected)	return Plugin_Handled;
 	int target;
 	target = GetClientAimTarget(client,true);
@@ -33,13 +33,14 @@ Action AimFly(int client, int args)	{
 	}
 	return Plugin_Handled;
 }
+
 void FlyMenu(int client) {
 	Menu menu = CreateMenu(FlyMenuHandler);
 	menu.SetTitle("开局传送-选择传送目标");
 	char index[4], name[64];
 	for (int i = 1; i <= MaxClients; i++) {
 		if (i == client) continue;
-		if (!IsValidHuman(i)) continue;
+		if (!IsValidHumanorBot(i)) continue;
 		IntToString(i, index, sizeof(index));
 		GetClientName(i, name, sizeof(name));
 		menu.AddItem(index, name);
@@ -73,12 +74,15 @@ void FlyTarget(int client, int target) {
 		PrintCenterText(client, "[开局传送失败: 活人才能使用]");
 		return;
 	}
-	if (!IsValidHuman(target)) {
+	if (!IsValidHumanorBot(target)) {
 		PrintCenterText(client, "[开局传送失败: 不可传送僵尸]");
 		return;
 	}
 	float ori[3], ang[3];
+	char name[64];
 	GetClientAbsOrigin(target, ori);
 	GetClientEyeAngles(target, ang);
+	GetClientName(target,name,sizeof(name));
 	TeleportEntity(client, ori, ang, NULL_VECTOR);
+	PrintCenterText(client,"[飞雷神启动：飞向%s]",name);
 }
