@@ -256,7 +256,7 @@ void AttemptInstantRTV(int client)
 	RTV_PlayerNeeded = Max(RTV_PlayerNeeded,1);	
 	if(g_RTV_PlyVoted[client])
 	{
-		Format(buffer,sizeof(buffer)," \x05[EMC]\x01您已要求立即换图(当前%d票，还需%d票",g_RTV_VotesNum,RTV_PlayerNeeded);
+		Format(buffer,sizeof(buffer)," \x05[EMC]\x01您已要求立即换图(当前%d票，还需%d票)",g_RTV_VotesNum,RTV_PlayerNeeded);
 		PrintToChat(client,buffer);
 		return;
 	}
