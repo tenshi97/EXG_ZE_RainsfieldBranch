@@ -304,7 +304,7 @@ void MapAdminConfigMenu(int client)
 	Format(buffer,sizeof(buffer),"地图订价(积分):%d",Cmap.cost);
 	menu.AddItem("",buffer);
 	Format(buffer,sizeof(buffer),"难度:%s",difficulty_name[Cmap.difficulty]);
-	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+	menu.AddItem("",buffer);
 	Format(buffer,sizeof(buffer),"开放订阅:%s",Cmap.available?"是":"否");
 	menu.AddItem("",buffer);
 	Format(buffer,sizeof(buffer),"已添加下载:%s",Cmap.download?"是":"否");
