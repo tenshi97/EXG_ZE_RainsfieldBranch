@@ -260,6 +260,7 @@ void AttemptInstantRTV(int client)
 		PrintToChat(client,buffer);
 		return;
 	}
+	g_RTV_PlyVoted[client]=true;
 	g_RTV_VotesNum++;
 	char clientname[256];
 	GetClientName(client,clientname,sizeof(clientname));
