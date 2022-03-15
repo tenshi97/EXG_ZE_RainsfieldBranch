@@ -1,6 +1,6 @@
 ConVar g_Cvar_RTV_MaxRounds;
 ConVar g_Cvar_RTV_PlayerNeededRatio;
-int g_RTV_TotalPlayer;
+
 int g_RTV_VotesNum;
 int g_RTV_Rounds;
 bool g_RTV_PlyaerVoted[65];
@@ -78,7 +78,7 @@ void RTVOnMapStart()
 void RTVOnMapEnd()
 {
 	PrintToChatAll("[RTVOnMapEnd]");
-	g_RTV_TotalPlayer = 0;
+
 	g_ChangeMap_Time = MapChangeTime_MapEnd;
 }
 void ResetRTV()
@@ -148,26 +148,20 @@ public void OnClientSayCommand_Post(int client, const char[] command, const char
 	}
 
 }
-public void RTVOnClientConnected(int client)
-{
-	if(!IsFakeClient(client))
-	{
-		g_RTV_TotalPlayer++;
-	}
-}
+
 public void RTVOnClientDisconnect(int client)
 {
 	if(!IsFakeClient(client))
 	{
-		g_RTV_TotalPlayer--;
+	
 		if(g_RTV_PlyaerVoted[client])
 		{
 			g_RTV_PlyaerVoted[client]=false;
 			g_RTV_VotesNum--;
 		}
 	}
-	if(g_RTV_TotalPlayer == 0)	return;
-	if(g_RTV_VotesNum>=g_RTV_TotalPlayer)
+	if(GetClientCount(true) == 0)	return;
+	if(g_RTV_VotesNum>=GetClientCount(true))
 	{
 		if(g_Instant_RTV)
 		{
@@ -233,7 +227,7 @@ void AttemptRTV(int client)
 	}
 	int RTV_PlayerNeeded;
 
-	RTV_PlayerNeeded = RoundToFloor(g_RTV_TotalPlayer * GetConVarFloat(g_Cvar_RTV_PlayerNeededRatio)); 
+	RTV_PlayerNeeded = RoundToFloor(GetClientCount(true) * GetConVarFloat(g_Cvar_RTV_PlayerNeededRatio)); 
 	RTV_PlayerNeeded = Max(RTV_PlayerNeeded,1);
 	if(g_RTV_PlyaerVoted[client])
 	{
@@ -256,7 +250,7 @@ void AttemptInstantRTV(int client)
 {
 	char buffer[256];
 	int RTV_PlayerNeeded;
-	RTV_PlayerNeeded = RoundToFloor(g_RTV_TotalPlayer * GetConVarFloat(g_Cvar_RTV_PlayerNeededRatio)); 
+	RTV_PlayerNeeded = RoundToFloor(GetClientCount(true) * GetConVarFloat(g_Cvar_RTV_PlayerNeededRatio)); 
 	RTV_PlayerNeeded = Max(RTV_PlayerNeeded,1);	
 	if(g_RTV_PlyaerVoted[client])
 	{
@@ -277,7 +271,7 @@ void AttemptInstantRTV(int client)
 }
 void StartMapVote(MapChangeTime when)
 {
-	if(g_RTV_TotalPlayer == 0)	return;
+	if(GetClientCount(true) == 0)	return;
 	Nominate_ALLOW = false;
 	g_MapVote_Initiated = true;
 	PrintToChatAll(" \x05[EMC]\x01 10秒后开启下张地图投票");
@@ -307,7 +301,7 @@ void CreateNextMapVote()
 {
 	int Random_Num;
 	char buffer[256];
-	if(g_RTV_TotalPlayer == 0)	return;
+	if(GetClientCount(true) == 0)	return;
 	Random_Num = Min(Nominate_Max_Num-Nom_Map_List.Length,5);
 	Nominate_ALLOW=false;
 	Menu menu = CreateMenu(NextMapVoteHandler, MenuAction_End | MenuAction_Display | MenuAction_DisplayItem | MenuAction_VoteCancel);
