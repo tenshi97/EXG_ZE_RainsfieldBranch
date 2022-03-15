@@ -3,7 +3,7 @@ ConVar g_Cvar_RTV_PlayerNeededRatio;
 
 int g_RTV_VotesNum;
 int g_RTV_Rounds;
-bool g_RTV_PlyaerVoted[65];
+bool g_RTV_PlyVoted[65];
 bool g_Allow_RTV;
 bool g_RTV_Confirmed;
 bool g_Nextmap_Selected;
@@ -94,7 +94,7 @@ void ResetRTV()
 	KillTimerSafe(g_WTimer_BeforeVote);
 	for(int i = 1 ; i<=MaxClients ; i++)
 	{
-		g_RTV_PlyaerVoted[i] = false;
+		g_RTV_PlyVoted[i] = false;
 	}
 	g_RTV_VotesNum=0;
 	g_RTV_Confirmed = false;
@@ -154,9 +154,9 @@ public void RTVOnClientDisconnect(int client)
 	if(!IsFakeClient(client))
 	{
 	
-		if(g_RTV_PlyaerVoted[client])
+		if(g_RTV_PlyVoted[client])
 		{
-			g_RTV_PlyaerVoted[client]=false;
+			g_RTV_PlyVoted[client]=false;
 			g_RTV_VotesNum--;
 		}
 	}
@@ -229,7 +229,7 @@ void AttemptRTV(int client)
 
 	RTV_PlayerNeeded = RoundToFloor(GetClientCount(true) * GetConVarFloat(g_Cvar_RTV_PlayerNeededRatio)); 
 	RTV_PlayerNeeded = Max(RTV_PlayerNeeded,1);
-	if(g_RTV_PlyaerVoted[client])
+	if(g_RTV_PlyVoted[client])
 	{
 		Format(buffer,sizeof(buffer)," \x05[EMC]\x01您已要求发起换图投票(当前%d票，还需%d票",g_RTV_VotesNum,RTV_PlayerNeeded);
 		PrintToChat(client,buffer);
@@ -241,7 +241,7 @@ void AttemptRTV(int client)
 
 	Format(buffer,sizeof(buffer)," \x05[EMC]\x01%s要求发起换图投票:%d票/%d票(仍需%d票)",clientname,g_RTV_VotesNum,RTV_PlayerNeeded,RTV_PlayerNeeded-g_RTV_VotesNum);
 	PrintToChatAll(buffer);
-	g_RTV_PlayerVoted[client]=true;
+	g_RTV_PlyVoted[client]=true;
 	if(g_RTV_VotesNum>=RTV_PlayerNeeded)
 	{
 		g_Allow_RTV = false;
@@ -254,7 +254,7 @@ void AttemptInstantRTV(int client)
 	int RTV_PlayerNeeded;
 	RTV_PlayerNeeded = RoundToFloor(GetClientCount(true) * GetConVarFloat(g_Cvar_RTV_PlayerNeededRatio)); 
 	RTV_PlayerNeeded = Max(RTV_PlayerNeeded,1);	
-	if(g_RTV_PlyaerVoted[client])
+	if(g_RTV_PlyVoted[client])
 	{
 		Format(buffer,sizeof(buffer)," \x05[EMC]\x01您已要求立即换图(当前%d票，还需%d票",g_RTV_VotesNum,RTV_PlayerNeeded);
 		PrintToChat(client,buffer);

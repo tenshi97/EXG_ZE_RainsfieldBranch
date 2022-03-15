@@ -99,14 +99,14 @@ void NominateMapMenu(int client,char trie_search[PLATFORM_MAX_PATH]="")
 			PrintToChat(client,"\x05预定地图：找不到匹配地图");
 			return;
 		}
-		if(menu.ItemCount == 1)
+		else if(menu.ItemCount == 1)
 		{
 			menu.GetItem(0, map.name, sizeof(map.name));
 			menu.Close();
 			Maps.GetArray(map.name,map,sizeof(map));
 			NomMapInfoMenu(client,map);
 		}
-		if(menu.ItemCount > 1)
+		else if(menu.ItemCount > 1)
 		{
 			menu.Display(client, MENU_TIME_FOREVER);			
 		}
