@@ -349,7 +349,7 @@ void CancelNom(int index,int opt)
 	{
 		GetClientName(opt,opt_name,sizeof(opt_name));
 		Format(buffer,sizeof(buffer),"[EMC]%s强制取消了%s预定的%s",opt_name,nom_log.nominator_name,nom_log.name);
-		for(int i = 0;i < MaxClients;i++)
+		for(int i = 1;i < MaxClients;i++)
 		{
 			if(GetSteamAccountID(i,true)==nom_log.nominator_steamid)
 			{
