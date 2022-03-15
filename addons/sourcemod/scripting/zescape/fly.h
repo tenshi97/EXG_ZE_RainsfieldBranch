@@ -3,8 +3,8 @@ void FlyOnPluginStart() {
 	RegConsoleCmd("sm_go", FlyCommand);
 	RegConsoleCmd("sm_fly", FlyCommand);
 	RegConsoleCmd("sm_efly", FlyCommand);
-	AddCommandListener(AimFly, "chatwheel_ping");
-	AddCommandListener(AimFly, "player_ping");
+//	AddCommandListener(AimFly, "chatwheel_ping");
+//	AddCommandListener(AimFly, "player_ping");
 }
 
 Action FlyCommand(int client, int args) {
@@ -18,6 +18,7 @@ Action FlyCommand(int client, int args) {
 	FlyTarget(client, FindTarget(client, arg, true, false));
 	return Plugin_Handled;
 }
+/*
 public Action AimFly(int client, const char[] command, int argc)
 {
 	if (Round.Infected)	return Plugin_Handled;
@@ -33,7 +34,7 @@ public Action AimFly(int client, const char[] command, int argc)
 	}
 	return Plugin_Handled;
 }
-
+*/
 void FlyMenu(int client) {
 	Menu menu = CreateMenu(FlyMenuHandler);
 	menu.SetTitle("开局传送-选择传送目标");
