@@ -391,6 +391,9 @@ void CreateNextMapVote()
 }
 int NextMapVoteHandler(Menu menu, MenuAction action, int param1, int param2) 
 {
+	Maps_VoteInfo mapv;
+	int nominator_credits;
+	int credits_return;
 	char buffer[256];
 	if (action == MenuAction_End)
 	{
