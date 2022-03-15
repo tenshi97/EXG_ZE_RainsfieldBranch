@@ -10,17 +10,19 @@ def print_hi(name):
 import time;
 import json;
 import sqlite3;
-db = sqlite3.connect('E:/csgo_db/exg_csgo.db')
+db = sqlite3.connect('D:/Steam/steamapps/common/Counter-Strike Global Offensive/csgo/addons/sourcemod/data/sqlite/exg_csgo_ry.sq3')
 map_data = open ("E:/csgo_db/map_name.json",'r',encoding='utf-8-sig',errors='ignore')
-sql = 'UPDATE ZEMAPS SET CN_NAME = ? WHERE NAME = ?'
+#sql = 'UPDATE ZEMAPS SET CN_NAME = ? WHERE NAME = ?'
+sql = 'UPDATE ZEMAPS SET CN_NAME = "" WHERE CN_NAME = "fuckmako"'
 map_lang = json.load(map_data)
-dbc=db.cursor();
+dbc=db.cursor();32
 map_load_info=[]
 for ele in map_lang:
     map_load_info.clear()
     map_info = list(ele.values());
     map_load_info.append(map_info[2]);
     map_load_info.append(map_info[1]);
-    dbc.execute(sql,map_load_info)
+ #   dbc.execute(sql,map_load_info)
+dbc.execute(sql);
 db.commit()
 # 访问 https://www.jetbrains.com/help/pycharm/ 获取 PyCharm 帮助

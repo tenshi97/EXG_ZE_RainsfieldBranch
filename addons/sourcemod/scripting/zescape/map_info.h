@@ -1,31 +1,50 @@
-Map_Info MapInfo;
-char difficulty_name[5][10]={"简单","普通","困难","高难","极难"};
+//Maps:Global Map StringMap in map_adm.h
+Map_Info Pmap;
 bool Current_Map_Loaded = false;
+ConVar Cvar_MP_TIMELIMIT;
 void MapInfoOnPluginStart(){
 	RegConsoleCmd("sm_mi", ActionMapInfoMenu);
 	RegConsoleCmd("sm_mapinfo", ActionMapInfoMenu);
 	Current_Map_Loaded = false;
+	Cvar_MP_TIMELIMIT = FindConVar("mp_timelimit");
 }
 void MapInfoOnMapStart(){
 	Current_Map_Loaded = false;
 }
-void MapInfoOnDbConnected(){
+void MapInfoOnDbConnected_MapStartPost(){
 	char map_name[64];
-	char query[256];
+	int Time_MapStart = 0;
+	if(Current_Map_Loaded)	return;
 	GetCurrentMap(map_name,sizeof(map_name));
-	Format(query,sizeof(query),"SELECT * FROM ZEMAPS WHERE NAME='%s'",map_name);
-	DbTQuery(CurrentMapInfoCallback,query);
-	Current_Map_Loaded = true;
+	if(Maps.GetArray(map_name,Pmap,sizeof(Pmap)))
+	{
+		PrintToServer("[当前地图信息读取完毕]");
+		Time_MapStart = GetTime();
+		if(!Current_Map_Loaded)
+		{
+			Pmap.round += 1;
+			Pmap.last_run_time = Time_MapStart;
+		}
+		Pmap.temp_cooldown = false;
+		MapCfgUpdate(Pmap);
+		Cvar_MP_TIMELIMIT.SetFloat(float(Pmap.timelimit),true,false);
+		Current_Map_Loaded = true;
+	}
+	else
+	{
+		PrintToServer("[地图信息读取失败:地图信息不存在]");		
+		Current_Map_Loaded = false;
+	}
 }
 
 Action ActionMapInfoMenu(int client,int args)
 {
 	if(!Current_Map_Loaded)
 	{
-		PrintCenterText(client,"[地图信息读取失败:尚未加载]");
+		PrintToServer("[地图信息读取失败:尚未加载 重试中...]");
+		MapInfoOnDbConnected_MapStartPost();
 		return Plugin_Handled;
 	}
-	PrintToChatAll("test");
 	MakeMapInfoMenu(client);
 	return Plugin_Handled;
 }
@@ -37,54 +56,16 @@ void MakeMapInfoMenu(int client){
 		地图难度:%s\n\
 		地图胜负:%d胜%d负\n\
 		地图热度:%d\n\
-		地图订价:%d",MapInfo.name,MapInfo.name_cn,difficulty_name[MapInfo.difficulty],MapInfo.wins,MapInfo.round-MapInfo.wins,MapInfo.heat,MapInfo.cost);
+		地图订价:%d",Pmap.name,Pmap.name_cn,difficulty_name[Pmap.difficulty],Pmap.wins,Pmap.round-Pmap.wins,Pmap.heat,Pmap.cost);
 	Menu menu = CreateMenu(MapInfoMenuHandler);
 	menu.SetTitle(title);
-	menu.AddItem("","关闭");
-	menu.ExitBackButton = true;
+	Format(title,sizeof(title),"回合时长:%d",Pmap.roundtime);
+	menu.AddItem("",title,ITEMDRAW_DISABLED);
+	Format(title,sizeof(title),"地图时长:%d",Pmap.timelimit);
+	menu.AddItem("",title,ITEMDRAW_DISABLED);
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
 int MapInfoMenuHandler(Menu menu, MenuAction action, int client, int param) {
 	if (action == MenuAction_End) menu.Close();
-	else if (action == MenuAction_Select)	menu.Close();
-}
-
-void CurrentMapInfoCallback(Handle owner, Handle hndl, char[] error, any data) {
-	if (owner == INVALID_HANDLE || hndl == INVALID_HANDLE)	SetFailState("数据库错误: %s", error);
-	if (!SQL_GetRowCount(hndl)) {
-		PrintToChatAll("当前地图信息未录入");
-		return;
-	}
-	int field;
-	if (!SQL_FieldNameToNum(hndl, "ID", field)) SetFailState("数据库错误: 未知列: id");
-	MapInfo.id = SQL_FetchInt(hndl, field);
-	if (!SQL_FieldNameToNum(hndl, "NAME", field)) SetFailState("数据库错误: 未知列: name");
-	SQL_FetchString(hndl, field,MapInfo.name,sizeof(MapInfo.name));
-	if (!SQL_FieldNameToNum(hndl, "CN_NAME", field)) SetFailState("数据库错误: 未知列: cn_name");
-	SQL_FetchString(hndl, field,MapInfo.name_cn,sizeof(MapInfo.name_cn));
-	if (!SQL_FieldNameToNum(hndl, "COOLDOWN", field)) SetFailState("数据库错误: 未知列: cooldown");
-	MapInfo.cooldown = SQL_FetchInt(hndl, field);
-	if (!SQL_FieldNameToNum(hndl, "LAST_RUN_TIME", field)) SetFailState("数据库错误: 未知列: last_run_time");
-	MapInfo.last_run_time = SQL_FetchInt(hndl, field);
-	if (!SQL_FieldNameToNum(hndl, "AVAILABLE", field)) SetFailState("数据库错误: 未知列: available");
-	MapInfo.available = SQL_FetchInt(hndl, field);
-	if (!SQL_FieldNameToNum(hndl, "COST", field)) SetFailState("数据库错误: 未知列: cost");
-	MapInfo.cost = SQL_FetchInt(hndl, field);
-	if (!SQL_FieldNameToNum(hndl, "HEAT", field)) SetFailState("数据库错误: 未知列: heat");
-	MapInfo.heat = SQL_FetchInt(hndl, field);
-	if (!SQL_FieldNameToNum(hndl, "DIFFICULTY", field)) SetFailState("数据库错误: 未知列: difficulty");
-	MapInfo.difficulty = SQL_FetchInt(hndl, field);
-	if (!SQL_FieldNameToNum(hndl, "TAG", field)) SetFailState("数据库错误: 未知列: tag");
-	MapInfo.tag = SQL_FetchInt(hndl, field);
-	if (!SQL_FieldNameToNum(hndl, "ROUND", field)) SetFailState("数据库错误: 未知列: round");
-	MapInfo.round = SQL_FetchInt(hndl, field);
-	if (!SQL_FieldNameToNum(hndl, "WINS", field)) SetFailState("数据库错误: 未知列: wins");
-	MapInfo.wins = SQL_FetchInt(hndl, field);
-	if (!SQL_FieldNameToNum(hndl, "TRANSLATED", field)) SetFailState("数据库错误: 未知列: translated");
-	MapInfo.translated = SQL_FetchInt(hndl, field);
-	if (!SQL_FieldNameToNum(hndl, "DOWNLOAD", field)) SetFailState("数据库错误: 未知列: download");
-	MapInfo.download = SQL_FetchInt(hndl, field);	
-	Current_Map_Loaded = true;
-	return;
 }

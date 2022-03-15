@@ -22,8 +22,7 @@ void DbTQuery(SQLTCallback callback, const char[] query, any data = 0, DBPriorit
 
 void DbOnDbConnected_MapStartPost()
 {
-	MapAdmOnDbConnected();
-	MapInfoOnDbConnected();
+	MapAdmOnDbConnected_MapStartPost();
 }
 
 void Db_Close()

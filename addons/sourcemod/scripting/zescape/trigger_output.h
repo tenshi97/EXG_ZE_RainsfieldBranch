@@ -19,10 +19,8 @@ enum struct Map_Info
 	int timelimit;
 	int infecttime;
 	int random;
-	int extend;
-	bool temp_cooldown;
+	bool temp_nominate;
 }
-char difficulty_name[5][10]={"简单","普通","困难","高难","极难"};
 enum struct Map_Log
 {
 	int id;
@@ -34,8 +32,6 @@ StringMap Maps;
 ArrayList Map_List;
 Map_Info Cmap;
 bool g_Map_Loaded;
-bool g_Admin_Editing;
-ConVar Cvar_SM_NEXTMAP;
 int MapListArraySort(int index1,int index2,Handle array,Handle hndl)
 {
 	Map_Log map1,map2;
@@ -47,15 +43,12 @@ void MapAdmOnMapEnd()
 {
 	PrintToServer("[MapAdm MapEnd]");
 	g_Map_Loaded = false;
-	g_Admin_Editing = false;
 }
 void MapAdmOnPluginStart() 
 {
-	g_Admin_Editing = false;
 	g_Map_Loaded = false;
 	Maps = CreateTrie();
 	Map_List = CreateArray(sizeof(Map_Log));
-	Cvar_SM_NEXTMAP = FindConVar("sm_nextmap");
 	RegAdminCmd("sm_mdr",MapDataReloadCommand,ADMFLAG_GENERIC);
 	RegAdminCmd("sm_mapdatareload",MapDataReloadCommand,ADMFLAG_GENERIC);
 	RegAdminCmd("sm_mfr",MapFileReloadCommand,ADMFLAG_GENERIC);
@@ -63,9 +56,8 @@ void MapAdmOnPluginStart()
 	RegAdminCmd("sm_ma",MapAdminCommand,ADMFLAG_GENERIC);
 	RegAdminCmd("sm_mapadmin",MapAdminCommand,ADMFLAG_GENERIC);
 	RegAdminCmd("sm_mapnamecn_update",MapNamecnCommand,ADMFLAG_GENERIC);
-	RegAdminCmd("sm_mapcd_update",MapCooldownCommand,ADMFLAG_GENERIC);
+	RegAdminCmd("sm_mapcd_update",MapNamecnCommand,ADMFLAG_GENERIC);
 	RegAdminCmd("sm_mapcost_update",MapCostCommand,ADMFLAG_GENERIC);
-	RegAdminCmd("sm_resetma",MapAdminResetCommand,ADMFLAG_GENERIC);
 }
 void MapAdmOnDbConnected_MapStartPost()
 {
@@ -99,15 +91,12 @@ void MapDataReload()
 
 void MapDataLoadCallback(Handle owner, Handle hndl, char[] error, any data)
 {
-	Map_List.Clear();
 	if (owner == INVALID_HANDLE || hndl == INVALID_HANDLE)	SetFailState("数据库错误: %s", error);
-	PrintToServer("[test]1 MDL");
 	if (!SQL_GetRowCount(hndl)) {
 		PrintToChatAll("当前地图信息未录入");
 		return;
 	}
 	else PrintToServer("DataLoading");
-	char buffer[256];
 	while (SQL_FetchRow(hndl)) {
 		Map_Info map;
 		Map_Log mapl;
@@ -131,28 +120,23 @@ void MapDataLoadCallback(Handle owner, Handle hndl, char[] error, any data)
 		map.roundtime = DbFetchInt(hndl, "ROUNDTIME");		
 		map.timelimit = DbFetchInt(hndl, "TIMELIMIT");		
 		map.infecttime = DbFetchInt(hndl, "INFECTTIME");	
-		map.random = DbFetchInt(hndl, "RANDOM");			
+		map.infecttime = DbFetchInt(hndl, "RANDOM");			
 		map.exist = 0;
-		map.extend = DbFetchInt(hndl, "EXTEND");	
 		Maps.SetArray(map.name, map, sizeof(map), true);
-		Format(buffer,sizeof(buffer),"[MapDataLoad]Added Map List:%s",mapl.name);
-		PrintToServer(buffer);
 		Map_List.PushArray(mapl,sizeof(mapl));
 		if(map.id>Map_Id_Max)	Map_Id_Max = map.id;
-		map.temp_cooldown = false;
+		if(!g_Map_Loaded)	map.temp_nominate = false;
 		//PrintToServer("%d %s",map.id,map.name);
 	}	
 	MapFileReload();
 }
 void MapFileReload()
 {
-	PrintToServer("[test]2 MFL");
 	DirectoryListing dl = OpenDirectory("maps", false);
 	if (!dl) SetFailState("Map File Load Failed");
 	char file_name[PLATFORM_MAX_PATH];
 	FileType type;
 	int index;
-	char buffer[256];
 	while(dl.GetNext(file_name,sizeof(file_name),type))
 	{
 		if(type!=FileType_File)	continue;
@@ -167,27 +151,23 @@ void MapFileReload()
 			Map_Id_Max++;
 			map.id = Map_Id_Max;
 			map.exist = 1;	
-			map.extend = 3;
-			map.temp_cooldown = false;
-			Maps.SetArray(map.name,map,sizeof(map),true);
 			//PrintToServer("New Map:%d %s",map.id,map.name);
 			NewMapFileUpdate(map);
-			mapl.id = map.id;
+			map.id = map.id;
 			mapl.name = map.name;
+			if(!g_Map_Loaded)	map.temp_nominate = false;
 			Map_List.PushArray(mapl,sizeof(mapl));
-			Format(buffer,sizeof(buffer),"[MapFileLoad]Added Map List:%s",mapl.name);
-			PrintToServer(buffer);
 		}
-		else
-		{
-			map.exist = 1;
-			Maps.SetArray(map.name,map,sizeof(map),true);
-		}
+		map.exist = 1;	
 	}
 	Map_List.SortCustom(MapListArraySort);
 	ResetFileExist();
-	PrintToServer("[test]4 MFE END");
-	MapInfoOnDbConnected_MapStartPost();
+	if(!g_Map_Loaded)
+	{
+		MapInfoOnDbConnected_MapStartPost();
+		PrintToServer("[地图管理:地图载入完成]");
+	}
+	g_Map_Loaded = true;
 }
 
 void NewMapFileUpdate(Map_Info map)
@@ -199,15 +179,13 @@ void NewMapFileUpdate(Map_Info map)
 
 void ResetFileExist()
 {
-	PrintToServer("[test]3 MFE");
 	StringMapSnapshot snap= Maps.Snapshot();
 	Map_Info map;
 	char query[256];
 	for (int i =0;i < snap.Length ; i++)
 	{
 		snap.GetKey(i, map.name, sizeof(map.name));
-		Maps.GetArray(map.name, map, sizeof(map));
-
+		Maps.GetArray(map.name, map, sizeof(map));	
 		Format(query,sizeof(query),"UPDATE ZEMAPS SET EXIST = %d where ID = %d",map.exist,map.id);
 		DbTQuery(DbQueryErrorCallback,query);		
 	}
@@ -220,25 +198,14 @@ Action MapAdminCommand(int client, int args) {
 		MapAdminMenu(client);
 		return Plugin_Handled;
 	}
-	if(!g_Admin_Editing)
-	{
-		PrintToServer("[地图管理:另一位管理正在编辑\n若遇到特殊情况可以使用!resetma]");
-	}
 	char arg[PLATFORM_MAX_PATH];
 	GetCmdArg(1, arg, sizeof(arg));
 	MapAdminMenu(client,arg);
 	return Plugin_Handled;
 }
 
-Action MapAdminResetCommand(int client, int args) {
-	if (!IsClientInGame(client)) return Plugin_Handled;
-	g_Admin_Editing = false;
-	return Plugin_Handled;
-}
-
 void MapAdminMenu(int client,char trie_search[PLATFORM_MAX_PATH]="")
 {
-	g_Admin_Editing = false;
 	Menu menu = CreateMenu(MapAdminMenuHandler);
 	Map_Log map;
 	menu.SetTitle("地图管理菜单");
@@ -252,9 +219,8 @@ void MapAdminMenu(int client,char trie_search[PLATFORM_MAX_PATH]="")
 	{
 		if(menu.ItemCount == 0)
 		{
-			g_Admin_Editing = false;
 			menu.Close();
-			PrintToChat(client,"\x05地图管理：找不到匹配地图");
+			PrintToChat(client,"\x04地图管理：找不到匹配地图");
 			return;
 		}
 		if(menu.ItemCount == 1)
@@ -262,18 +228,15 @@ void MapAdminMenu(int client,char trie_search[PLATFORM_MAX_PATH]="")
 			menu.GetItem(0, map.name, sizeof(map.name));
 			menu.Close();
 			Maps.GetArray(map.name,Cmap,sizeof(Cmap));
-			g_Admin_Editing =true;
 			MapAdminConfigMenu(client);
 		}
 		if(menu.ItemCount > 1)
 		{
-			g_Admin_Editing = true;
 			menu.Display(client, MENU_TIME_FOREVER);			
 		}
 	}
 	else
 	{
-		g_Admin_Editing = true;
 		menu.Display(client, MENU_TIME_FOREVER);
 	}
 }
@@ -294,8 +257,7 @@ void MapAdminConfigMenu(int client)
 	Menu menu = CreateMenu(MapAdminCfgHandler);
 	char buffer[PLATFORM_MAX_PATH];
 	char ctime[64];
-	FormatTime(ctime, 64, NULL_STRING,Cmap.last_run_time);
-	Format(buffer,sizeof(buffer),"地图管理:\n地图名:%s\n上次运行时间%s",Cmap.name,ctime);
+	Format(buffer,sizeof(buffer),"地图管理:\n地图名:%s",Cmap.name);
 	menu.SetTitle(buffer);
 	Format(buffer,sizeof(buffer),"地图译名:%s",Cmap.name_cn);
 	menu.AddItem("",buffer);
@@ -303,26 +265,15 @@ void MapAdminConfigMenu(int client)
 	menu.AddItem("",buffer);
 	Format(buffer,sizeof(buffer),"地图订价(积分):%d",Cmap.cost);
 	menu.AddItem("",buffer);
-	Format(buffer,sizeof(buffer),"难度:%s",difficulty_name[Cmap.difficulty]);
+	FormatTime(ctime, 64, NULL_STRING,Cmap.last_run_time);
+	Format(buffer,sizeof(buffer),"上次运行时间:%s",ctime);
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-	Format(buffer,sizeof(buffer),"开放订阅:%s",Cmap.available?"是":"否");
-	menu.AddItem("",buffer);
-	Format(buffer,sizeof(buffer),"已添加下载:%s",Cmap.download?"是":"否");
-	menu.AddItem("",buffer);
-	Format(buffer,sizeof(buffer),"能否野生出现:%s",Cmap.random?"是":"否");
-	menu.AddItem("",buffer);
-	Format(buffer,sizeof(buffer),"延长次数:%d",Cmap.extend);
-	menu.AddItem("",buffer);
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param) 
 {
 	char buffer[PLATFORM_MAX_PATH];
-	if (action == MenuAction_End)
-	{
-		g_Admin_Editing = false;
-		menu.Close();
-	}
+	if (action == MenuAction_End) menu.Close();
 	else if (action == MenuAction_Select)
 	{                             
 		if(param == 0)
@@ -335,57 +286,12 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 		{
 			MapCooldownMenu(client);
 		}
-		if(param == 2)
-		{
-			MapCostMenu(client);
-		}
-		if(param == 3)
-		{
-			Cmap.difficulty--;
-			if(Cmap.difficulty<0)
-			{
-				Cmap.difficulty = 4;
-			}
-			MapCfgUpdate(Cmap);
-			MapAdminConfigMenu(client);
-		}
-		if(param == 4)
-		{
-			if(Cmap.available == 1)	Cmap.available =0;
-			else Cmap.available = 1;
-			MapCfgUpdate(Cmap);
-			MapAdminConfigMenu(client);
-		}	
-		if(param == 5)
-		{
-			if(Cmap.download == 1)	Cmap.download =0;
-			else Cmap.download = 1;
-			MapCfgUpdate(Cmap);
-			MapAdminConfigMenu(client);
-		}	
-		if(param == 6)
-		{
-			if(Cmap.random == 1)	Cmap.random =0;
-			else Cmap.random =1;
-			MapCfgUpdate(Cmap);
-			MapAdminConfigMenu(client);
-		}
-		if(param == 7)
-		{
-			Cmap.extend--;
-			if(Cmap.extend<0)
-			{
-				Cmap.extend = 5;
-			}
-			MapCfgUpdate(Cmap);
-			MapAdminConfigMenu(client);
-		}
 	}	
 }
 void MapCfgUpdate(Map_Info map)
 {
 	char query[256];
-	Format(query,sizeof(query),"UPDATE ZEMAPS SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.id,map.name);
+	Format(query,sizeof(query),"UPDATE ZEMAPS SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.id,map.name);
 	PrintToServer(query);
 	DbTQuery(DbQueryErrorCallback,query);	
 	Map_Log mapl;
@@ -439,11 +345,7 @@ void MapCooldownMenu(int client)
 int MapCooldownCfgHandler(Menu menu, MenuAction action, int client, int param) 
 {
 	char buffer[256];
-	if (action == MenuAction_End)
-	{
-		g_Admin_Editing = false;
-		menu.Close();
-	}
+	if (action == MenuAction_End) menu.Close();
 	else if (param == MenuCancel_ExitBack) MapAdminConfigMenu(client);
 	else if (action == MenuAction_Select) {
 		if (param == 0) Cmap.cooldown = Max(0, Cmap.cooldown-10);
@@ -494,8 +396,8 @@ void MapCostMenu(int client)
 	Format(title,sizeof(title),"地图订价修改:\n%s\n当前订价:%d积分",Cmap.name,Cmap.cost);
 	menu.SetTitle(title);
 	menu.AddItem("","-10积分",Cmap.cost>0?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
-	menu.AddItem("","-50积分",Cmap.cost>0?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
-	menu.AddItem("","-200积分",Cmap.cost>0?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem("","-50积分",Cmap.costCmap.costCmap.cost>0?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem("","-200积分",Cmap.costCmap.cost>0?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem("","-1000积分",Cmap.cost>0?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem("","-5000积分",Cmap.cost>0?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem("","+10积分",Cmap.cost<10000?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
@@ -511,23 +413,19 @@ void MapCostMenu(int client)
 int MapCostCfgHandler(Menu menu, MenuAction action, int client, int param) 
 {
 	char buffer[256];
-	if (action == MenuAction_End)
-	{
-		g_Admin_Editing = false;
-		menu.Close();
-	}
+	if (action == MenuAction_End) menu.Close();
 	else if (param == MenuCancel_ExitBack) MapAdminConfigMenu(client);
 	else if (action == MenuAction_Select) {
-		if (param == 0) Cmap.cost = Max(0, Cmap.cost-10);
-		else if (param == 1) Cmap.cost = Max(0, Cmap.cost-50);
-		else if (param == 2) Cmap.cost = Max(0, Cmap.cost-200);
-		else if (param == 3) Cmap.cost = Max(0, Cmap.cost-1000);
-		else if (param == 4) Cmap.cost = Max(0, Cmap.cost-5000);
-		else if (param == 5) Cmap.cost = Min(10000, Cmap.cost+10);
-		else if (param == 6) Cmap.cost = Min(10000, Cmap.cost+50);
-		else if (param == 7) Cmap.cost = Min(10000, Cmap.cost+200);
-		else if (param == 8) Cmap.cost = Min(10000, Cmap.cost+1000);
-		else if (param == 9) Cmap.cost = Min(10000, Cmap.cost+5000);
+		if (param == 0) Cmap.cooldown = Max(0, Cmap.cost-10);
+		else if (param == 1) Cmap.cooldown = Max(0, Cmap.cost-50);
+		else if (param == 2) Cmap.cooldown = Max(0, Cmap.cost-200);
+		else if (param == 3) Cmap.cooldown = Max(0, Cmap.cost-1000);
+		else if (param == 4) Cmap.cooldown = Max(0, Cmap.cost-5000);
+		else if (param == 5) Cmap.cooldown = Min(10000, Cmap.cost+10);
+		else if (param == 6) Cmap.cooldown = Min(10000, Cmap.cost+50);
+		else if (param == 7) Cmap.cooldown = Min(10000, Cmap.cost+200);
+		else if (param == 8) Cmap.cooldown = Min(10000, Cmap.cost+1000);
+		else if (param == 9) Cmap.cooldown = Min(10000, Cmap.cost+5000);
 		else if (param == 10)
 		{
 			PrintToChat(client,"更改订价参数已发送至控制台");
@@ -535,7 +433,7 @@ int MapCostCfgHandler(Menu menu, MenuAction action, int client, int param)
 			PrintToServer(buffer);
 		}
 		MapCfgUpdate(Cmap);
-		MapCostMenu(client);
+		MapCoSTMenu(client);
 	}	
 }
 
@@ -554,7 +452,7 @@ Action MapCostCommand(int client,int args)
 		PrintToChat(client,"参数不合法，请输入0~10000间的数字");
 		return Plugin_Handled;
 	}
-	map.cost = n_cost;
+	map.cooldown = n_cost;
 	MapCfgUpdate(map);
 	return Plugin_Handled;
 }

@@ -16,10 +16,10 @@ void EventOnPluginStart() {
 	//HookEvent("player_falldamage", OnPlayerFall, EventHookMode_Post);
 	// HookEvent("cs_win_panel_round", OnWinPanelRound, EventHookMode_Pre);
 	HookEvent("round_prestart", OnRoundPreStart, EventHookMode_Post);
-	//HookEvent("round_start", OnRoundStart, EventHookMode_Post);
+	HookEvent("round_start", OnRoundStart, EventHookMode_Post);
 	//HookEvent("round_poststart", OnRoundPostStart, EventHookMode_Post);
 	HookEvent("round_freeze_end", OnRoundFreezeEnd, EventHookMode_Post);
-	//HookEvent("round_end", OnRoundEnd, EventHookMode_Post);
+	HookEvent("round_end", OnRoundEnd, EventHookMode_Post);
 }
 void OnRoundPreStart(Event event, const char[] name, bool dontBroadcast) {
 	PrintToServer("[OnRoundPreStart]");
@@ -33,4 +33,12 @@ void OnRoundFreezeEnd(Event event, const char[] name, bool dontBroadcast) {
 void OnRoundInfected() {
 	RoundOnInfected();
 	PrintToServer("[OnRoundInfected]");
+}
+void OnRoundStart(Event event, const char[] name, bool dontBroadcast) {
+	PrintToServer("[RoundStart]");
+	RTVOnRoundStart();
+}
+void OnRoundEnd(Event event, const char[] name, bool dontBroadcast) {
+	PrintToServer("[RoundEnd]");
+	RTVOnRoundEnd();
 }
