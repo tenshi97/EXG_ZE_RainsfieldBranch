@@ -280,7 +280,7 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 		{
 			PrintToChat(client,"译名修改参数已发送至控制台");
 			Format(buffer,sizeof(buffer),"sm_mapnamecn_update \"%s\" \"%s\"",Cmap.name,Cmap.name_cn);
-			PrintToServer(buffer);
+			PrintToConsole(client,buffer);
 		}	
 		if(param == 1)
 		{
