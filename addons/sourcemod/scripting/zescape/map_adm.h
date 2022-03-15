@@ -93,7 +93,7 @@ void MapDataReload()
 {
 	Map_Id_Max = 0;
 	char query[256];
-	Format(query,sizeof(query),"SELECT * FROM ZEMAPS ORDER BY name ASC");
+	Format(query,sizeof(query),"SELECT * FROM zemaps ORDER BY name ASC");
 	DbTQuery(MapDataLoadCallback,query);
 }
 
@@ -193,7 +193,7 @@ void MapFileReload()
 void NewMapFileUpdate(Map_Info map)
 {
 	char query[256];
-	Format(query,sizeof(query),"INSERT INTO ZEMAPS (ID,NAME) VALUES(%d,'%s')",map.id,map.name);
+	Format(query,sizeof(query),"INSERT INTO zemaps (ID,NAME) VALUES(%d,'%s')",map.id,map.name);
 	DbTQuery(DbQueryErrorCallback,query);
 }
 
@@ -208,7 +208,7 @@ void ResetFileExist()
 		snap.GetKey(i, map.name, sizeof(map.name));
 		Maps.GetArray(map.name, map, sizeof(map));
 
-		Format(query,sizeof(query),"UPDATE ZEMAPS SET EXIST = %d where ID = %d",map.exist,map.id);
+		Format(query,sizeof(query),"UPDATE zemaps SET EXIST = %d where ID = %d",map.exist,map.id);
 		DbTQuery(DbQueryErrorCallback,query);		
 	}
 	snap.Close();
@@ -385,7 +385,7 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 void MapCfgUpdate(Map_Info map)
 {
 	char query[256];
-	Format(query,sizeof(query),"UPDATE ZEMAPS SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.id,map.name);
+	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.id,map.name);
 	PrintToServer(query);
 	DbTQuery(DbQueryErrorCallback,query);	
 	Map_Log mapl;
