@@ -238,8 +238,10 @@ void AttemptRTV(int client)
 	g_RTV_VotesNum++;
 	char clientname[256];
 	GetClientName(client,clientname,sizeof(clientname));
+
 	Format(buffer,sizeof(buffer)," \x05[EMC]\x01%s要求发起换图投票:%d票/%d票(仍需%d票)",clientname,g_RTV_VotesNum,RTV_PlayerNeeded,RTV_PlayerNeeded-g_RTV_VotesNum);
 	PrintToChatAll(buffer);
+	g_RTV_PlayerVoted[client]=true;
 	if(g_RTV_VotesNum>=RTV_PlayerNeeded)
 	{
 		g_Allow_RTV = false;
