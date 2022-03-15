@@ -67,10 +67,7 @@ public int ZR_OnClientInfected(int client, int attacker, bool motherInfect, bool
 		OnRoundInfected();
 	}
 }
-public void OnClientConnected(int client)
-{
-	RTVOnClientConnected(client);
-}
+
 public void OnClientDisconnect(int client)
 {
 	NominateOnClientDisconnect(client);
