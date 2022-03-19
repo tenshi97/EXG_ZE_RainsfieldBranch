@@ -10,6 +10,8 @@ const int Nominate_Max_Num = 5;
 bool Nominate_ALLOW;
 ArrayList Nom_Map_List;
 Map_Info g_Nextmap;
+bool g_MapVote_Initiated;
+bool g_MapVote_Proceeding;
 void NominateOnPluginStart()
 {
 	RegConsoleCmd("sm_nominate",NominateCommand);
@@ -55,6 +57,11 @@ Action NomListCommand(int client,int args)
 {
 	if (!IsClientInGame(client)) return Plugin_Handled;
 	if (IsFakeClient(client))	return Plugin_Handled;
+	if(g_MapVote_Initiated|g_MapVote_Proceeding)
+	{
+		PrintToChat(client," \x05[EMC]\x01当前不可打开预定列表");
+		return Plugin_Handled;
+	}
 	BuildNomlistMenu(client);
 	return Plugin_Handled;	
 }

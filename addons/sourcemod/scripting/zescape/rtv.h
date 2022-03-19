@@ -7,8 +7,6 @@ bool g_RTV_PlyVoted[65];
 bool g_Allow_RTV;
 bool g_RTV_Confirmed;
 bool g_Nextmap_Selected;
-bool g_MapVote_Initiated;
-bool g_MapVote_Proceeding;
 int g_WarningTime_BeforeVote;
 int g_Extend_Times;
 bool g_MapVote_PlayerVoted[65];
@@ -39,6 +37,8 @@ ArrayList RandomMap_Candidate;
 Maps_VoteInfo g_Nextmap_Result,g_LastRound_MapVoteSave;
 void RTVOnPluginStart()
 {
+	g_MapVote_Initiated = false;
+	g_MapVote_Proceeding = false;
 	g_WTimer_BeforeVote = INVALID_HANDLE;
 	g_WTimer_BeforeMapChange = INVALID_HANDLE;
 	g_Timer_Timeleft = INVALID_HANDLE;
@@ -48,6 +48,7 @@ void RTVOnPluginStart()
 	RegConsoleCmd("sm_rtv",RTVCommand);
 	RegConsoleCmd("sm_ht",RTVCommand);
 	RegConsoleCmd("sm_mct",MapChangeTimeCommand);
+	RegAdminCmd("sm_forcertv",ForceRTVCommand,ADMFLAG_GENERIC);
 	g_Cvar_RTV_PlayerNeededRatio = CreateConVar("emc_rtv_needed","0.5","Percentage of RTV Votes needed to start(def:0.45)",0, true, 0.05, true, 1.0);
 	g_Cvar_RTV_MaxRounds = CreateConVar("emc_max_rounds","50","Percentage of RTV Votes needed to start(def:0.45)",0, true, 0.05, true, 1.0);
 }
@@ -68,10 +69,29 @@ Action MapChangeTimeCommand(int client,int args)
 	}
 	return Plugin_Handled;
 }
+Action ForceRTVCommand(int client,int args)
+{
+	if(!IsClientInGame(client))	return Plugin_Handled;
+	char buffer[256];
+	GetClientName(client,buffer,sizeof(buffer));
+	PrintToChatAll(" \x05[EMC]\x09%s\x01发起了强制换图投票",buffer);
+	g_Allow_RTV = false;
+	if(g_Nextmap_Selected)
+	{
+		g_ChangeMap_Time = MapChangeTime_Instant;
+		ChangeMap();
+	}
+	else
+	{
+		StartMapVote(MapChangeTime_RoundEnd);
+	}
+	return Plugin_Handled;
+}
 void RTVOnMapStart()
 {
 	g_WTimer_BeforeVote = INVALID_HANDLE;
 	g_WTimer_BeforeMapChange = INVALID_HANDLE;
+	g_Timer_Timeleft = INVALID_HANDLE;
 	ResetRTV();
 	g_RTV_Rounds = 0;
 }
@@ -163,6 +183,7 @@ public void RTVOnClientDisconnect(int client)
 	if(GetClientCount(true) == 0)	return;
 	if(g_RTV_VotesNum>=GetClientCount(true))
 	{
+		g_Allow_RTV = false;
 		if(g_Instant_RTV)
 		{
 			StartMapVote(MapChangeTime_Instant);				
@@ -177,14 +198,23 @@ public void RTVOnClientDisconnect(int client)
 public void OnMapTimeLeftChanged()
 {
 	int timeleft;
-	GetMapTimeLeft(timeleft);
-	g_Timer_Timeleft = INVALID_HANDLE;
-	KillTimerSafe(g_Timer_Timeleft);
 	char buffer[256];
+	GetMapTimeLeft(timeleft);
 	Format(buffer,sizeof(buffer)," \x05地图时间:\x01%d秒",timeleft);
 	PrintToServer(buffer);
+	PrintToConsoleAll(buffer);
 	if(timeleft<0)	return;
-	g_Timer_Timeleft = CreateTimer(float(timeleft)-300.0,TIMELEFT_AUTOVOTEMAP_HNDL, _,TIMER_FLAG_NO_MAPCHANGE);
+	PrintToServer("test");
+	if(timeleft-180<=0)
+	{
+		g_ChangeMap_Time = MapChangeTime_MapEnd;
+		g_Allow_RTV = false;
+		StartMapVote(MapChangeTime_MapEnd);	
+	}
+	else
+	{
+		g_Timer_Timeleft = CreateTimer(float(timeleft)-180.0,TIMELEFT_AUTOVOTEMAP_HNDL, _,TIMER_FLAG_NO_MAPCHANGE);
+	}
 }
 Action TIMELEFT_AUTOVOTEMAP_HNDL(Handle timer)
 {
@@ -192,11 +222,12 @@ Action TIMELEFT_AUTOVOTEMAP_HNDL(Handle timer)
 	{
 		return Plugin_Handled;
 	}
-	PrintToServer(" \x05[EMC]\x01地图剩余时间已到5分钟，准备换图");
+	PrintToServer(" \x05[EMC]\x01地图剩余时间已到3分钟，准备换图");
+	PrintToConsoleAll(" \x05[EMC]\x01地图剩余时间已到3分钟，准备换图");
 	g_ChangeMap_Time = MapChangeTime_MapEnd;
 	g_Allow_RTV = false;
 	StartMapVote(MapChangeTime_MapEnd);
-	g_Timer_Timeleft = INVALID_HANDLE;
+	KillTimerSafe(g_Timer_Timeleft);
 	return Plugin_Handled;
 }
 Action RTVCommand(int client,int args)
@@ -277,6 +308,11 @@ void StartMapVote(MapChangeTime when)
 	if(GetClientCount(true) == 0)	return;
 	Nominate_ALLOW = false;
 	g_MapVote_Initiated = true;
+	g_RTV_VotesNum = 0;
+	for(int i = 1; i <= 64; i++)
+	{
+		g_RTV_PlyVoted[i] = false;
+	}
 	PrintToChatAll(" \x05[EMC]\x01 10秒后开启下张地图投票");
 	g_ChangeMap_Time = when;
 	KillTimerSafe(g_WTimer_BeforeVote);
@@ -294,6 +330,7 @@ Action g_Wtimer_Hndl(Handle timer,MapChangeTime when)
 		return Plugin_Handled;
 	}
 	g_MapVote_Initiated = false;
+	g_MapVote_Proceeding = true;
 	g_WarningTime_BeforeVote = 10;
 	CreateNextMapVote();
 	g_WTimer_BeforeVote = INVALID_HANDLE;
@@ -408,6 +445,7 @@ int NextMapVoteHandler(Menu menu, MenuAction action, int param1, int param2)
 			g_MapVote_Proceeding = false;
 			Format(buffer,sizeof(buffer)," \x05[EMC]\x01随机选择了地图:%s",g_Nextmap_Result.name);
 			PrintToChatAll(buffer);
+			g_Nextmap_Selected = true;
 			for(int i=0;i<MapVote_List.Length;i++)
 			{
 				GetArrayArray(MapVote_List,i,mapv,sizeof(mapv));
@@ -454,7 +492,6 @@ public void MapVoteHandler(Menu menu, int num_votes, int num_clients, const int[
 		g_MapVote_Initiated = false;
 		g_MapVote_Proceeding = false;
 		Nominate_ALLOW = true;
-		g_RTV_VotesNum = 0;
 	}
 	else if(strcmp(result,"NoChange")==0)
 	{
@@ -466,7 +503,6 @@ public void MapVoteHandler(Menu menu, int num_votes, int num_clients, const int[
 		g_MapVote_Initiated = false;
 		g_MapVote_Proceeding = false;
 		Nominate_ALLOW = true;
-		g_RTV_VotesNum = 0;
 	}
 	else
 	{
@@ -509,28 +545,26 @@ void ChangeMap()
 	g_MapVote_Proceeding = false;
 	Format(buffer,sizeof(buffer)," \x05下一张地图为:%s %s%s",g_Nextmap_Result.name,g_Nextmap_Result.nominated?"预定者:":"",g_Nextmap_Result.nominated?g_Nextmap_Result.nominator_name:"");
 	PrintToChatAll(buffer);
-	for(int i = 1 ;i <= 64; i++)
+	g_RTV_VotesNum = 0;
+	for(int i = 1; i <= 64; i++)
 	{
-		g_MapVote_PlayerVoted[i]=false;
+		g_RTV_PlyVoted[i] = false;
 	}
 	if(g_ChangeMap_Time == MapChangeTime_RoundEnd)
 	{ 
 		PrintToChatAll(" \x05[EMC]\x01地图将在本回合结束后更换，再发起rtv可以立刻换图");
 		g_Instant_RTV = true;
-		g_RTV_VotesNum = 0;
 	}
 	else if(g_ChangeMap_Time == MapChangeTime_Instant)
 	{	
 		g_Instant_RTV = false;
 		KillTimerSafe(g_WTimer_BeforeMapChange);
-		g_RTV_VotesNum = 0;
 		g_WTimer_BeforeMapChange = CreateTimer(4.0,Instant_ChangeMap_Hndl, _,TIMER_FLAG_NO_MAPCHANGE);
 	}
 	else if(g_ChangeMap_Time == MapChangeTime_MapEnd)
 	{
 		PrintToChatAll(" x05[EMC]\x01地图将在时间结束后更换，再发起rtv可以立刻换图");	
 		g_Instant_RTV = true;	
-		g_RTV_VotesNum = 0;
 	}
 }
 
