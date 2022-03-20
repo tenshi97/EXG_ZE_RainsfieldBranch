@@ -95,7 +95,7 @@ void NominateMapMenu(int client,char trie_search[PLATFORM_MAX_PATH]="")
 	for(int i = 0 ; i < Map_List.Length ; i++)
 	{
 		GetArrayArray(Map_List,i,map,sizeof(map));
-		if(strlen(trie_search) && StrContains(map.name,trie_search)==-1 && StrContains(map.name_cn,trie_search) == -1)	continue;
+		if(strlen(trie_search) && StrContains(map.name,trie_search,false)==-1 && StrContains(map.name_cn,trie_search) == -1)	continue;
 		menu.AddItem(map.name,map.name);
 	}
 	if(strlen(trie_search))
