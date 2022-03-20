@@ -8,6 +8,7 @@
 #include <store>
 #include <timers>
 #include <nextmap>
+#include <server_redirect>
 #pragma semicolon 1
 #pragma newdecls required
 #include "zescape/basic_func.h"
@@ -19,7 +20,7 @@
 #include "zescape/rtv.h"
 #include "zescape/round.h"
 #include "zescape/fly.h"
-#include "zescape/convar.h"
+#include "zescape/jump.h"
 public Plugin myinfo = {
 	name = " EXG_Zombie_Escape_RY",
 	author = "Rainsfield&WackoD",
@@ -37,6 +38,8 @@ public void OnPluginStart()
 	MapInfoOnPluginStart();
 	NominateOnPluginStart();
 	RTVOnPluginStart();
+	LoadTranslations("common.phrases");
+	JumpOnPluginStart();
 }
 
 public void OnMapStart() 

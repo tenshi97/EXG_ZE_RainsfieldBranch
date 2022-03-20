@@ -5,11 +5,9 @@ int g_RTV_VotesNum;
 int g_RTV_Rounds;
 bool g_RTV_PlyVoted[65];
 bool g_Allow_RTV;
-bool g_RTV_Confirmed;
 bool g_Nextmap_Selected;
 int g_WarningTime_BeforeVote;
 int g_Extend_Times;
-bool g_MapVote_PlayerVoted[65];
 bool g_Instant_RTV;
 Handle g_WTimer_BeforeVote;
 Handle g_WTimer_BeforeMapChange;
@@ -117,7 +115,6 @@ void ResetRTV()
 		g_RTV_PlyVoted[i] = false;
 	}
 	g_RTV_VotesNum=0;
-	g_RTV_Confirmed = false;
 	g_Nextmap_Selected = false;
 	g_MapVote_Initiated = false;
 	g_MapVote_Proceeding = false;
@@ -204,7 +201,6 @@ public void OnMapTimeLeftChanged()
 	PrintToServer(buffer);
 	PrintToConsoleAll(buffer);
 	if(timeleft<0)	return;
-	PrintToServer("test");
 	if(timeleft-180<=0)
 	{
 		g_ChangeMap_Time = MapChangeTime_MapEnd;

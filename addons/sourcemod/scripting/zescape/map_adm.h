@@ -187,6 +187,7 @@ void MapFileReload()
 	Map_List.SortCustom(MapListArraySort);
 	ResetFileExist();
 	PrintToServer("[test]4 MFE END");
+	g_Map_Loaded = true;
 	MapInfoOnDbConnected_MapStartPost();
 }
 
