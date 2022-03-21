@@ -82,6 +82,9 @@ public void NominateOnClientDisconnect(int client)
 		PrintToServer(buffer);
 		PrintToChatAll(buffer);
 		Nom_Map_List.Erase(nom_index);
+
+
+
 	}
 	Format(buffer,sizeof(buffer),"当前剩余订阅地图数:%d",Nom_Map_List.Length);
 	PrintToServer(buffer);
@@ -157,7 +160,7 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 	Format(buffer,sizeof(buffer),"地图预定:%s\n\
 		最后运行时间:%s\n\
 		冷却时间:%d分钟(%s)\n\
-		订价:%d积分\n\
+		订价:%d积分[VIP减半]\n\
 		下载站:%s添加\n\
 		可预定:%s\n\
 		地图存在:%s",Tmap.name,ctime,Tmap.cooldown,cooldown_state,Tmap.cost,Tmap.download?"已":"未",Tmap.available?"是":"否",Tmap.exist?"是":"否");
@@ -235,11 +238,20 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 			CancelNom(nom_index,client);
 		}
 		nommap.nom_cost = 0;
-		if(!forcenom)
+		if(!forcenom && map.cost > 0)
 		{
+			if (GetUserFlagBits(client) && ADMFLAG_RESERVATION)
+			{
+			PrintToServer("vip");
+			nommap.nom_cost = RoundFloat(map.cost * 0.5);
+			PrintToServer("%i",map.cost);
+			}
+			else
+			{
 			nommap.nom_cost = map.cost;
-			Store_SetClientCredits(client,credits-map.cost);
-			Format(buffer,sizeof(buffer),"[EMC]消费积分%d",map.cost);
+			}
+			Store_SetClientCredits(client,credits-nommap.nom_cost);
+			Format(buffer,sizeof(buffer),"[EMC]消费积分%d",nommap.nom_cost);
 			PrintCenterText(client,buffer);
 		}
 		Nom_Map_List.PushArray(nommap,sizeof(nommap));
