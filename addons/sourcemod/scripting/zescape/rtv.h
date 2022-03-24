@@ -96,8 +96,8 @@ void RTVOnMapStart()
 void RTVOnMapEnd()
 {
 	PrintToChatAll("[RTVOnMapEnd]");
-
-	g_ChangeMap_Time = MapChangeTime_MapEnd;
+	ResetRTV();
+	g_ChangeMap_Time = MapChangeTime_MapEnd;	
 }
 void ResetRTV()
 {
@@ -178,7 +178,8 @@ public void RTVOnClientDisconnect(int client)
 		}
 	}
 	if(GetClientCount(true) == 0)	return;
-	if(g_RTV_VotesNum>=GetClientCount(true))
+	if(!g_Allow_RTV)	return;
+	if(g_RTV_VotesNum>=(GetClientCount(true)*GetConVarFloat(g_Cvar_RTV_PlayerNeededRatio)))
 	{
 		g_Allow_RTV = false;
 		if(g_Instant_RTV)
