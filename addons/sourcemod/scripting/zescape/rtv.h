@@ -179,7 +179,9 @@ public void RTVOnClientDisconnect(int client)
 	}
 	if(GetClientCount(true) == 0)	return;
 	if(!g_Allow_RTV)	return;
-	if(g_RTV_VotesNum>=(GetClientCount(true)*GetConVarFloat(g_Cvar_RTV_PlayerNeededRatio)))
+	int d_RTV_PlayerNeeded;
+	d_RTV_PlayerNeeded=Max(1,RoundToFloor(GetClientCount(true)*GetConVarFloat(g_Cvar_RTV_PlayerNeededRatio)));
+	if(g_RTV_VotesNum>=d_RTV_PlayerNeeded)
 	{
 		g_Allow_RTV = false;
 		if(g_Instant_RTV)
@@ -387,9 +389,7 @@ void CreateNextMapVote()
 				}
 			}
 		}
-		char test[64];
-		Format(test,sizeof(test),"随机地图池总数:%d",RandomMap_Candidate.Length);
-		PrintToServer(test);
+		snap.Close();
 		while(RandomMap_Picked<Random_Num||(!RandomMap_Candidate.Length))
 		{
 			RandomMap_Order = GetURandomInt()%(RandomMap_Candidate.Length);	//随机序号0~Length-1,索引同理
