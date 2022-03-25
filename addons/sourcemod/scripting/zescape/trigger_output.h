@@ -54,7 +54,8 @@ void TriggerOnTouch(const char[] output, int caller, int activator, float delay)
 {
 	if (GetEntPropEnt(caller, Prop_Data, "m_hMoveParent") != -1 ||
 		GetEntPropEnt(caller, Prop_Data, "m_hMoveChild") != -1 ||
-		GetEntPropEnt(caller, Prop_Data, "m_hMovePeer") != -1) return;	
+		GetEntPropEnt(caller, Prop_Data, "m_hMovePeer") != -1) return;
+	if(activator<1||activator>64)	return;	
 	if(!Trigger_Spam_Client[activator])
 	{
 		Trigger_Spam_Client[activator] = true;
