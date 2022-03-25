@@ -33,9 +33,6 @@ Action NominateCommand(int client,int args)
 	if (!IsClientInGame(client)) return Plugin_Handled;
 	if (IsFakeClient(client))	return Plugin_Handled;
 	int x,y;
-	StringMapSnapshot msnap = Maps.Snapshot();
-	y = msnap.Length;
-	x = Map_List.Length;
 	char buffer[256];
 	Format(buffer,sizeof(buffer),"%d %d",x,y);
 	PrintToServer(buffer);
@@ -50,7 +47,6 @@ Action NominateCommand(int client,int args)
 	char arg[PLATFORM_MAX_PATH];
 	GetCmdArg(1,arg,sizeof(arg));
 	NominateMapMenu(client,arg);
-	msnap.Close();
 	return Plugin_Handled;	
 }
 
@@ -175,6 +171,8 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 int NomMapInfoMenuHandler(Menu menu, MenuAction action, int client, int param)
 {
 	Map_Info map;
+	char client_name[64];
+	GetClientName(client,client_name,sizeof(client_name));
 	if (action == MenuAction_End)
 	{
 		menu.Close();
@@ -192,6 +190,8 @@ int NomMapInfoMenuHandler(Menu menu, MenuAction action, int client, int param)
 		{
 			map.temp_cooldown = true;
 			Maps.SetArray(map.name,map,sizeof(map),true);
+			Format(buffer,sizeof(buffer)," \x05[EMC] \x09%s \x01重置了地图 \x07%s \x01的冷却",client_name,map.name);
+			PrintToChatAll(buffer);
 		}
 		else if (param == 2)
 		{
@@ -256,10 +256,17 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 			PrintCenterText(client,buffer);
 		}
 		Nom_Map_List.PushArray(nommap,sizeof(nommap));
-		Format(buffer,sizeof(buffer)," \x05[EMC]\x09%s\01预定了地图\x07%s",nommap.nominator_name,nommap.name);
+		if(forcenom)
+		{
+			Format(buffer,sizeof(buffer)," \x05[EMC] \x09%s \x01强制预定了地图 \x07%s",nommap.nominator_name,nommap.name);
+		}
+		else
+		{
+			Format(buffer,sizeof(buffer)," \x05[EMC] \x09%s \x01预定了地图 \x07%s",nommap.nominator_name,nommap.name);
+		}
 		PrintToServer(buffer);
 		PrintToChatAll(buffer);
-		Format(buffer,sizeof(buffer)," \x05[EMC]\x01当前已预定\x03%d张地图",Nom_Map_List.Length);
+		Format(buffer,sizeof(buffer)," \x05[EMC] \x01当前已预定 \x03%d张地图",Nom_Map_List.Length);
 		PrintToChatAll(buffer);
 	}
 	else

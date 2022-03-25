@@ -21,6 +21,7 @@
 #include "zescape/round.h"
 #include "zescape/fly.h"
 #include "zescape/jump.h"
+#include "zescape/trigger_output.h"
 public Plugin myinfo = {
 	name = " EXG_Zombie_Escape_RY",
 	author = "Rainsfield&WackoD",
@@ -40,11 +41,13 @@ public void OnPluginStart()
 	RTVOnPluginStart();
 	LoadTranslations("common.phrases");
 	JumpOnPluginStart();
+	TriggerOutputOnPluginStart();
 }
 
 public void OnMapStart() 
 {
 	PrintToServer("[OnMapStart]");
+	TriggerOutputOnMapStart();
 	MapInfoOnMapStart();
 	RTVOnMapStart();
 	NominateOnMapStart();

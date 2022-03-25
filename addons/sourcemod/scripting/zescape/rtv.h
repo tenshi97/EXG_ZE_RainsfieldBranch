@@ -72,7 +72,7 @@ Action ForceRTVCommand(int client,int args)
 	if(!IsClientInGame(client))	return Plugin_Handled;
 	char buffer[256];
 	GetClientName(client,buffer,sizeof(buffer));
-	PrintToChatAll(" \x05[EMC]\x09%s\x01发起了强制换图投票",buffer);
+	PrintToChatAll(" \x05[EMC] \x09%s\x01发起了强制换图投票",buffer);
 	g_Allow_RTV = false;
 	if(g_Nextmap_Selected)
 	{
@@ -135,7 +135,7 @@ void RTVOnRoundStart()
 	GetCurrentMap(map_name,sizeof(map_name));
 	if(g_RTV_Rounds<=2&&(strcmp(map_name,g_LastRound_MapVoteSave.name)==0))
 	{
-		Format(buffer,sizeof(buffer)," \x05当前地图:\x09%s%s%s",map_name,g_LastRound_MapVoteSave.nominated?"\x05预定者":"",g_LastRound_MapVoteSave.nominated?g_LastRound_MapVoteSave.nominator_name:"");
+		Format(buffer,sizeof(buffer)," \x05当前地图: \x09%s%s%s",map_name,g_LastRound_MapVoteSave.nominated?"\x05预定者":"",g_LastRound_MapVoteSave.nominated?g_LastRound_MapVoteSave.nominator_name:"");
 		PrintToChatAll(buffer);
 		Format(buffer,sizeof(buffer),"[EMC]%s%s(STEAMID:%d)",g_LastRound_MapVoteSave.nominated?"预定者":"当前地图为野生",g_LastRound_MapVoteSave.nominated?g_LastRound_MapVoteSave.nominator_name:"",g_LastRound_MapVoteSave.nominator_steamid);
 		PrintToServer(buffer);
@@ -200,7 +200,7 @@ public void OnMapTimeLeftChanged()
 	int timeleft;
 	char buffer[256];
 	GetMapTimeLeft(timeleft);
-	Format(buffer,sizeof(buffer)," \x05地图时间:\x01%d秒",timeleft);
+	Format(buffer,sizeof(buffer),"地图时间:%d秒",timeleft);
 	PrintToServer(buffer);
 	PrintToConsoleAll(buffer);
 	if(timeleft<0)	return;
@@ -221,8 +221,8 @@ Action TIMELEFT_AUTOVOTEMAP_HNDL(Handle timer)
 	{
 		return Plugin_Handled;
 	}
-	PrintToServer(" \x05[EMC]\x01地图剩余时间已到3分钟，准备换图");
-	PrintToConsoleAll(" \x05[EMC]\x01地图剩余时间已到3分钟，准备换图");
+	PrintToServer(" [EMC]地图剩余时间已到3分钟，准备换图");
+	PrintToConsoleAll("[EMC]地图剩余时间已到3分钟，准备换图");
 	g_ChangeMap_Time = MapChangeTime_MapEnd;
 	g_Allow_RTV = false;
 	StartMapVote(MapChangeTime_MapEnd);
@@ -247,12 +247,12 @@ void AttemptRTV(int client)
 	}
 	if(!g_Allow_RTV)
 	{
-		PrintToChat(client," \x05[EMC]\x01当前无法发起换图投票");
+		PrintToChat(client," \x05[EMC] \x01当前无法发起换图投票");
 		return;
 	}
 	if(g_MapVote_Proceeding||g_MapVote_Initiated)
 	{
-		PrintToChat(client," \x05[EMC]\x01地图投票正在进行中");
+		PrintToChat(client," \x05[EMC] \x01地图投票正在进行中");
 		return;		
 	}
 	int RTV_PlayerNeeded;
@@ -261,7 +261,7 @@ void AttemptRTV(int client)
 	RTV_PlayerNeeded = Max(RTV_PlayerNeeded,1);
 	if(g_RTV_PlyVoted[client])
 	{
-		Format(buffer,sizeof(buffer)," \x05[EMC]\x01您已要求发起换图投票(当前%d票，还需%d票",g_RTV_VotesNum,RTV_PlayerNeeded);
+		Format(buffer,sizeof(buffer)," \x05[EMC] \x01您已要求发起换图投票(当前%d票，还需%d票",g_RTV_VotesNum,RTV_PlayerNeeded);
 		PrintToChat(client,buffer);
 		return;
 	}
@@ -269,7 +269,7 @@ void AttemptRTV(int client)
 	char clientname[256];
 	GetClientName(client,clientname,sizeof(clientname));
 
-	Format(buffer,sizeof(buffer)," \x05[EMC]\x01%s要求发起换图投票:%d票/%d票(仍需%d票)",clientname,g_RTV_VotesNum,RTV_PlayerNeeded,RTV_PlayerNeeded-g_RTV_VotesNum);
+	Format(buffer,sizeof(buffer)," \x05[EMC] \x09%s \x01要求发起换图投票:%d票/%d票(仍需%d票)",clientname,g_RTV_VotesNum,RTV_PlayerNeeded,RTV_PlayerNeeded-g_RTV_VotesNum);
 	PrintToChatAll(buffer);
 	g_RTV_PlyVoted[client]=true;
 	if(g_RTV_VotesNum>=RTV_PlayerNeeded)
@@ -286,7 +286,7 @@ void AttemptInstantRTV(int client)
 	RTV_PlayerNeeded = Max(RTV_PlayerNeeded,1);	
 	if(g_RTV_PlyVoted[client])
 	{
-		Format(buffer,sizeof(buffer)," \x05[EMC]\x01您已要求立即换图(当前%d票，还需%d票)",g_RTV_VotesNum,RTV_PlayerNeeded);
+		Format(buffer,sizeof(buffer)," \x05[EMC] \x01您已要求立即换图(当前%d票，还需%d票)",g_RTV_VotesNum,RTV_PlayerNeeded);
 		PrintToChat(client,buffer);
 		return;
 	}
@@ -294,7 +294,7 @@ void AttemptInstantRTV(int client)
 	g_RTV_VotesNum++;
 	char clientname[256];
 	GetClientName(client,clientname,sizeof(clientname));
-	Format(buffer,sizeof(buffer)," \x05[EMC]\x01%s要求立即换图:%d票/%d票(仍需%d票)",clientname,g_RTV_VotesNum,RTV_PlayerNeeded,RTV_PlayerNeeded-g_RTV_VotesNum);
+	Format(buffer,sizeof(buffer)," \x05[EMC] \x09%s \x01要求立即换图:%d票/%d票(仍需%d票)",clientname,g_RTV_VotesNum,RTV_PlayerNeeded,RTV_PlayerNeeded-g_RTV_VotesNum);
 	PrintToChatAll(buffer);
 	if(g_RTV_VotesNum>=RTV_PlayerNeeded)
 	{
@@ -440,7 +440,7 @@ int NextMapVoteHandler(Menu menu, MenuAction action, int param1, int param2)
 			GetArrayArray(MapVote_List,RandomMap_Select,g_Nextmap_Result,sizeof(g_Nextmap_Result));
 			g_LastRound_MapVoteSave = g_Nextmap_Result;
 			g_MapVote_Proceeding = false;
-			Format(buffer,sizeof(buffer)," \x05[EMC]\x01随机选择了地图:%s",g_Nextmap_Result.name);
+			Format(buffer,sizeof(buffer)," \x05[EMC] \x01随机选择了地图:%s",g_Nextmap_Result.name);
 			PrintToChatAll(buffer);
 			g_Nextmap_Selected = true;
 			for(int i=0;i<MapVote_List.Length;i++)
@@ -457,7 +457,7 @@ int NextMapVoteHandler(Menu menu, MenuAction action, int param1, int param2)
 			 				nominator_credits = Store_GetClientCredits(j);
 			 				credits_return = RoundToFloor(mapv.nominate_cost * 0.5);
 							Store_SetClientCredits(j,nominator_credits+credits_return);
-							PrintToChatAll(" \x05[EMC]\x09%s\x01预定的\x07%s\x01未选上，\x07%d\x01积分已退还",mapv.nominator_name,mapv.name,credits_return);	 				
+							PrintToChatAll(" \x05[EMC] \x09%s \x01预定的 \x07%s \x01未选上，\x07%d \x01积分已退还",mapv.nominator_name,mapv.name,credits_return);	 				
 			 			}
 			 		}
 			 	}
@@ -481,7 +481,7 @@ public void MapVoteHandler(Menu menu, int num_votes, int num_clients, const int[
 	{
 		ExtendMapTimeLimit(900);
 		g_Extend_Times++;
-		Format(buffer,sizeof(buffer)," \x05[EMC]\x01地图已延长15分钟，延长次数:\x05%d\x01/\x07%d",g_Extend_Times,Pmap.extend);
+		Format(buffer,sizeof(buffer)," \x05[EMC] \x01地图已延长15分钟，延长次数: \x05%d \x01/ \x07%d",g_Extend_Times,Pmap.extend);
 		PrintToChatAll(buffer);
 		g_ChangeMap_Time = MapChangeTime_MapEnd;
 		g_Allow_RTV = true;
@@ -521,7 +521,7 @@ public void MapVoteHandler(Menu menu, int num_votes, int num_clients, const int[
 		 				nominator_credits = Store_GetClientCredits(j);
 		 				credits_return = RoundToFloor(mapv.nominate_cost * 0.5);
 						Store_SetClientCredits(j,nominator_credits+credits_return);
-						PrintToChatAll(" \x05[EMC]\x09%s\x01预定的\x07%s\x01未选上，\x07%d\x01积分已退还",mapv.nominator_name,mapv.name,credits_return);	 				
+						PrintToChatAll(" \x05[EMC] \x09%s \x01预定的 \x07%s \x01未选上，\x07%d \x01积分已退还",mapv.nominator_name,mapv.name,credits_return);	 				
 		 			}
 		 		}
 		 	}
@@ -540,7 +540,7 @@ void ChangeMap()
 	g_Nextmap_Selected = true;
 	g_MapVote_Initiated = false;
 	g_MapVote_Proceeding = false;
-	Format(buffer,sizeof(buffer)," \x05下一张地图为:%s %s%s",g_Nextmap_Result.name,g_Nextmap_Result.nominated?"预定者:":"",g_Nextmap_Result.nominated?g_Nextmap_Result.nominator_name:"");
+	Format(buffer,sizeof(buffer)," \x05下一张地图为: \09%s %s \x07%s",g_Nextmap_Result.name,g_Nextmap_Result.nominated?" \x01预定者:":"",g_Nextmap_Result.nominated?g_Nextmap_Result.nominator_name:"");
 	PrintToChatAll(buffer);
 	g_RTV_VotesNum = 0;
 	for(int i = 1; i <= 64; i++)
