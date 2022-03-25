@@ -50,6 +50,7 @@ Action NominateCommand(int client,int args)
 	char arg[PLATFORM_MAX_PATH];
 	GetCmdArg(1,arg,sizeof(arg));
 	NominateMapMenu(client,arg);
+	msnap.Close();
 	return Plugin_Handled;	
 }
 
