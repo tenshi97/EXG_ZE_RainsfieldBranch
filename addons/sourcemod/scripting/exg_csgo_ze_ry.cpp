@@ -43,6 +43,7 @@ public void OnPluginStart()
 	LoadTranslations("common.phrases");
 	JumpOnPluginStart();
 	TriggerOutputOnPluginStart();
+	VoiceChatOnPluginStart();
 
 }
 
