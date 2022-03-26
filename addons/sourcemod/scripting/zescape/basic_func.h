@@ -31,6 +31,11 @@ bool IsValidHumanorBot(int client)
 	return false;
 }
 
+bool IsInSameTeam(int client1,int client2)
+{
+	if(GetClientTeam(client1)==GetClientTeam(client2))	return true;
+	return false;
+}
 int Max(int a,int b)
 {
 	return a>=b?a:b;

@@ -103,6 +103,7 @@ void ResetRTV()
 {
 	g_WTimer_BeforeVote = INVALID_HANDLE;
 	g_WTimer_BeforeMapChange = INVALID_HANDLE;
+	g_Timer_Timeleft = INVALID_HANDLE;
 	g_Allow_RTV = true;
 	g_Instant_RTV = false;
 	g_ChangeMap_Time = MapChangeTime_MapEnd;
@@ -212,6 +213,7 @@ public void OnMapTimeLeftChanged()
 	}
 	else
 	{
+		KillTimerSafe(g_Timer_Timeleft);
 		g_Timer_Timeleft = CreateTimer(float(timeleft)-180.0,TIMELEFT_AUTOVOTEMAP_HNDL, _,TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
@@ -225,8 +227,8 @@ Action TIMELEFT_AUTOVOTEMAP_HNDL(Handle timer)
 	PrintToConsoleAll("[EMC]地图剩余时间已到3分钟，准备换图");
 	g_ChangeMap_Time = MapChangeTime_MapEnd;
 	g_Allow_RTV = false;
+	g_Timer_Timeleft = INVALID_HANDLE;
 	StartMapVote(MapChangeTime_MapEnd);
-	KillTimerSafe(g_Timer_Timeleft);
 	return Plugin_Handled;
 }
 Action RTVCommand(int client,int args)

@@ -90,7 +90,7 @@ Action MapFileReloadCommand(int client,int args)
 void MapDataReload()
 {
 	Map_Id_Max = 0;
-	char query[256];
+	char query[512];
 	Format(query,sizeof(query),"SELECT * FROM zemaps ORDER BY name ASC");
 	DbTQuery(MapDataLoadCallback,query);
 }
@@ -105,7 +105,7 @@ void MapDataLoadCallback(Handle owner, Handle hndl, char[] error, any data)
 		return;
 	}
 	else PrintToServer("DataLoading");
-	char buffer[256];
+	char buffer[512];
 	while (SQL_FetchRow(hndl)) {
 		Map_Info map;
 		Map_Log mapl;
@@ -150,7 +150,7 @@ void MapFileReload()
 	char file_name[PLATFORM_MAX_PATH];
 	FileType type;
 	int index;
-	char buffer[256];
+	char buffer[512];
 	while(dl.GetNext(file_name,sizeof(file_name),type))
 	{
 		if(type!=FileType_File)	continue;
@@ -191,7 +191,7 @@ void MapFileReload()
 
 void NewMapFileUpdate(Map_Info map)
 {
-	char query[256];
+	char query[512];
 	Format(query,sizeof(query),"INSERT INTO zemaps (ID,NAME) VALUES(%d,'%s')",map.id,map.name);
 	DbTQuery(DbQueryErrorCallback,query);
 }
@@ -201,7 +201,7 @@ void ResetFileExist()
 	PrintToServer("[test]3 MFE");
 	StringMapSnapshot snap= Maps.Snapshot();
 	Map_Info map;
-	char query[256];
+	char query[512];
 	for (int i =0;i < snap.Length ; i++)
 	{
 		snap.GetKey(i, map.name, sizeof(map.name));
@@ -304,6 +304,8 @@ void MapAdminConfigMenu(int client,Map_Info map)
 	menu.AddItem(map.name,buffer);
 	Format(buffer,sizeof(buffer),"延长次数:%d",map.extend);
 	menu.AddItem(map.name,buffer);
+	Format(buffer,sizeof(buffer),"地图时长:%d分钟",map.timelimit);
+	menu.AddItem(map.name,buffer);
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param) 
@@ -374,12 +376,16 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 			MapCfgUpdate(map);
 			MapAdminConfigMenu(client,map);
 		}
+		if(param == 8)
+		{
+			MapTimeLimitMenu(client,map);
+		}
 	}	
 }
 void MapCfgUpdate(Map_Info map)
 {
-	char query[256];
-	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.id,map.name);
+	char query[1024];
+	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.id,map.name);
 	PrintToServer(query);
 	DbTQuery(DbQueryErrorCallback,query);	
 	Map_Log mapl;
@@ -455,7 +461,7 @@ int MapCooldownCfgHandler(Menu menu, MenuAction action, int client, int param)
 		{
 			PrintToChat(client,"更改时间参数已发送至控制台");
 			Format(buffer,sizeof(buffer),"sm_mapcd_update \"%s\" %d",map.name,map.cooldown);
-			PrintToServer(buffer);
+			PrintToConsole(client,buffer);
 		}
 		MapCfgUpdate(map);
 		MapCooldownMenu(client,map);
@@ -493,11 +499,11 @@ void MapCostMenu(int client,Map_Info map)
 	menu.AddItem(map.name,"-200积分",map.cost>0?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(map.name,"-1000积分",map.cost>0?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(map.name,"-5000积分",map.cost>0?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
-	menu.AddItem(map.name,"+10积分",map.cost<10000?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
-	menu.AddItem(map.name,"+50积分",map.cost<10000?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
-	menu.AddItem(map.name,"+200积分",map.cost<10000?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
-	menu.AddItem(map.name,"+1000积分",map.cost<10000?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
-	menu.AddItem(map.name,"+5000积分",map.cost<10000?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"+10积分",map.cost<15000?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"+50积分",map.cost<15000?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"+200积分",map.cost<15000?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"+1000积分",map.cost<15000?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"+5000积分",map.cost<15000?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(map.name,"自定义");
 	menu.Display(client, MENU_TIME_FOREVER);
 }
@@ -519,16 +525,16 @@ int MapCostCfgHandler(Menu menu, MenuAction action, int client, int param)
 		else if (param == 2) map.cost = Max(0, map.cost-200);
 		else if (param == 3) map.cost = Max(0, map.cost-1000);
 		else if (param == 4) map.cost = Max(0, map.cost-5000);
-		else if (param == 5) map.cost = Min(10000, map.cost+10);
-		else if (param == 6) map.cost = Min(10000, map.cost+50);
-		else if (param == 7) map.cost = Min(10000, map.cost+200);
-		else if (param == 8) map.cost = Min(10000, map.cost+1000);
-		else if (param == 9) map.cost = Min(10000, map.cost+5000);
+		else if (param == 5) map.cost = Min(15000, map.cost+10);
+		else if (param == 6) map.cost = Min(15000, map.cost+50);
+		else if (param == 7) map.cost = Min(15000, map.cost+200);
+		else if (param == 8) map.cost = Min(15000, map.cost+1000);
+		else if (param == 9) map.cost = Min(15000, map.cost+5000);
 		else if (param == 10)
 		{
 			PrintToChat(client,"更改订价参数已发送至控制台");
 			Format(buffer,sizeof(buffer),"sm_mapcost_update \"%s\" %d",map.name,map.cost);
-			PrintToServer(buffer);
+			PrintToConsole(client,buffer);
 		}
 		MapCfgUpdate(map);
 		MapCostMenu(client,map);
@@ -545,12 +551,53 @@ Action MapCostCommand(int client,int args)
 	if(!Maps.GetArray(map.name,map,sizeof(map)))	return Plugin_Handled;
 	GetCmdArg(2, buffer, sizeof(buffer));
 	n_cost = StringToInt(buffer);
-	if(n_cost<0||n_cost>10000)
+	if(n_cost<0||n_cost>15000)
 	{
-		PrintToChat(client,"参数不合法，请输入0~10000间的数字");
+		PrintToChat(client,"参数不合法，请输入0~15000间的数字");
 		return Plugin_Handled;
 	}
 	map.cost = n_cost;
 	MapCfgUpdate(map);
 	return Plugin_Handled;
+}
+
+void MapTimeLimitMenu(int client,Map_Info map)
+{
+	char title[256];
+	Menu menu = CreateMenu(MapTimeLimitMenuHandler);
+	Format(title,sizeof(title),"地图时长修改:\n%s\n当前时长:%d分钟",map.name,map.timelimit);
+	menu.SetTitle(title);
+	menu.AddItem(map.name,"+5分钟",map.timelimit<120?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"+10分钟",map.timelimit<120?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"+30分钟",map.timelimit<120?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"+60分钟",map.timelimit<120?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"-5分钟",map.timelimit<120?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"-10分钟",map.timelimit>10?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"-30分钟",map.timelimit>10?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"-60分钟",map.timelimit>10?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+
+int MapTimeLimitMenuHandler(Menu menu, MenuAction action, int client, int param) 
+{
+	char map_name[PLATFORM_MAX_PATH];
+	Map_Info map;
+	if (action == MenuAction_End)
+	{
+		menu.Close();
+	}
+	else if (action == MenuAction_Select) {
+		menu.GetItem(param,map_name,sizeof(map_name));
+		Maps.GetArray(map_name,map,sizeof(map));		
+		if (param == 0) map.timelimit = Min(120, map.timelimit+5);
+		else if (param == 1) map.timelimit = Min(120, map.timelimit+10);
+		else if (param == 2) map.timelimit = Min(120, map.timelimit+30);
+		else if (param == 3) map.timelimit = Min(120, map.timelimit+60);
+		else if (param == 4) map.timelimit = Max(10, map.timelimit-5);
+		else if (param == 5) map.timelimit = Max(10, map.timelimit-10);
+		else if (param == 6) map.timelimit = Max(10, map.timelimit-30);
+		else if (param == 7) map.timelimit = Max(10, map.timelimit-60);
+		MapCfgUpdate(map);
+		MapTimeLimitMenu(client,map);
+	}
 }

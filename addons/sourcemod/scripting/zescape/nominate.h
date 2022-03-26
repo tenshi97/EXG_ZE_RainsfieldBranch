@@ -172,6 +172,10 @@ int NomMapInfoMenuHandler(Menu menu, MenuAction action, int client, int param)
 {
 	Map_Info map;
 	char client_name[64];
+	if(client<=0||client>=65)
+	{
+		menu.Close();
+	}
 	GetClientName(client,client_name,sizeof(client_name));
 	if (action == MenuAction_End)
 	{
