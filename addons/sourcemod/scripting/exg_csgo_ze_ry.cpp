@@ -43,7 +43,7 @@ public void OnPluginStart()
 	LoadTranslations("common.phrases");
 	JumpOnPluginStart();
 	TriggerOutputOnPluginStart();
-	VoiceChatOnPluginStart();
+
 }
 
 public void OnMapStart() 
@@ -52,7 +52,7 @@ public void OnMapStart()
 	TriggerOutputOnMapStart();
 	MapInfoOnMapStart();
 	RTVOnMapStart();
-	VoiceChatOnMapStart();
+
 	NominateOnMapStart();
 	//RoundOnMapStart();
 	if(!isDbConnected())	return;			//未连接，return，通过Db连接函数的函数执行Post，已连接则通直接Post使得换图后重载各插件数据
@@ -82,7 +82,7 @@ public void OnClientDisconnect(int client)
 	NominateOnClientDisconnect(client);
 	RTVOnClientDisconnect(client);
 }
-public void OnClientConnected(int client)
+public void OnClientPutInServer(int client)
 {
 	VoiceChatOnClientConnected(client);
 }
