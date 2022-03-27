@@ -172,17 +172,13 @@ int NomMapInfoMenuHandler(Menu menu, MenuAction action, int client, int param)
 {
 	Map_Info map;
 	char client_name[64];
-	if(client<=0||client>=65)
-	{
-		menu.Close();
-	}
-	GetClientName(client,client_name,sizeof(client_name));
-	if (action == MenuAction_End)
+	if (action == MenuAction_End||client<=0||client>=65)
 	{
 		menu.Close();
 	}
 	else if(action == MenuAction_Select)
 	{
+		GetClientName(client,client_name,sizeof(client_name));
 		menu.GetItem(param,map.name,sizeof(map.name));
 		Maps.GetArray(map.name,map,sizeof(map));
 		char buffer[256];
