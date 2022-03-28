@@ -70,8 +70,6 @@ public void NominateOnClientDisconnect(int client)
 	nom_index=is_Nominator(client);
 	char buffer[256];
 	Nomlist_Log nom_log;
-	Format(buffer,sizeof(buffer),"当前剩余订阅地图数:%d",Nom_Map_List.Length);
-	PrintToServer(buffer);
 	if(nom_index!=-1)
 	{
 		GetArrayArray(Nom_Map_List,nom_index,nom_log,sizeof(nom_log));
@@ -79,12 +77,7 @@ public void NominateOnClientDisconnect(int client)
 		PrintToServer(buffer);
 		PrintToChatAll(buffer);
 		Nom_Map_List.Erase(nom_index);
-
-
-
 	}
-	Format(buffer,sizeof(buffer),"当前剩余订阅地图数:%d",Nom_Map_List.Length);
-	PrintToServer(buffer);
 }
 void NominateMapMenu(int client,char trie_search[PLATFORM_MAX_PATH]="")
 {
