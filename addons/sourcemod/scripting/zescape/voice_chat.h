@@ -8,7 +8,7 @@ void VoiceChatOnPluginStart()
 
 void VoiceChatOnClientConnected(int client)
 {
-	SetClientListeningFlags(client,VOICE_TEAM);
+	SetClientListeningFlags(client,VOICE_SPEAKALL);
 
 }
 /*public void OnClientSpeakingEx(int client)
