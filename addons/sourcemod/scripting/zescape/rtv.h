@@ -138,6 +138,8 @@ void RTVOnRoundStart()
 	{
 		Format(buffer,sizeof(buffer)," \x05当前地图: \x09%s%s%s",map_name,g_LastRound_MapVoteSave.nominated?"\x05预定者":"",g_LastRound_MapVoteSave.nominated?g_LastRound_MapVoteSave.nominator_name:"");
 		PrintToChatAll(buffer);
+		PrintToChatAll(buffer);
+		PrintToChatAll(buffer);
 		Format(buffer,sizeof(buffer),"[EMC]%s%s(STEAMID:%d)",g_LastRound_MapVoteSave.nominated?"预定者":"当前地图为野生",g_LastRound_MapVoteSave.nominated?g_LastRound_MapVoteSave.nominator_name:"",g_LastRound_MapVoteSave.nominator_steamid);
 		PrintToServer(buffer);
 	}

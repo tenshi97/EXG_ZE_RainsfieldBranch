@@ -27,6 +27,7 @@ void ButtonOnPressed(const char[] output, int caller, int activator, float delay
 		GetEntPropEnt(caller, Prop_Data, "m_hMoveChild") != -1 ||
 		GetEntPropEnt(caller, Prop_Data, "m_hMovePeer") != -1) return;	
 	if(activator<1||activator>64)	return;
+	if(!IsClientInGame(activator))	return;
 	if(!Button_Spam_Client[activator])
 	{
 		Button_Spam_Client[activator] = true;
@@ -56,6 +57,7 @@ void TriggerOnTouch(const char[] output, int caller, int activator, float delay)
 		GetEntPropEnt(caller, Prop_Data, "m_hMoveChild") != -1 ||
 		GetEntPropEnt(caller, Prop_Data, "m_hMovePeer") != -1) return;
 	if(activator<1||activator>64)	return;	
+	if(!IsClientInGame(activator))	return;
 	if(!Trigger_Spam_Client[activator])
 	{
 		Trigger_Spam_Client[activator] = true;
