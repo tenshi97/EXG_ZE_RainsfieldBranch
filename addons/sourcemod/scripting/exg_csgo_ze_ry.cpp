@@ -42,7 +42,7 @@ public void OnPluginStart()
 	RTVOnPluginStart();
 	LoadTranslations("common.phrases");
 	JumpOnPluginStart();
-	TriggerOutputOnPluginStart();
+	//TriggerOutputOnPluginStart();
 	VoiceChatOnPluginStart();
 
 }
@@ -50,7 +50,7 @@ public void OnPluginStart()
 public void OnMapStart() 
 {
 	PrintToServer("[OnMapStart]");
-	TriggerOutputOnMapStart();
+	//TriggerOutputOnMapStart();
 	MapInfoOnMapStart();
 	RTVOnMapStart();
 
