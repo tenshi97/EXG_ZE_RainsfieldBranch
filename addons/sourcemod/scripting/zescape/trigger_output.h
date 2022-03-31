@@ -1,24 +1,24 @@
 bool Button_Spam_Client[65];
-bool Trigger_Spam_Client[65];
+//bool Trigger_Spam_Client[65];
 void TriggerOutputOnPluginStart()
 {
 	for(int i=1;i<=64;i++)
 	{
 		Button_Spam_Client[i]=false;
-		Trigger_Spam_Client[i]=false;
+//		Trigger_Spam_Client[i]=false;
 	}
 	HookEntityOutput("func_button", "OnPressed", ButtonOnPressed);
-	HookEntityOutput("trigger_once", "OnStartTouch", TriggerOnTouch);
-	HookEntityOutput("trigger_multiple", "OnStartTouch", TriggerOnTouch);
-	HookEntityOutput("trigger_once", "OnEndTouch", TriggerOnTouch);
-	HookEntityOutput("trigger_multiple", "OnEndTouch", TriggerOnTouch);
+//	HookEntityOutput("trigger_once", "OnStartTouch", TriggerOnTouch);
+//	HookEntityOutput("trigger_multiple", "OnStartTouch", TriggerOnTouch);
+//	HookEntityOutput("trigger_once", "OnEndTouch", TriggerOnTouch);
+//	HookEntityOutput("trigger_multiple", "OnEndTouch", TriggerOnTouch);
 }
 void TriggerOutputOnMapStart()
 {
 	for(int i=1;i<=64;i++)
 	{
 		Button_Spam_Client[i]=false;
-		Trigger_Spam_Client[i]=false;
+//		Trigger_Spam_Client[i]=false;
 	}	
 }
 void ButtonOnPressed(const char[] output, int caller, int activator, float delay)
@@ -51,7 +51,7 @@ Action ButtonOnPressedCallback(Handle timer, int activator) {
 	return Plugin_Handled;
 }
 
-void TriggerOnTouch(const char[] output, int caller, int activator, float delay)
+/*void TriggerOnTouch(const char[] output, int caller, int activator, float delay)
 {
 	if (GetEntPropEnt(caller, Prop_Data, "m_hMoveParent") != -1 ||
 		GetEntPropEnt(caller, Prop_Data, "m_hMoveChild") != -1 ||
@@ -78,4 +78,4 @@ Action TriggerOnTouchCallback(Handle timer, int activator) {
 	if (!Trigger_Spam_Client[activator]) return Plugin_Handled;
 	Trigger_Spam_Client[activator] = false;
 	return Plugin_Handled;
-}
+}*/

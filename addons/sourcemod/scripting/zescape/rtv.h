@@ -93,6 +93,28 @@ void RTVOnMapStart()
 	ResetRTV();
 	g_RTV_Rounds = 0;
 }
+public bool isMapCoolDownOver(Map_Info map)
+{
+	int current_time;
+	char cooldown_state[PLATFORM_MAX_PATH];
+	current_time = GetTime();
+	if(!DiffTimeTransform1(cooldown_state,current_time,map.last_run_time,map.cooldown*60))
+	{
+		return true;
+	}
+	return false;
+}
+public bool GetCurrentMapNominatorName(char ret_name[PLATFORM_MAX_PATH])
+{
+	if(g_LastRound_MapVoteSave.nominated)
+	{
+		PrintToServer(g_LastRound_MapVoteSave.nominator_name);
+		strcopy(ret_name,sizeof(ret_name),g_LastRound_MapVoteSave.nominator_name);
+		return true;
+	}
+	return false;
+}
+
 void RTVOnMapEnd()
 {
 	PrintToChatAll("[RTVOnMapEnd]");
@@ -146,7 +168,7 @@ void RTVOnRoundStart()
 }
 void RTVOnRoundEnd()
 {
-	if(g_ChangeMap_Time == MapChangeTime_RoundEnd)
+	if(g_ChangeMap_Time == MapChangeTime_RoundEnd&&g_Nextmap_Selected)
 	{
 		KillTimerSafe(g_WTimer_BeforeMapChange);
 		g_WTimer_BeforeMapChange = CreateTimer(4.0,ChangeMap_RoundEnd_Hndl, _,TIMER_FLAG_NO_MAPCHANGE);
@@ -166,7 +188,6 @@ public void OnClientSayCommand_Post(int client, const char[] command, const char
 	{
 		AttemptRTV(client);
 	}
-
 }
 
 public void RTVOnClientDisconnect(int client)
@@ -265,7 +286,7 @@ void AttemptRTV(int client)
 	RTV_PlayerNeeded = Max(RTV_PlayerNeeded,1);
 	if(g_RTV_PlyVoted[client])
 	{
-		Format(buffer,sizeof(buffer)," \x05[EMC] \x01您已要求发起换图投票(当前%d票，还需%d票",g_RTV_VotesNum,RTV_PlayerNeeded);
+		Format(buffer,sizeof(buffer)," \x05[EMC] \x01您已要求发起换图投票(当前\x08 %d票，还需\x09 %d票",g_RTV_VotesNum,RTV_PlayerNeeded);
 		PrintToChat(client,buffer);
 		return;
 	}
@@ -273,7 +294,7 @@ void AttemptRTV(int client)
 	char clientname[256];
 	GetClientName(client,clientname,sizeof(clientname));
 
-	Format(buffer,sizeof(buffer)," \x05[EMC] \x09%s \x01要求发起换图投票:%d票/%d票(仍需%d票)",clientname,g_RTV_VotesNum,RTV_PlayerNeeded,RTV_PlayerNeeded-g_RTV_VotesNum);
+	Format(buffer,sizeof(buffer)," \x05[EMC] \x09%s \x01要求发起换图投票:\x08 %d票/\x09 %d票(仍需\x09 %d票)",clientname,g_RTV_VotesNum,RTV_PlayerNeeded,RTV_PlayerNeeded-g_RTV_VotesNum);
 	PrintToChatAll(buffer);
 	g_RTV_PlyVoted[client]=true;
 	if(g_RTV_VotesNum>=RTV_PlayerNeeded)
@@ -290,7 +311,7 @@ void AttemptInstantRTV(int client)
 	RTV_PlayerNeeded = Max(RTV_PlayerNeeded,1);	
 	if(g_RTV_PlyVoted[client])
 	{
-		Format(buffer,sizeof(buffer)," \x05[EMC] \x01您已要求立即换图(当前%d票，还需%d票)",g_RTV_VotesNum,RTV_PlayerNeeded);
+		Format(buffer,sizeof(buffer)," \x05[EMC] \x01您已要求立即换图(当前\x08 %d票，还需\x09 %d票)",g_RTV_VotesNum,RTV_PlayerNeeded);
 		PrintToChat(client,buffer);
 		return;
 	}
@@ -298,7 +319,7 @@ void AttemptInstantRTV(int client)
 	g_RTV_VotesNum++;
 	char clientname[256];
 	GetClientName(client,clientname,sizeof(clientname));
-	Format(buffer,sizeof(buffer)," \x05[EMC] \x09%s \x01要求立即换图:%d票/%d票(仍需%d票)",clientname,g_RTV_VotesNum,RTV_PlayerNeeded,RTV_PlayerNeeded-g_RTV_VotesNum);
+	Format(buffer,sizeof(buffer)," \x05[EMC] \x09%s \x01要求立即换图:\x08 %d票 /\x09 %d票(仍需\x09 %d票)",clientname,g_RTV_VotesNum,RTV_PlayerNeeded,RTV_PlayerNeeded-g_RTV_VotesNum);
 	PrintToChatAll(buffer);
 	if(g_RTV_VotesNum>=RTV_PlayerNeeded)
 	{
@@ -381,7 +402,7 @@ void CreateNextMapVote()
 			Maps.GetArray(map.name, map, sizeof(map));
 			if(map.available&&map.exist&&map.download&&map.random)
 			{	
-				if(!isNominated(map))
+				if(!isNominated(map)&&isMapCoolDownOver(map))
 				{
 					mapv.name = map.name;
 					mapv.nominated = false;
@@ -393,7 +414,6 @@ void CreateNextMapVote()
 				}
 			}
 		}
-		snap.Close();
 		while(RandomMap_Picked<Random_Num||(!RandomMap_Candidate.Length))
 		{
 			RandomMap_Order = GetURandomInt()%(RandomMap_Candidate.Length);	//随机序号0~Length-1,索引同理
@@ -404,6 +424,7 @@ void CreateNextMapVote()
 			RandomMap_Picked++;
 		}
 	}
+	snap.Close();
 	for(int i = 0; i<MapVote_List.Length ; i++)
 	{
 		GetArrayArray(MapVote_List,i,mapv,sizeof(mapv));
@@ -496,7 +517,7 @@ public void MapVoteHandler(Menu menu, int num_votes, int num_clients, const int[
 	}
 	else if(strcmp(result,"NoChange")==0)
 	{
-		Format(buffer,sizeof(buffer),"地图未更换");
+		Format(buffer,sizeof(buffer)," \x05[EMC] \x07地图未更换");
 		PrintToChatAll(buffer);
 		g_ChangeMap_Time = MapChangeTime_MapEnd;
 		g_Allow_RTV = true;
@@ -514,6 +535,7 @@ public void MapVoteHandler(Menu menu, int num_votes, int num_clients, const int[
 			{
 				g_Nextmap_Result = mapv;
 				g_LastRound_MapVoteSave = g_Nextmap_Result;
+				g_Nextmap_Selected = true;
 			}
 		 	else if(mapv.nominated)
 		 	{

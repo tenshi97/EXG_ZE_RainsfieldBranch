@@ -32,10 +32,6 @@ Action NominateCommand(int client,int args)
 {
 	if (!IsClientInGame(client)) return Plugin_Handled;
 	if (IsFakeClient(client))	return Plugin_Handled;
-	int x,y;
-	char buffer[256];
-	Format(buffer,sizeof(buffer),"%d %d",x,y);
-	PrintToServer(buffer);
 	if (!args) {
 		NominateMapMenu(client);
 		return Plugin_Handled;
@@ -129,7 +125,6 @@ int NominateMenuHandler(Menu menu, MenuAction action, int client, int param)
 		NomMapInfoMenu(client,Tmap);
 	}	
 }
-
 void NomMapInfoMenu(int client,Map_Info Tmap)
 {
 	Menu menu = CreateMenu(NomMapInfoMenuHandler);

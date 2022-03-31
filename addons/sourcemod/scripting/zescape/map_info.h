@@ -39,6 +39,7 @@ void MapInfoOnDbConnected_MapStartPost(){
 
 Action ActionMapInfoMenu(int client,int args)
 {
+	if (!IsClientInGame(client)) return Plugin_Handled;
 	if(!Current_Map_Loaded)
 	{
 		PrintToServer("[地图信息读取失败:尚未加载 重试中...]");
@@ -51,6 +52,7 @@ Action ActionMapInfoMenu(int client,int args)
 
 void MakeMapInfoMenu(int client){
 	char title[256];
+	char nominator_name[PLATFORM_MAX_PATH];
 	Format(title,sizeof(title),"当前地图:%s\n\
 		地图译名:%s\n\
 		地图难度:%s\n\
@@ -63,9 +65,33 @@ void MakeMapInfoMenu(int client){
 	menu.AddItem("",title,ITEMDRAW_DISABLED);
 	Format(title,sizeof(title),"地图时长:%d",Pmap.timelimit);
 	menu.AddItem("",title,ITEMDRAW_DISABLED);
+	if(GetCurrentMapNominatorName(nominator_name))
+	{
+		Format(title,sizeof(title),"预定者:%s",nominator_name);
+		menu.AddItem("",title,ITEMDRAW_DISABLED);
+	}
+	else
+	{
+		menu.AddItem("","野生",ITEMDRAW_DISABLED);
+	}
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
 int MapInfoMenuHandler(Menu menu, MenuAction action, int client, int param) {
 	if (action == MenuAction_End) menu.Close();
+}
+
+void MapInfoOnRoundEnd(int winner)
+{
+	if(winner==2)
+	{
+		Pmap.round++;	
+	}
+	if(winner==3)
+	{
+		Pmap.round++;
+		Pmap.wins++;
+	}
+	MapCfgUpdate(Pmap);
+	return;
 }

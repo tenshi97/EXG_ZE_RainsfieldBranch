@@ -44,7 +44,13 @@ int Min(int a,int b)
 {
 	return a<=b?a:b;
 }
-
+Action SetClientTeam(int client,int team)
+{
+	if(!IsClientInGame(client))	return;
+	if (team == 1) FakeClientCommand(client, "jointeam spectator");
+	if (team == 2) FakeClientCommand(client, "jointeam red");
+	if (team == 3) FakeClientCommand(client, "jointeam blue");
+}
 bool DiffTimeTransform1(char buffer[PLATFORM_MAX_PATH],int timestamp1,int timestamp2,int total)
 {
 	int day,hour,minute;

@@ -39,6 +39,8 @@ void OnRoundStart(Event event, const char[] name, bool dontBroadcast) {
 	RTVOnRoundStart();
 }
 void OnRoundEnd(Event event, const char[] name, bool dontBroadcast) {
-	PrintToServer("[RoundEnd]");
+	int winner = event.GetInt("winner");
+	PrintToServer("[RoundEnd] [winner:%d]",winner);
 	RTVOnRoundEnd();
+	MapInfoOnRoundEnd(winner);
 }
