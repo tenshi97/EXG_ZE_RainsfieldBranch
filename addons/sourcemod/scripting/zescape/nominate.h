@@ -27,7 +27,12 @@ void NominateOnMapStart()
 	Nom_Map_List.Clear();
 	Nominate_ALLOW = true;
 }
-
+void NominateOnMapEnd()
+{
+	Nom_Map_List.Clear();
+	CloseHandleSafe(Nom_Map_List);
+	Nom_Map_List = CreateArray(sizeof(Nomlist_Log));
+}
 Action NominateCommand(int client,int args)
 {
 	if (!IsClientInGame(client)) return Plugin_Handled;
@@ -195,9 +200,6 @@ int NomMapInfoMenuHandler(Menu menu, MenuAction action, int client, int param)
 	}
 }
 
-void NomOnMapEnd()
-{
-}
 
 void NominateMap(int client,Map_Info map,int forcenom=0)
 {

@@ -69,7 +69,7 @@ public void OnPluginEnd()
 public void OnMapEnd() 
 {
 	MapAdmOnMapEnd();
-	NomOnMapEnd();
+	NominateOnMapEnd();
 	RTVOnMapEnd();
 }
 public int ZR_OnClientInfected(int client, int attacker, bool motherInfect, bool respawnOverride, bool respawn) 
@@ -106,3 +106,4 @@ public void OnClientPutInServer(int client)
 	int download;
 	int exist;
 */
+//

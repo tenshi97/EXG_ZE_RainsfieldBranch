@@ -119,6 +119,10 @@ void RTVOnMapEnd()
 {
 	PrintToChatAll("[RTVOnMapEnd]");
 	ResetRTV();
+	CloseHandleSafe(MapVote_List);
+	CloseHandleSafe(RandomMap_Candidate);
+	MapVote_List = CreateArray(sizeof(Maps_VoteInfo));
+	RandomMap_Candidate = CreateArray(sizeof(Maps_VoteInfo));	
 	g_ChangeMap_Time = MapChangeTime_MapEnd;	
 }
 void ResetRTV()

@@ -45,6 +45,8 @@ void MapAdmOnMapEnd()
 {
 	Maps.Clear();
 	Map_List.Clear();
+	CloseHandleSafe(Map_List);
+	Map_List = CreateArray(sizeof(Map_Log));
 	PrintToServer("[MapAdm MapEnd]");
 	g_Map_Loaded = false;
 }
