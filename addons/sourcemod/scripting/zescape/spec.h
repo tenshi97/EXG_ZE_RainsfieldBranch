@@ -1,6 +1,6 @@
 void SpecOnPluginStart()
 {
-	RegConsoleCmd("sm_spec",SpecCommand);
+	RegConsoleCmd("sm_gc",SpecCommand);
 }
 Action SpecCommand(int client,int args)
 {
