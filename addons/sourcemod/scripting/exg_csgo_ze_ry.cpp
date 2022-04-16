@@ -9,6 +9,7 @@
 #include <timers>
 #include <nextmap>
 #include <server_redirect>
+#include <rainsfield>
 #pragma semicolon 1
 #pragma newdecls required
 #include "zescape/basic_func.h"
@@ -31,7 +32,13 @@ public Plugin myinfo = {
 	version = "1.0",
 	url = "https://zegod.cn"
 };
-
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
+{
+	CreateNative("RY_MapProperty_BanHumanSkills",Native_RY_MapProperty_BanHumanSkills);
+	CreateNative("RY_MapProperty_BanZombieSkills",Native_RY_MapProperty_BanZombieSkills);
+	CreateNative("RY_MapProperty_BanJK",Native_RY_MapProperty_BanJK);
+	CreateNative("RY_MapProperty_NoBhopLimit",Native_RY_MapProperty_NoBhopLimit);
+}
 public void OnPluginStart()	
 {
 	FlyOnPluginStart();

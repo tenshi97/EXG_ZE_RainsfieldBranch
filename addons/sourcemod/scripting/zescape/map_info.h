@@ -22,7 +22,6 @@ void MapInfoOnDbConnected_MapStartPost(){
 		Time_MapStart = GetTime();
 		if(!Current_Map_Loaded)
 		{
-			Pmap.round += 1;
 			Pmap.last_run_time = Time_MapStart;
 		}
 		Pmap.temp_cooldown = false;
@@ -35,6 +34,33 @@ void MapInfoOnDbConnected_MapStartPost(){
 		PrintToServer("[地图信息读取失败:地图信息不存在]");		
 		Current_Map_Loaded = false;
 	}
+}
+void Pmap_Reload()
+{
+	if(!Current_Map_Loaded)	return;
+	char map_name[64];
+	GetCurrentMap(map_name,sizeof(map_name));
+	Maps.GetArray(map_name,Pmap,sizeof(Pmap));
+}
+public int Native_RY_MapProperty_BanHumanSkills(Handle plugin, int numParams)
+{
+	Pmap_Reload();
+	return Pmap.nohmskill;
+}
+public int Native_RY_MapProperty_BanZombieSkills(Handle plugin, int numParams)
+{
+	Pmap_Reload();
+	return Pmap.nozmskill;
+}
+public int Native_RY_MapProperty_BanJK(Handle plugin, int numParams)
+{
+	Pmap_Reload();
+	return Pmap.nojk;
+}
+public int Native_RY_MapProperty_NoBhopLimit(Handle plugin, int numParams)
+{
+	Pmap_Reload();
+	return Pmap.nobhoplimit;
 }
 
 Action ActionMapInfoMenu(int client,int args)
