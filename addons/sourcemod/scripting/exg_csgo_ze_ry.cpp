@@ -22,7 +22,7 @@
 #include "zescape/round.h"
 #include "zescape/fly.h"
 #include "zescape/jump.h"
-#include "zescape/trigger_output.h"
+//#include "zescape/trigger_output.h"
 #include "zescape/voice_chat.h"
 #include "zescape/spec.h"
 public Plugin myinfo = {
@@ -50,7 +50,7 @@ public void OnPluginStart()
 	RTVOnPluginStart();
 	LoadTranslations("common.phrases");
 	JumpOnPluginStart();
-	TriggerOutputOnPluginStart();
+	//TriggerOutputOnPluginStart();
 	VoiceChatOnPluginStart();
 	SpecOnPluginStart();
 
@@ -59,7 +59,7 @@ public void OnPluginStart()
 public void OnMapStart() 
 {
 	PrintToServer("[OnMapStart]");
-	TriggerOutputOnMapStart();
+	//TriggerOutputOnMapStart();
 	MapInfoOnMapStart();
 	RTVOnMapStart();
 
