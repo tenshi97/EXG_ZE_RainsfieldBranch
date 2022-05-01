@@ -106,7 +106,7 @@ public void OnClientDisconnect(int client)
 	RTVOnClientDisconnect(client);
 	MissionOnClientDisconnect(client);
 }
-public void OnClientPutInServer(int client)
+public void OnClientPostAdminCheck(int client)
 {
 	VoiceChatOnClientConnected(client);
 	MissionOnClientConnected(client);
