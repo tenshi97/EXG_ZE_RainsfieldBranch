@@ -10,6 +10,8 @@
 #include <nextmap>
 #include <server_redirect>
 #include <rainsfield>
+#include <leader>
+#include <mostactive>
 #pragma semicolon 1
 #pragma newdecls required
 #include "zescape/basic_func.h"
@@ -25,6 +27,8 @@
 #include "zescape/trigger_output.h"
 #include "zescape/voice_chat.h"
 #include "zescape/spec.h"
+#include "zescape/time.h"
+#include "zescape/mission.h"
 public Plugin myinfo = {
 	name = " EXG_Zombie_Escape_RY",
 	author = "Rainsfield&WackoD",
@@ -53,7 +57,8 @@ public void OnPluginStart()
 	TriggerOutputOnPluginStart();
 	VoiceChatOnPluginStart();
 	SpecOnPluginStart();
-
+	TimeOnPluginStart();
+	MissionOnPluginStart();
 }
 
 public void OnMapStart() 
@@ -78,6 +83,7 @@ public void OnMapEnd()
 	MapAdmOnMapEnd();
 	NominateOnMapEnd();
 	RTVOnMapEnd();
+	MissionOnMapEnd();
 }
 public int ZR_OnClientInfected(int client, int attacker, bool motherInfect, bool respawnOverride, bool respawn) 
 {
@@ -85,16 +91,25 @@ public int ZR_OnClientInfected(int client, int attacker, bool motherInfect, bool
 	{
 		OnRoundInfected();
 	}
+	if(attacker>=1&&attacker<=64&&client>=1&&client<=64)
+	{
+		if(IsClientInGame(attacker)&&!IsFakeClient(attacker))
+		{
+			MissionZombieInfectHuman(attacker);
+		}
+	}
 }
 
 public void OnClientDisconnect(int client)
 {
 	NominateOnClientDisconnect(client);
 	RTVOnClientDisconnect(client);
+	MissionOnClientDisconnect(client);
 }
 public void OnClientPutInServer(int client)
 {
 	VoiceChatOnClientConnected(client);
+	MissionOnClientConnected(client);
 }
 /*
 	int id;

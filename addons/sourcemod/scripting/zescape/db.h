@@ -9,7 +9,8 @@ void Db_Connect_Callback(Handle owner, Handle hndl, const char[] error, any data
 	SQL_SetCharset(hndl, "utf8");
 	Db_Connection = hndl;
 	DbOnDbConnected_MapStartPost();
-
+	CheckValidMission();
+	ReloadAllPlayerMissionInfo();
 }
 bool isDbConnected()
 {
