@@ -216,6 +216,7 @@ void LoadPlayerMissionInfoCallBack(Handle owner, Handle hndl, char[] error, any 
 		playermission_list[client].taskdata[2]=DbFetchInt(hndl,"DDMGTAKE");	//complete
 		playermission_list[client].taskdata[3]=DbFetchInt(hndl,"DDMGMAKE");	//complete
 		playermission_list[client].taskdata[4]=DbFetchInt(hndl,"DONLINE");	
+	
 		playermission_list[client].taskdata[5]=DbFetchInt(hndl,"DPASS");	//complete
 		playermission_list[client].taskdata[6]=DbFetchInt(hndl,"DLEAD");	//complete
 		playermission_list[client].taskdata[7]=DbFetchInt(hndl,"DNADE");	
