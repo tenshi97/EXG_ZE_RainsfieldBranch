@@ -174,7 +174,7 @@ void LoadPlayerMissionInfo(int client)
 		return;
 	}
 	playermission_list[client]=nullpmi;
-	if(!IsClientInGame())	return;
+	if(!IsClientInGame(client))	return;
 	uid = GetSteamAccountID(client);
 	int playtime = MostActive_GetPlayTimeTotal(client);	
 	PrintToServer("[调试]进服玩家%d[UID:%d],总游玩时长:%d",client,uid,playtime);
@@ -700,6 +700,7 @@ int DailyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 			}
 		}
 		UpdatePlayerMissionInfo(client);
+		DailyTaskMenu(client);
 	}	
 	else if (param == MenuCancel_ExitBack) MissionMenuBuild(client);
 }
@@ -783,6 +784,7 @@ int WeeklyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 			}
 		}
 		UpdatePlayerMissionInfo(client);
+		WeeklyTaskMenu(client);
 	}		
 	else if (param == MenuCancel_ExitBack) MissionMenuBuild(client);
 }
