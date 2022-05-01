@@ -137,7 +137,7 @@ void UpdateMissionTimeStamp()
 }
 void PlayerMissionDailyUpdate(int client)
 {
-	if(client<=0||client>=64)	return;
+	if(client<=0||client>=65)	return;
 	PrintToServer(" \x05[调试]玩家%d的每日任务数据过期，清空中...",client);
 	for(int i=0;i<=7;i++)
 	{
@@ -145,17 +145,19 @@ void PlayerMissionDailyUpdate(int client)
 		playermission_list[client].taskstage[i]=0;		
 	}
 	playermission_list[client].taskdata[4]=MostActive_GetPlayTimeTotal(client);
+	playermission_list[client].loaded = 1;
 	UpdatePlayerMissionInfo(client);
 }
 void PlayerMissionWeeklyUpdate(int client)
 {
-	if(client<=0||client>=64)	return;
+	if(client<=0||client>=65)	return;
 	PrintToServer(" \x05[调试]玩家%d的每周任务数据过期，清空中...",client);
 	for(int i=8;i<=12;i++)
 	{
 		playermission_list[client].taskdata[i]=0;
 		playermission_list[client].taskstage[i]=0;		
 	}
+	playermission_list[client].loaded = 1;
 	UpdatePlayerMissionInfo(client);
 }
 void LoadPlayerMissionInfo(int client)
@@ -172,6 +174,7 @@ void LoadPlayerMissionInfo(int client)
 		return;
 	}
 	playermission_list[client]=nullpmi;
+	if(!IsClientInGame())	return;
 	uid = GetSteamAccountID(client);
 	int playtime = MostActive_GetPlayTimeTotal(client);	
 	PrintToServer("[调试]进服玩家%d[UID:%d],总游玩时长:%d",client,uid,playtime);
@@ -194,8 +197,8 @@ void LoadPlayerMissionInfoCallBack(Handle owner, Handle hndl, char[] error, any 
 	}
 	else
 	{
-		PrintToConsoleAll("[调试]检测到玩家%d赛季活动数据，载入[UID:%d]数据 当前时间:%d",client,uid,current_time);
 		playermission_list[client].dataupdate_time = DbFetchInt(hndl,"TIMESTAMP");	
+		PrintToConsoleAll("[调试]检测到玩家%d赛季活动数据，载入[UID:%d]数据 上一次数据更新时间戳:%d 当前时间戳:%d 当前赛季活动日时间戳:%d",client,uid,playermission_list[client].dataupdate_time,current_time,Current_Mission.daily_timestamp);
 		playermission_list[client].exp = DbFetchInt(hndl,"EXP");
 		playermission_list[client].lvl = DbFetchInt(hndl,"LVL");
 		playermission_list[client].taskstage[0]=DbFetchInt(hndl,"DT1ST");
@@ -216,7 +219,6 @@ void LoadPlayerMissionInfoCallBack(Handle owner, Handle hndl, char[] error, any 
 		playermission_list[client].taskdata[2]=DbFetchInt(hndl,"DDMGTAKE");	//complete
 		playermission_list[client].taskdata[3]=DbFetchInt(hndl,"DDMGMAKE");	//complete
 		playermission_list[client].taskdata[4]=DbFetchInt(hndl,"DONLINE");	
-	
 		playermission_list[client].taskdata[5]=DbFetchInt(hndl,"DPASS");	//complete
 		playermission_list[client].taskdata[6]=DbFetchInt(hndl,"DLEAD");	//complete
 		playermission_list[client].taskdata[7]=DbFetchInt(hndl,"DNADE");	
@@ -599,6 +601,7 @@ void DailyTaskMenu(int client)
 	int onlinetime;
 	if(!playermission_list[client].loaded)	return;
 	if(client<=0||client>=65)	return;
+	menu.SetTitle("每日任务-完成后请点击任务提交\n注意每日任务均有3档");
 	onlinetime = (MostActive_GetPlayTimeTotal(client) - playermission_list[client].taskdata[4])/60;
 	for(int i=0;i<Current_Mission_Tasklist.Length;i++)
 	{
@@ -708,6 +711,7 @@ void WeeklyTaskMenu(int client)
 	char buffer[256],buffer2[256];
 	if(!playermission_list[client].loaded)	return;
 	if(client<=0||client>=65)	return;
+	menu.SetTitle("每周任务-完成后请点击任务提交");
 	for(int i=0;i<Current_Mission_Tasklist.Length;i++)
 	{
 		GetArrayArray(Current_Mission_Tasklist,i,task,sizeof(task));
@@ -812,11 +816,11 @@ void AwardMenu(int client)
 {
 	Menu menu = CreateMenu(AwardMenuHandle);
 	menu.SetTitle("特典奖励领取\n点击对应选项领取奖励");
-	menu.AddItem("uid_wepskin_cso2axe","近战武器-极寒咆哮");
-	menu.AddItem("uid_model_xinhai","人物模型-心海");
-	menu.AddItem("uid_wepskin_dualg18","双枪-双持格洛克");
-	menu.AddItem("uid_wepskin_carbizon","野牛-CAR 斯卡蒂");
-	menu.AddItem("uid_model_lemalin","人物模型-恶毒");
+	menu.AddItem("uid_wepskin_cso2axe","近战武器-极寒咆哮[LV20]");
+	menu.AddItem("uid_model_xinhai","人物模型-心海[LV40]");
+	menu.AddItem("uid_wepskin_dualg18","双枪-双持格洛克[LV60]");
+	menu.AddItem("uid_wepskin_carbizon","野牛-CAR 斯卡蒂[LV80]");
+	menu.AddItem("uid_model_lemalin","人物模型-恶毒[LV100]");
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }
