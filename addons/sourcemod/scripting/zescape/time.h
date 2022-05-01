@@ -69,6 +69,6 @@ void daily_timercheck(int start_time)
 void TimerRecord_Update(char[] record_name,int timestamp,int repeat=1,int period=0,int begin=0,int finish=0)
 {
 	char query[512];
-	Format(query,sizeof(query),"UPDATE ZETIMER SET TIMESTAMP = %d, REPEAT = %d, PERIOD = %d, BEGINTIME = %d, ENDTIME = %d WHERE NAME = '%s' ",timestamp,repeat,period,begin,finish,record_name);
+	Format(query,sizeof(query),"UPDATE ZETIMER SET TIMESTAMP = %d, REPEAT = %d, PERIOD = %d, BEGINTIME = %d, ENDTIME = %d WHERE NAME = %s ",timestamp,repeat,period,begin,finish,record_name);
 	DbTQuery(DbQueryErrorCallback,query);
 }  	
