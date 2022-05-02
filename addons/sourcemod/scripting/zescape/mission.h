@@ -80,48 +80,15 @@ void MissionTimeCheck()
 		Current_Mission.weekly_timestamp += weeks_delta*604800;
 		Timestampweeklychanged = true;
 	}
-	if(Timestampdailychanged)
-	{
-		PrintToChatAll(" \x05[调试]新活动日，清空在线玩家每日任务数据");
-		for(int i=1;i<=64;i++)
-		{
-			if(IsClientInGame(i))
-			{
-				if(!IsFakeClient(i))
-				{
-					playermission_list[i].dataupdate_time=current_time+1;
-					for(int j=0;j<=7;j++)
-					{
-						playermission_list[i].taskdata[j]=0;
-						playermission_list[i].taskstage[j]=0;
-					}
-					playermission_list[i].loaded=1;
-					playermission_list[i].taskdata[4]=MostActive_GetPlayTimeTotal(i);
-					UpdatePlayerMissionInfo(i);
-				}
-			}
-
-		}
-	}
 	if(Timestampweeklychanged)
 	{
-		PrintToChatAll(" \x05[调试]新活动周，清空在线玩家每周任务数据");
-		for(int i=1;i<=64;i++)
+		ClearPlayerMissionInfo(1);
+	}
+	else
+	{
+		if(Timestampdailychanged)
 		{
-			if(IsClientInGame(i))
-			{
-				if(!IsFakeClient(i))
-				{
-					playermission_list[i].dataupdate_time=current_time+1;
-					for(int j=8;j<=12;j++)
-					{
-						playermission_list[i].taskdata[j]=0;
-						playermission_list[i].taskstage[j]=0;
-					}
-					playermission_list[i].loaded=1;
-					UpdatePlayerMissionInfo(i);
-				}
-			}
+			ClearPlayerMissionInfo(0);
 		}
 	}
 	if(Timestampdailychanged||Timestampweeklychanged)
@@ -248,6 +215,7 @@ void LoadPlayerMissionInfoCallBack(Handle owner, Handle hndl, char[] error, any 
 	DbTQuery(DbQueryErrorCallback,query);
 	playermission_list[client].loaded = 1;
 }
+
 void ReloadAllPlayerMissionInfo()
 {
 	for(int i=1;i<=64;i++)
@@ -261,6 +229,25 @@ void ReloadAllPlayerMissionInfo()
 			}
 		}
 	}
+}
+
+void ClearPlayerMissionInfo(int weekly=0)
+{
+	char query[512];
+	if(weekly)
+	{
+		PrintToChatAll(" \x05[任务系统]清空每周任务数据....");
+		Format(query,sizeof(query),"UPDATE %s SET WINFECT = 0,WKILLZM = 0,WDMGMAKE = 0,WDMGTAKE = 0,WNADE = 0,WT1ST = 0,WT2ST = 0,WT3ST =0,WT4ST = 0,WT5ST =0",Current_Mission.playerdbname);
+		DbTQuery(DbQueryErrorCallback,query);
+	}
+	PrintToChatAll(" \x05[任务系统]清空每日任务数据....");
+	Format(query,sizeof(query),"UPDATE %s SET DINFECT = 0, DKILLZM = 0, DDMGTAKE=0, DDMGMAKE=0, DPASS=0, DLEAD=0, DNADE=0, DT1ST=0, DT2ST=0, DT3ST=0, DT4ST=0, DT5ST=0, DT6ST=0, DT7ST=0, DT8ST=0",Current_Mission.playerdbname);
+	DbTQuery(DbClearPlayerMissionInfoCallback,query);
+}
+
+void DbClearPlayerMissionInfoCallback(Handle owner, Handle hndl, char[] error, any data)
+{
+	ReloadAllPlayerMissionInfo();
 }
 void UpdatePlayerMissionInfo(int client)
 {
@@ -287,7 +274,7 @@ void UpdatePlayerMissionInfo(int client)
 		taskstage[i]=playermission_list[client].taskstage[i];
 	}
 	int current_time = GetTime();
-	PrintToServer("[任务系统][UID:%d]玩家%d退出，保存数据",uid,client);
+	PrintToServer("[任务系统][UID:%d]保存玩家%d数据",uid,client);
 	Format(query,sizeof(query),"UPDATE %s SET LVL = %d, EXP = %d, DINFECT = %d,DKILLZM = %d,DDMGTAKE = %d,DDMGMAKE = %d,DONLINE = %d, DPASS = %d, DLEAD = %d, DNADE = %d, WINFECT = %d, WKILLZM = %d, WDMGTAKE = %d, WDMGMAKE = %d, WNADE = %d, DT1ST = %d, DT2ST = %d, DT3ST = %d, DT4ST = %d, DT5ST =%d, DT6ST = %d, DT7ST = %d, DT8ST = %d, WT1ST = %d, WT2ST = %d, WT3ST = %d, WT4ST = %d, WT5ST = %d, TIMESTAMP = %d, SP1 = %d, SP2 = %d, SP3 = %d, SP4 = %d, SP5 = %d WHERE UID = %d",Current_Mission.playerdbname,lvl,exp,taskdata[0],taskdata[1],taskdata[2],taskdata[3],taskdata[4],taskdata[5],taskdata[6],taskdata[7],taskdata[8],taskdata[9],taskdata[10],taskdata[11],taskdata[12],taskstage[0],taskstage[1],taskstage[2],taskstage[3],taskstage[4],taskstage[5],taskstage[6],taskstage[7],taskstage[8],taskstage[9],taskstage[10],taskstage[11],taskstage[12],current_time,sp1,sp2,sp3,sp4,sp5,uid);
 	DbTQuery(DbQueryErrorCallback,query);
 }
@@ -306,7 +293,6 @@ void MissionOnClientDisconnect(int client)
 void MissionOnRoundEnd(int winner)
 {
 	int player_num = GetClientCount(true);
-	PrintToServer(" \x05[调试语句]回合结束：玩家数量%d",player_num);
 	for(int i=1;i<=64;i++)
 	{
 		if(IsClientInGame(i))
@@ -469,7 +455,7 @@ void TEMP_OpHR_TasklistSet()
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 3;
-	task.num[0] = 10;task.num[1] = 20;task.num[2] = 42;
+	task.num[0] = 8;task.num[1] = 16;task.num[2] = 32;
 	task.exp_base = 100;
 	task.period = 1;
 	task.type = HM_DMGMAKE;
@@ -509,7 +495,7 @@ void TEMP_OpHR_TasklistSet()
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 1;
-	task.num[0] = 140;
+	task.num[0] = 120;
 	task.exp_base = 1500;
 	task.period = 7;
 	task.type = ZM_INFECT;
@@ -525,7 +511,7 @@ void TEMP_OpHR_TasklistSet()
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 1;
-	task.num[0] = 150;
+	task.num[0] = 250;
 	task.exp_base = 1500;
 	task.period = 7;
 	task.type = ZM_DMGTAKE;
@@ -533,7 +519,7 @@ void TEMP_OpHR_TasklistSet()
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 1;
-	task.num[0] = 300;
+	task.num[0] = 180;
 	task.exp_base = 1500;
 	task.period = 7;
 	task.type = HM_DMGMAKE;
