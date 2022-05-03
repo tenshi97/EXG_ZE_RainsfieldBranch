@@ -69,7 +69,17 @@ bool DiffTimeTransform1(char buffer[PLATFORM_MAX_PATH],int timestamp1,int timest
 		return true;
 	}
 }
-
+int IsClientVIP(int client)
+{
+	if(client<=0||client>=65)	return -1;
+	if(!IsClientInGame(client))	return -1;
+	if(IsFakeClient(client))	return -1;
+	if (GetUserFlagBits(client) && ADMFLAG_RESERVATION)
+	{
+		return 1;
+	}
+	return 0;
+}
 void KillTimerSafe(Handle& timer) {
 	if (!timer) return;
 	KillTimer(timer);

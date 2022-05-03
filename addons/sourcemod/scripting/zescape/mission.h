@@ -42,6 +42,7 @@ enum struct PlayerMissionInfo
 	int dataupdate_time;
 	int loaded;	//temp
 	int sp[5];
+	int vip;
 }
 ArrayList Current_Mission_Tasklist;
 bool g_ValidMission_Exist;
@@ -160,7 +161,7 @@ void LoadPlayerMissionInfoCallBack(Handle owner, Handle hndl, char[] error, any 
 	{
 		int playtime = MostActive_GetPlayTimeTotal(client);
 		PrintToConsoleAll("[调试]未检测到玩家%d赛季活动数据，注册新玩家%d 当前时间:%d,载入时总游玩时间%d",client,uid,current_time,playtime);
-		Format(query,sizeof(query),"INSERT INTO %s (UID,TIMESTAMP,DONLINE) VALUES(%d,%d,%d)",Current_Mission.playerdbname,uid,current_time,playtime);
+		Format(query,sizeof(query),"INSERT INTO %s (UID,TIMESTAMP,DONLINE,VIP) VALUES(%d,%d,%d)",Current_Mission.playerdbname,uid,current_time,playtime);
 	}
 	else
 	{
@@ -199,6 +200,7 @@ void LoadPlayerMissionInfoCallBack(Handle owner, Handle hndl, char[] error, any 
 		playermission_list[client].sp[2]=DbFetchInt(hndl,"SP3");
 		playermission_list[client].sp[3]=DbFetchInt(hndl,"SP4");
 		playermission_list[client].sp[4]=DbFetchInt(hndl,"SP5");
+		playermission_list[client].vip = DbFetchInt(hndl,"VIP");
 		if(playermission_list[client].dataupdate_time<Current_Mission.daily_timestamp)
 		{
 			PlayerMissionDailyUpdate(client);
@@ -275,7 +277,7 @@ void UpdatePlayerMissionInfo(int client)
 	}
 	int current_time = GetTime();
 	PrintToServer("[任务系统][UID:%d]保存玩家%d数据",uid,client);
-	Format(query,sizeof(query),"UPDATE %s SET LVL = %d, EXP = %d, DINFECT = %d,DKILLZM = %d,DDMGTAKE = %d,DDMGMAKE = %d,DONLINE = %d, DPASS = %d, DLEAD = %d, DNADE = %d, WINFECT = %d, WKILLZM = %d, WDMGTAKE = %d, WDMGMAKE = %d, WNADE = %d, DT1ST = %d, DT2ST = %d, DT3ST = %d, DT4ST = %d, DT5ST =%d, DT6ST = %d, DT7ST = %d, DT8ST = %d, WT1ST = %d, WT2ST = %d, WT3ST = %d, WT4ST = %d, WT5ST = %d, TIMESTAMP = %d, SP1 = %d, SP2 = %d, SP3 = %d, SP4 = %d, SP5 = %d WHERE UID = %d",Current_Mission.playerdbname,lvl,exp,taskdata[0],taskdata[1],taskdata[2],taskdata[3],taskdata[4],taskdata[5],taskdata[6],taskdata[7],taskdata[8],taskdata[9],taskdata[10],taskdata[11],taskdata[12],taskstage[0],taskstage[1],taskstage[2],taskstage[3],taskstage[4],taskstage[5],taskstage[6],taskstage[7],taskstage[8],taskstage[9],taskstage[10],taskstage[11],taskstage[12],current_time,sp1,sp2,sp3,sp4,sp5,uid);
+	Format(query,sizeof(query),"UPDATE %s SET LVL = %d, EXP = %d, DINFECT = %d,DKILLZM = %d,DDMGTAKE = %d,DDMGMAKE = %d,DONLINE = %d, DPASS = %d, DLEAD = %d, DNADE = %d, WINFECT = %d, WKILLZM = %d, WDMGTAKE = %d, WDMGMAKE = %d, WNADE = %d, DT1ST = %d, DT2ST = %d, DT3ST = %d, DT4ST = %d, DT5ST =%d, DT6ST = %d, DT7ST = %d, DT8ST = %d, WT1ST = %d, WT2ST = %d, WT3ST = %d, WT4ST = %d, WT5ST = %d, TIMESTAMP = %d, SP1 = %d, SP2 = %d, SP3 = %d, SP4 = %d, SP5 = %d, VIP = %d WHERE UID = %d",Current_Mission.playerdbname,lvl,exp,taskdata[0],taskdata[1],taskdata[2],taskdata[3],taskdata[4],taskdata[5],taskdata[6],taskdata[7],taskdata[8],taskdata[9],taskdata[10],taskdata[11],taskdata[12],taskstage[0],taskstage[1],taskstage[2],taskstage[3],taskstage[4],taskstage[5],taskstage[6],taskstage[7],taskstage[8],taskstage[9],taskstage[10],taskstage[11],taskstage[12],current_time,sp1,sp2,sp3,sp4,sp5,playermission_list[client].vip,uid);
 	DbTQuery(DbQueryErrorCallback,query);
 }
 void MissionOnClientConnected(int client)
@@ -552,7 +554,8 @@ void MissionMenuBuild(int client)
 	menu.SetTitle(buffer);
 	menu.AddItem("","每日任务");
 	menu.AddItem("","每周挑战");
-	menu.AddItem("","奖励兑换");                           
+	menu.AddItem("","奖励兑换");
+	menu.AddItem("","VIP奖励");                    
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
@@ -575,6 +578,10 @@ int MissionMenuHandler(Menu menu, MenuAction action, int client, int param)
 		else if (param == 2)
 		{
 			AwardMenu(client);
+		}
+		else if (param == 3)
+		{
+			CheckVIPBonus(client);
 		}
 	}
 }
@@ -780,7 +787,7 @@ void GrantExp(int client,int exp)
 	if(client<=0||client>=65)	return;
 	int credits=Store_GetClientCredits(client);
 	playermission_list[client].exp+=exp;
-	PrintToChat(client," \x05[任务系统]您在%s中获得%d经验",Current_Mission.name,exp);
+	PrintToChat(client," \x05[任务系统]\x01您在\x09%s\x01中获得\x09%d\x01经验",Current_Mission.cnname,exp);
 	int level_exp = Current_Mission.level_exp;
 	int max_level = Current_Mission.max_level;
 	int uplevel;
@@ -791,7 +798,7 @@ void GrantExp(int client,int exp)
 			uplevel = playermission_list[client].exp/level_exp;
 			playermission_list[client].lvl+=uplevel;
 			playermission_list[client].exp%=level_exp;
-			PrintToChat(client," \x05[任务系统] 您在%s的等级提升到了%d,并获得500积分奖励",Current_Mission.name,playermission_list[client].lvl);
+			PrintToChat(client," \x05[任务系统] \x01您在\x09%s\x01的等级提升到了\x09%d\x01,并获得500积分奖励",Current_Mission.name,playermission_list[client].lvl);
 			Store_SetClientCredits(client,credits+500*uplevel);
 		}
 		else
@@ -857,4 +864,36 @@ int AwardMenuHandle(Menu menu, MenuAction action, int client, int param)
 		}	
 	}		
 	else if (param == MenuCancel_ExitBack) MissionMenuBuild(client);
+}
+
+void CheckVIPBonus(int client)
+{
+	int vipstatus;
+	vipstatus=IsClientVIP(client);
+	if(!playermission_list[client].loaded)
+	{
+		PrintToChat(client," \x05[任务系统]数据未载入，无法领取(请等待下一回合或换图)");
+		return;
+	}
+	if(vipstatus!=-1)
+	{
+		if(vipstatus)
+		{
+			if(playermission_list[client].vip==0)
+			{
+				PrintToChat(client," \x05[任务系统]\x01VIP奖励—10000点经验已发放");
+				GrantExp(client,10000);
+				playermission_list[client].vip=1;
+				UpdatePlayerMissionInfo(client);
+			}
+			else
+			{
+				PrintToChat(client," \x05[任务系统]\x01你已经领取过VIP奖励!");
+			}
+		}
+		else
+		{
+			PrintToChat(client," \x05[任务系统]\x01你还不是VIP，无法领取奖励，快去氪金吧!");
+		}
+	}
 }
