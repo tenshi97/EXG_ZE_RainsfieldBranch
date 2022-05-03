@@ -448,7 +448,7 @@ void TEMP_OpHR_TasklistSet()
 
 	task.stage = 3;
 	task.num[0] = 5;task.num[1] = 10;task.num[2] = 21;
-	task.exp_base = 80;
+	task.exp_base = 120;
 	task.period = 1;
 	task.type = ZM_DMGTAKE;
 	task.name = "[僵尸]承受伤害:";
@@ -456,14 +456,14 @@ void TEMP_OpHR_TasklistSet()
 
 	task.stage = 3;
 	task.num[0] = 8;task.num[1] = 16;task.num[2] = 32;
-	task.exp_base = 100;
+	task.exp_base = 180;
 	task.period = 1;
 	task.type = HM_DMGMAKE;
 	task.name = "[人类]造成伤害:";
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 3;
-	task.num[0] = 120;task.num[1] = 240;task.num[2] = 360;
+	task.num[0] = 60;task.num[1] = 120;task.num[2] = 240;
 	task.exp_base = 60;
 	task.period = 1;
 	task.type = ALL_ONLINE;
@@ -512,7 +512,7 @@ void TEMP_OpHR_TasklistSet()
 
 	task.stage = 1;
 	task.num[0] = 250;
-	task.exp_base = 1500;
+	task.exp_base = 3000;
 	task.period = 7;
 	task.type = ZM_DMGTAKE;
 	task.name = "[僵尸]承受伤害:";
@@ -520,7 +520,7 @@ void TEMP_OpHR_TasklistSet()
 
 	task.stage = 1;
 	task.num[0] = 180;
-	task.exp_base = 1500;
+	task.exp_base = 3000;
 	task.period = 7;
 	task.type = HM_DMGMAKE;
 	task.name = "[人类]造成伤害:";
@@ -651,7 +651,7 @@ int DailyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 			if((playermission_list[client].taskdata[taskid]/10000)>=task.num[playermission_list[client].taskstage[taskid]])
 			{
 				playermission_list[client].taskstage[taskid]++;
-				GrantExp(client,task.exp_base*(playermission_list[client].taskstage[taskid]+1));
+				GrantExp(client,task.exp_base*(playermission_list[client].taskstage[taskid]));
 			}
 			else
 			{
@@ -750,7 +750,7 @@ int WeeklyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 			if((playermission_list[client].taskdata[taskid]/10000)>=task.num[playermission_list[client].taskstage[taskid]])
 			{
 				playermission_list[client].taskstage[taskid]++;
-				GrantExp(client,task.exp_base*(playermission_list[client].taskstage[taskid]+1));
+				GrantExp(client,task.exp_base*(playermission_list[client].taskstage[taskid]));
 			}
 			else
 			{
@@ -783,14 +783,16 @@ void GrantExp(int client,int exp)
 	PrintToChat(client," \x05[任务系统]您在%s中获得%d经验",Current_Mission.name,exp);
 	int level_exp = Current_Mission.level_exp;
 	int max_level = Current_Mission.max_level;
+	int uplevel;
 	if(playermission_list[client].exp>=level_exp)
 	{
 		if(playermission_list[client].lvl<max_level)
 		{
-			playermission_list[client].lvl+=playermission_list[client].exp/level_exp;
+			uplevel = playermission_list[client].exp/level_exp;
+			playermission_list[client].lvl+=uplevel;
 			playermission_list[client].exp%=level_exp;
 			PrintToChat(client," \x05[任务系统] 您在%s的等级提升到了%d,并获得500积分奖励",Current_Mission.name,playermission_list[client].lvl);
-			Store_SetClientCredits(client,credits+500);
+			Store_SetClientCredits(client,credits+500*uplevel);
 		}
 		else
 		{
