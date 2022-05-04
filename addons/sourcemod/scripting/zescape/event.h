@@ -58,9 +58,13 @@ void OnPlayerHurt(Event event, const char[] name, bool dontBroadcast)
 	if(!IsClientInGame(victim)||!IsClientInGame(attacker))	return;
 	if(victim==attacker)	return;
 	if(IsFakeClient(attacker))	return;
-	if(ZR_IsClientHuman(attacker)&&ZR_IsClientZombie(victim))
+	if(!IsPlayerAlive(attacker))	return;
+	if(ZR_IsClientHuman(attacker))
 	{
-		MissionHumanDmgCount(attacker,victim,damage);
+		if(!IsPlayerAlive(victim)||ZR_IsClientZombie(victim))
+		{
+			MissionHumanDmgCount(attacker,victim,damage);
+		}
 	}
 
 }

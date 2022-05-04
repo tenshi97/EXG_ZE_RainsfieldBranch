@@ -803,7 +803,7 @@ void GrantExp(int client,int exp)
 			uplevel = playermission_list[client].exp/level_exp;
 			playermission_list[client].lvl+=uplevel;
 			playermission_list[client].exp%=level_exp;
-			PrintToChat(client," \x05[任务系统] \x01您在\x09%s\x01的等级提升到了\x09%d\x01,并获得500积分奖励",Current_Mission.name,playermission_list[client].lvl);
+			PrintToChat(client," \x05[任务系统] \x01您在\x09%s\x01的等级提升到了\x09%d\x01,并获得%d积分奖励",Current_Mission.name,playermission_list[client].lvl,500*uplevel);
 			Store_SetClientCredits(client,credits+500*uplevel);
 		}
 		else
@@ -906,10 +906,11 @@ void CheckVIPBonus(int client)
 void SecretShopMenu(int client)
 {
 	Menu menu = CreateMenu(SecretShopHandler);
+	if(client<=0||client>=65)	return;
 	int credits = Store_GetClientCredits(client);
 	menu.SetTitle("神秘商店\n您当前积分为:%d",credits);
 	menu.AddItem("","购买1大行动等级(2500积分)",credits>=2500?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
-	menu.AddItem("","购买10大行动等级(22000积分)",credits>=23000?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("","购买10大行动等级(23000积分)",credits>=23000?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }
@@ -954,6 +955,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 				PrintToChat(client," \x05[任务系统]你的积分不足或你已满级!");
 			}
 		}
+		SecretShopMenu(client);
 	}		
 	else if (param == MenuCancel_ExitBack) MissionMenuBuild(client);
 }
