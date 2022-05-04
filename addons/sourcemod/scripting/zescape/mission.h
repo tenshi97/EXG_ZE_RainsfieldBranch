@@ -161,7 +161,7 @@ void LoadPlayerMissionInfoCallBack(Handle owner, Handle hndl, char[] error, any 
 	{
 		int playtime = MostActive_GetPlayTimeTotal(client);
 		PrintToConsoleAll("[调试]未检测到玩家%d赛季活动数据，注册新玩家%d 当前时间:%d,载入时总游玩时间%d",client,uid,current_time,playtime);
-		Format(query,sizeof(query),"INSERT INTO %s (UID,TIMESTAMP,DONLINE,VIP) VALUES(%d,%d,%d)",Current_Mission.playerdbname,uid,current_time,playtime);
+		Format(query,sizeof(query),"INSERT INTO %s (UID,TIMESTAMP,DONLINE,VIP) VALUES(%d,%d,%d,0)",Current_Mission.playerdbname,uid,current_time,playtime);
 	}
 	else
 	{
@@ -555,7 +555,8 @@ void MissionMenuBuild(int client)
 	menu.AddItem("","每日任务");
 	menu.AddItem("","每周挑战");
 	menu.AddItem("","奖励兑换");
-	menu.AddItem("","VIP奖励");                    
+	menu.AddItem("","VIP奖励");    
+	menu.AddItem("","神秘商店");                
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
@@ -582,6 +583,10 @@ int MissionMenuHandler(Menu menu, MenuAction action, int client, int param)
 		else if (param == 3)
 		{
 			CheckVIPBonus(client);
+		}
+		else if (param == 4)
+		{
+			SecretShopMenu(client);
 		}
 	}
 }
@@ -824,7 +829,7 @@ void AwardMenu(int client)
 
 int AwardMenuHandle(Menu menu, MenuAction action, int client, int param)
 {
-	char buffer[256],item[256];
+	char item[256];
 	int item_id;
 	int current_time=GetTime();
 	int expdate;
@@ -837,12 +842,12 @@ int AwardMenuHandle(Menu menu, MenuAction action, int client, int param)
 		menu.GetItem(param,item,sizeof(item));
 		if(playermission_list[client].sp[param])
 		{
-			PrintToChat(client," \x05[任务系统]已经领取过该奖励！");
+			PrintToChat(client," \x05[任务系统]\x01已经领取过该奖励！");
 			return;
 		}
 		if(playermission_list[client].lvl<20*(param+1))
 		{
-			PrintToChat(client," \x05[任务系统]领取所需等级不足!需要赛季等级%d级，而你只有%d级",20*(param+1),playermission_list[client].lvl);
+			PrintToChat(client," \x05[任务系统]\x01领取所需等级不足!需要赛季等级\x09%d\x01级，而你只有\x09%d\x01级",20*(param+1),playermission_list[client].lvl);
 			return;
 		}
 		item_id = Store_GetItemIdbyUniqueId(item);
@@ -896,4 +901,59 @@ void CheckVIPBonus(int client)
 			PrintToChat(client," \x05[任务系统]\x01你还不是VIP，无法领取奖励，快去氪金吧!");
 		}
 	}
+}
+
+void SecretShopMenu(int client)
+{
+	Menu menu = CreateMenu(SecretShopHandler);
+	int credits = Store_GetClientCredits(client);
+	menu.SetTitle("神秘商店\n您当前积分为:%d",credits);
+	menu.AddItem("","购买1大行动等级(2500积分)",credits>=2500?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("","购买10大行动等级(22000积分)",credits>=23000?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.ExitBackButton = true;
+	menu.Display(client,MENU_TIME_FOREVER);
+}
+
+int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
+{
+	int credits = Store_GetClientCredits(client);
+	if(!playermission_list[client].loaded)
+	{
+		PrintToChat(client," \x05[任务系统]数据未载入，无法购买(请等待下一回合或换图)");
+		menu.Close();
+	}
+	if(client<=0||client>=65)	return;	if (action == MenuAction_End||client<=0||client>=65)
+	{
+		menu.Close();
+	}
+	else if(action == MenuAction_Select)
+	{
+		if(param == 0)
+		{
+			if(credits>=2500&&playermission_list[client].lvl<100)
+			{
+				GrantExp(client,1000);	
+				Store_SetClientCredits(client,credits-2500);
+				PrintToChat(client," \x05[任务系统]消费积分购买了1大行动等级");
+			}
+			else
+			{
+				PrintToChat(client," \x05[任务系统]你的积分不足或你已满级!");
+			}
+		}
+		else if(param == 1)
+		{
+			if(credits>=23000&&playermission_list[client].lvl<100)
+			{
+				GrantExp(client,10000);	
+				Store_SetClientCredits(client,credits-23000);
+				PrintToChat(client," \x05[任务系统]消费积分购买了10大行动等级");
+			}
+			else
+			{
+				PrintToChat(client," \x05[任务系统]你的积分不足或你已满级!");
+			}
+		}
+	}		
+	else if (param == MenuCancel_ExitBack) MissionMenuBuild(client);
 }

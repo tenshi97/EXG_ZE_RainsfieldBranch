@@ -2,6 +2,8 @@
 Map_Info Pmap;
 bool Current_Map_Loaded = false;
 ConVar Cvar_MP_TIMELIMIT;
+char g_current_nominator_name[PLATFORM_MAX_PATH];
+bool g_current_nominated;
 void MapInfoOnPluginStart(){
 	RegConsoleCmd("sm_mi", ActionMapInfoMenu);
 	RegConsoleCmd("sm_mapinfo", ActionMapInfoMenu);
@@ -10,6 +12,7 @@ void MapInfoOnPluginStart(){
 }
 void MapInfoOnMapStart(){
 	Current_Map_Loaded = false;
+	g_current_nominated = GetCurrentMapNominatorName(g_current_nominator_name);
 }
 void MapInfoOnDbConnected_MapStartPost(){
 	char map_name[64];
@@ -78,7 +81,6 @@ Action ActionMapInfoMenu(int client,int args)
 
 void MakeMapInfoMenu(int client){
 	char title[256];
-	char nominator_name[PLATFORM_MAX_PATH];
 	Format(title,sizeof(title),"当前地图:%s\n\
 		地图译名:%s\n\
 		地图难度:%s\n\
@@ -91,9 +93,9 @@ void MakeMapInfoMenu(int client){
 	menu.AddItem("",title,ITEMDRAW_DISABLED);
 	Format(title,sizeof(title),"地图时长:%d",Pmap.timelimit);
 	menu.AddItem("",title,ITEMDRAW_DISABLED);
-	if(GetCurrentMapNominatorName(nominator_name))
+	if(g_current_nominated)
 	{
-		Format(title,sizeof(title),"预定者:%s",nominator_name);
+		Format(title,sizeof(title),"预定者:%s",g_current_nominator_name);
 		menu.AddItem("",title,ITEMDRAW_DISABLED);
 	}
 	else
