@@ -230,7 +230,7 @@ public void OnMapTimeLeftChanged()
 	GetMapTimeLeft(timeleft);
 	Format(buffer,sizeof(buffer),"地图时间:%d秒",timeleft);
 	PrintToServer(buffer);
-	PrintToConsoleAll(buffer);
+	//PrintToConsoleAll(buffer);
 	if(timeleft<0)	return;
 	if(timeleft-180<=0)
 	{
@@ -251,7 +251,7 @@ Action TIMELEFT_AUTOVOTEMAP_HNDL(Handle timer)
 		return Plugin_Handled;
 	}
 	PrintToServer(" [EMC]地图剩余时间已到3分钟，准备换图");
-	PrintToConsoleAll("[EMC]地图剩余时间已到3分钟，准备换图");
+	//PrintToConsoleAll("[EMC]地图剩余时间已到3分钟，准备换图");
 	g_ChangeMap_Time = MapChangeTime_MapEnd;
 	g_Allow_RTV = false;
 	g_Timer_Timeleft = INVALID_HANDLE;
@@ -418,7 +418,7 @@ void CreateNextMapVote()
 				}
 				if(!isNominated(map)&&isMapCoolDownOver(map)&&interval_status)
 				{
-					PrintToConsoleAll("Random+ %s",map.name);
+					//PrintToConsoleAll("Random+ %s",map.name);
 					mapv.name = map.name;
 					mapv.nominated = false;
 					mapv.nominator_name = "\0";
