@@ -28,5 +28,7 @@ native bool RY_MapProperty_BanJK();
  */
 native bool RY_MapProperty_NoBhopLimit();
 
+native int RY_Mission_GetClientMissionLevel(int client);
 
+native int RY_Mission_GiveClientExp(int client,int exp);
 

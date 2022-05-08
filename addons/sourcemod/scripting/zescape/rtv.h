@@ -398,16 +398,27 @@ void CreateNextMapVote()
 	StringMapSnapshot snap=Maps.Snapshot();
 	int RandomMap_Picked,RandomMap_Order;
 	RandomMap_Picked = 0;
+	int server_port = FindConVar("hostport").IntValue;
 	if(Random_Num>0)
 	{
 		for(int i =0;i < snap.Length ; i++)
 		{
 			snap.GetKey(i, map.name, sizeof(map.name));
 			Maps.GetArray(map.name, map, sizeof(map));
+			bool interval_status = true;
 			if(map.available&&map.exist&&map.download&&map.random)
 			{	
-				if(!isNominated(map)&&isMapCoolDownOver(map))
+				if(map.difficulty>=2&&server_port==27015)
 				{
+					if(g_Map_Interval_Count>0)
+					{
+						interval_status = false;
+						//PrintToConsoleAll("地图%s由于疲劳机制被剔出了随机队列",map.name);
+					}
+				}
+				if(!isNominated(map)&&isMapCoolDownOver(map)&&interval_status)
+				{
+					PrintToConsoleAll("Random+ %s",map.name);
 					mapv.name = map.name;
 					mapv.nominated = false;
 					mapv.nominator_name = "\0";

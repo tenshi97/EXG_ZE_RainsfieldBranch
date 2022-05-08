@@ -434,7 +434,7 @@ void TEMP_OpHR_TasklistSet()
 	TASK task;
 	task.stage = 3;
 	task.num[0] = 5;task.num[1] = 10;task.num[2] = 20;
-	task.exp_base = 70;
+	task.exp_base = 80;
 	task.period = 1;
 	task.type = ZM_INFECT;
 	task.name = "[僵尸]感染人类:";
@@ -442,23 +442,23 @@ void TEMP_OpHR_TasklistSet()
 
 	task.stage = 3;
 	task.num[0] = 1;task.num[1] = 3;task.num[2] = 5;
-	task.exp_base = 70;
+	task.exp_base = 80;
 	task.period = 1;
 	task.type = HM_KILLZM;
 	task.name = "[人类]击杀僵尸:";
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 3;
-	task.num[0] = 5;task.num[1] = 10;task.num[2] = 21;
-	task.exp_base = 120;
+	task.num[0] = 5;task.num[1] = 10;task.num[2] = 20;
+	task.exp_base = 150;
 	task.period = 1;
 	task.type = ZM_DMGTAKE;
 	task.name = "[僵尸]承受伤害:";
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 3;
-	task.num[0] = 8;task.num[1] = 16;task.num[2] = 32;
-	task.exp_base = 180;
+	task.num[0] = 4;task.num[1] = 8;task.num[2] = 16;
+	task.exp_base = 160;
 	task.period = 1;
 	task.type = HM_DMGMAKE;
 	task.name = "[人类]造成伤害:";
@@ -466,7 +466,7 @@ void TEMP_OpHR_TasklistSet()
 
 	task.stage = 3;
 	task.num[0] = 60;task.num[1] = 120;task.num[2] = 240;
-	task.exp_base = 60;
+	task.exp_base = 80;
 	task.period = 1;
 	task.type = ALL_ONLINE;
 	task.name = "[公共]在线时间(分钟):";
@@ -917,13 +917,14 @@ void SecretShopMenu(int client)
 
 int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 {
+	if(client<=0||client>=65) return;
 	int credits = Store_GetClientCredits(client);
 	if(!playermission_list[client].loaded)
 	{
 		PrintToChat(client," \x05[任务系统]数据未载入，无法购买(请等待下一回合或换图)");
 		menu.Close();
 	}
-	if(client<=0||client>=65)	return;	if (action == MenuAction_End||client<=0||client>=65)
+	if (action == MenuAction_End||client<=0||client>=65)
 	{
 		menu.Close();
 	}
@@ -958,4 +959,27 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 		SecretShopMenu(client);
 	}		
 	else if (param == MenuCancel_ExitBack) MissionMenuBuild(client);
+}
+
+public int Native_RY_GetClientMissionLevel(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	if(client<=0||client>=65)	return -1;
+	if(!IsClientInGame(client))	return -1;
+	if(IsFakeClient(client))	return -1;
+	if(!playermission_list[client].loaded)	return -1;
+	return playermission_list[client].lvl;
+}
+
+public int Native_RY_GiveClientMissionExp(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	int exp = GetNativeCell(2);
+	if(client<=0||client>=65)	return -1;
+	if(exp<=0)	return -1;
+	if(!IsClientInGame(client))	return -1;
+	if(IsFakeClient(client))	return -1;
+	if(!playermission_list[client].loaded)	return -1;
+	GrantExp(client,exp);
+	return 0;
 }

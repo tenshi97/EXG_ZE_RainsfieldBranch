@@ -25,8 +25,11 @@ enum struct Map_Info
  	int nozmskill;
  	int nojk;
  	int nobhoplimit;
+ 	int interval;
 }
 char difficulty_name[5][10]={"简单","普通","困难","高难","极难"};
+//char label_name[10][10]={"FF","卤粉","闯关","娱乐","弹幕","方块","咸鱼","挑战","长征","感染"};
+//int label_code[10]={1,2,4,8,16,32,64,128,256,512};
 enum struct Map_Log
 {
 	int id;
@@ -70,6 +73,7 @@ void MapAdmOnPluginStart()
 	RegAdminCmd("sm_mapcd_update",MapCooldownCommand,ADMFLAG_GENERIC);
 	RegAdminCmd("sm_mapcost_update",MapCostCommand,ADMFLAG_GENERIC);
 	RegAdminCmd("sm_resetma",MapAdminResetCommand,ADMFLAG_GENERIC);
+
 }
 void MapAdmOnDbConnected_MapStartPost()
 {
@@ -93,6 +97,7 @@ Action MapFileReloadCommand(int client,int args)
 	}
 	return Plugin_Handled;
 }
+
 void MapDataReload()
 {
 	Map_Id_Max = 0;
@@ -142,9 +147,10 @@ void MapDataLoadCallback(Handle owner, Handle hndl, char[] error, any data)
 		map.nozmskill = DbFetchInt(hndl,"NOZMSKILL");
 		map.nojk = DbFetchInt(hndl,"NOJK");
 		map.nobhoplimit = DbFetchInt(hndl,"NOBHOPLIMIT");
+		map.interval = DbFetchInt(hndl,"FATIGUE"); 
 		Maps.SetArray(map.name, map, sizeof(map), true);
-		Format(buffer,sizeof(buffer),"[MapDataLoad]Added Map List:%s",mapl.name);
-		PrintToServer(buffer);
+//		Format(buffer,sizeof(buffer),"[MapDataLoad]Added Map List:%s",mapl.name);
+//		PrintToServer(buffer);
 		Map_List.PushArray(mapl,sizeof(mapl));
 		if(map.id>Map_Id_Max)	Map_Id_Max = map.id;
 		map.temp_cooldown = false;
@@ -183,8 +189,8 @@ void MapFileReload()
 			mapl.id = map.id;
 			mapl.name = map.name;
 			Map_List.PushArray(mapl,sizeof(mapl));
-			Format(buffer,sizeof(buffer),"[MapFileLoad]Added Map List:%s",mapl.name);
-			PrintToServer(buffer);
+//			Format(buffer,sizeof(buffer),"[MapFileLoad]Added Map List:%s",mapl.name);
+//			PrintToServer(buffer);
 		}
 		else
 		{
@@ -326,6 +332,15 @@ void MapAdminConfigMenu(int client,Map_Info map)
 	menu.AddItem(map.name,buffer);
 	Format(buffer,sizeof(buffer),"连跳限速:%s",map.nobhoplimit?"关闭":"开启");
 	menu.AddItem(map.name,buffer);
+	if(map.difficulty<=1)
+	{
+		menu.AddItem(map.name,"疲劳回合:无效(难度低于困难)",ITEMDRAW_DISABLED);
+	}
+	else
+	{
+		Format(buffer,sizeof(buffer),"疲劳回合:%d",map.interval);
+		menu.AddItem(map.name,buffer);
+	}
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param) 
@@ -428,12 +443,19 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 			MapCfgUpdate(map);
 			MapAdminConfigMenu(client,map);
 		}
+		if(param == 13)
+		{
+			if(map.interval == 0)	map.interval = 2;
+			else map.interval--;
+			MapCfgUpdate(map);
+			MapAdminConfigMenu(client,map);
+		}
 	}	
 }
 void MapCfgUpdate(Map_Info map)
 {
 	char query[1024];
-	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.id,map.name);
+	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d, WINS = %d, FATIGUE = %d WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.wins,map.interval,map.id,map.name);
 	PrintToServer(query);
 	DbTQuery(DbQueryErrorCallback,query);	
 	Map_Log mapl;

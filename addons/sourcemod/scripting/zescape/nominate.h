@@ -155,10 +155,24 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 		可预定:%s\n\
 		地图存在:%s",Tmap.name,ctime,Tmap.cooldown,cooldown_state,Tmap.cost,Tmap.download?"已":"未",Tmap.available?"是":"否",Tmap.exist?"是":"否");
 	menu.SetTitle(buffer);
-	menu.AddItem(Tmap.name,"预定地图",(Tmap.available&&(cooldown_over||Tmap.temp_cooldown)&&Tmap.download&&Tmap.exist) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	int server_port = FindConVar("hostport").IntValue;
+	bool g_Interval_Allow = true;
+	if(server_port == 27015)
+	{
+		if(Tmap.difficulty>=2)
+		{
+			if(g_Map_Interval_Count>0)
+			{
+				g_Interval_Allow = false;
+			}
+		}
+	}
+	menu.AddItem(Tmap.name,"预定地图",(g_Interval_Allow&&Tmap.available&&(cooldown_over||Tmap.temp_cooldown)&&Tmap.download&&Tmap.exist) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(Tmap.name,"重置冷却",GetAdminFlag(GetUserAdmin(client),Admin_Generic) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(Tmap.name,"强制提名",GetAdminFlag(GetUserAdmin(client),Admin_Generic) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(Tmap.name,"强制更换",GetAdminFlag(GetUserAdmin(client),Admin_Generic) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"疲劳状态:%d(+%d)\n仅对1F困难图生效",g_Map_Interval_Count,Tmap.interval);
+	menu.AddItem(Tmap.name,buffer,ITEMDRAW_DISABLED);
 	menu.Display(client,MENU_TIME_FOREVER);
 }
 int NomMapInfoMenuHandler(Menu menu, MenuAction action, int client, int param)
@@ -357,7 +371,7 @@ void CancelNom(int index,int opt)
 	if(nom_log.nominator_steamid==opt_steamid)
 	{
 
-		Format(buffer,sizeof(buffer),"[EMC]%s取消了自己预定的%s,费用%d积分已归还",nom_log.nominator_name,nom_log.name,nom_log.nom_cost);
+		Format(buffer,sizeof(buffer)," \x05[EMC]\x09%s\x01取消了自己预定的\x09%s\x01,费用\x09%d\x01积分已归还",nom_log.nominator_name,nom_log.name,nom_log.nom_cost);
 		PrintToChatAll(buffer);
 		nominator_credits = Store_GetClientCredits(opt);
 		Store_SetClientCredits(opt,nominator_credits+nom_log.nom_cost);		

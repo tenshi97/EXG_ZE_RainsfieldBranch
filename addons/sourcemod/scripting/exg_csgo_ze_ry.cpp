@@ -24,7 +24,7 @@
 #include "zescape/round.h"
 #include "zescape/fly.h"
 #include "zescape/jump.h"
-//#include "zescape/trigger_output.h"
+#include "zescape/trigger_output.h"
 #include "zescape/voice_chat.h"
 #include "zescape/spec.h"
 #include "zescape/time.h"
@@ -42,6 +42,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CreateNative("RY_MapProperty_BanZombieSkills",Native_RY_MapProperty_BanZombieSkills);
 	CreateNative("RY_MapProperty_BanJK",Native_RY_MapProperty_BanJK);
 	CreateNative("RY_MapProperty_NoBhopLimit",Native_RY_MapProperty_NoBhopLimit);
+	CreateNative("RY_Mission_GetClientMissionLevel",Native_RY_GetClientMissionLevel);
+	CreateNative("RY_Mission_GiveClientExp",Native_RY_GiveClientMissionExp);
 }
 public void OnPluginStart()	
 {
@@ -54,7 +56,7 @@ public void OnPluginStart()
 	RTVOnPluginStart();
 	LoadTranslations("common.phrases");
 	JumpOnPluginStart();
-	//TriggerOutputOnPluginStart();
+	TriggerOutputOnPluginStart();
 	VoiceChatOnPluginStart();
 	SpecOnPluginStart();
 	TimeOnPluginStart();

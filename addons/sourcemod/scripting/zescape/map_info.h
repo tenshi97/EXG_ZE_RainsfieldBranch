@@ -4,7 +4,9 @@ bool Current_Map_Loaded = false;
 ConVar Cvar_MP_TIMELIMIT;
 char g_current_nominator_name[PLATFORM_MAX_PATH];
 bool g_current_nominated;
+int g_Map_Interval_Count;
 void MapInfoOnPluginStart(){
+	g_Map_Interval_Count = 0;
 	RegConsoleCmd("sm_mi", ActionMapInfoMenu);
 	RegConsoleCmd("sm_mapinfo", ActionMapInfoMenu);
 	Current_Map_Loaded = false;
@@ -19,13 +21,24 @@ void MapInfoOnDbConnected_MapStartPost(){
 	int Time_MapStart = 0;
 	if(Current_Map_Loaded)	return;
 	GetCurrentMap(map_name,sizeof(map_name));
+	int server_port = FindConVar("hostport").IntValue;
 	if(Maps.GetArray(map_name,Pmap,sizeof(Pmap)))
 	{
 		PrintToServer("[当前地图信息读取完毕]");
 		Time_MapStart = GetTime();
 		if(!Current_Map_Loaded)
 		{
+			//PrintToServer("疲劳计数:%d",g_Map_Interval_Count);
 			Pmap.last_run_time = Time_MapStart;
+			if(server_port == 27015)
+			{
+				if(Pmap.difficulty>=2)
+				{
+					g_Map_Interval_Count = Min(2,g_Map_Interval_Count+Pmap.interval);				}
+				else
+				{
+					g_Map_Interval_Count= Max(0,g_Map_Interval_Count-1);				}
+			}
 		}
 		Pmap.temp_cooldown = false;
 		MapCfgUpdate(Pmap);
