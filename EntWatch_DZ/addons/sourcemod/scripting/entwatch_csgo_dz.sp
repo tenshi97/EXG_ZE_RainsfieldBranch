@@ -7,7 +7,7 @@
 #include <cstrike>
 #include <clientprefs>
 #include <csgocolors_fix>
-#include <TransmitManager>
+
 
 #include "entwatch/smlib.inc"
 #include "entwatch/function.inc"
@@ -1334,11 +1334,7 @@ public Action OnWeaponEquip(int iClient, int iWeapon)
 			g_ItemList.GetArray(i, ItemTest, sizeof(ItemTest));
 			if(ItemTest.WeaponID == iWeapon)
 			{
-				if (!TransmitManager_IsEntityHooked(iWeapon))
-				{
-				TransmitManager_AddEntityHooks(iWeapon);
-				}
-				TransmitManager_SetEntityOwner(iWeapon, iClient);
+			
 
 				ItemTest.OwnerID = iClient;
 				ItemTest.UpdateTime();
