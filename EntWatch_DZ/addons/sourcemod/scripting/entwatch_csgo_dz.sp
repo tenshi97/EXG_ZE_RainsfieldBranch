@@ -242,6 +242,7 @@ public Action Event_RoundEnd(Event hEvent, const char[] sName, bool bDontBroadca
 			{
 				int CurrentButton = ItemTest.ButtonsArray.Get(j);
 				SDKUnhook(CurrentButton, SDKHook_Use, OnButtonUse);
+				CloseHandleSafe(ItemTest.ButtonsArray);
 			}
 			SDKUnhook(ItemTest.WeaponID, SDKHook_SpawnPost, OnItemSpawned);
 		}
@@ -722,6 +723,7 @@ public bool RegisterItem(class_ItemConfig ItemConfig, int iEntity, int iHammerID
 		NewItem.GlowColor[3] = ItemConfig.GlowColor[3];
 		
 		NewItem.WeaponID = iEntity;
+
 		NewItem.ButtonsArray = new ArrayList();
 		
 		NewItem.OwnerID = INVALID_ENT_REFERENCE;
