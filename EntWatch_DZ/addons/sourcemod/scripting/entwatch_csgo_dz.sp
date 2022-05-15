@@ -47,15 +47,15 @@ bool g_bIsAdmin[MAXPLAYERS+1] = {false,...};
 #include "entwatch/module_hud.inc"
 #include "entwatch/module_forwards.inc" //For the include EntWatch.inc to work correctly, use with module_eban
 #include "entwatch/module_eban.inc"
-#include "entwatch/module_offline_eban.inc" // Need module_eban. Experimental
+//#include "entwatch/module_offline_eban.inc" // Need module_eban. Experimental
 #include "entwatch/module_natives.inc" //For the include EntWatch.inc to work correctly, use with module_eban
 #include "entwatch/module_transfer.inc"
-#include "entwatch/module_spawn_item.inc"
+//#include "entwatch/module_spawn_item.inc"
 #include "entwatch/module_menu.inc"
 #include "entwatch/module_glow.inc"
 #include "entwatch/module_use_priority.inc"
 #include "entwatch/module_extended_logs.inc"
-//#include "entwatch/module_clantag.inc"
+#include "entwatch/module_clantag.inc"
 
 //#include "entwatch/module_physbox.inc" //Heavy module for the server. Not recommended. Need Collision Hook Ext https://forums.alliedmods.net/showthread.php?t=197815
 //#include "entwatch/module_debug.inc"
