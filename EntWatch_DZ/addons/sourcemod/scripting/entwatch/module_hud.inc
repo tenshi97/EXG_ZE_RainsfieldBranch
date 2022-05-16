@@ -175,8 +175,12 @@ stock void EWM_Hud_LoadDefaultClientSettings(int iClient)
 
 public void EWM_Hud_OnMapStart()
 {
-	g_iHItemsArray.Clear();
-	g_iZMItemsArray.Clear();
+	//g_iHItemsArray.Clear();
+	//g_iZMItemsArray.Clear();
+	CloseHandleSafe(g_iHItemsArray);
+	CloseHandleSafe(g_iZMItemsArray);
+	g_iHItemsArray = new ArrayList(32);
+	g_iZMItemsArray = new ArrayList(32);
 	for(int i = 0; i < 3; i++)
 	{
 		g_iRotation[i][0] = 0;
@@ -188,8 +192,10 @@ public Action EWM_Hud_Timer_DisplayHUD(Handle timer, int client)
 {
 	if (g_bDispEnabled && g_bConfigLoaded)
 	{
-		g_iHItemsArray.Clear();
-		g_iZMItemsArray.Clear();
+		CloseHandleSafe(g_iHItemsArray);
+		CloseHandleSafe(g_iZMItemsArray);
+		g_iHItemsArray = new ArrayList(32);
+		g_iZMItemsArray = new ArrayList(32);
 		for(int i = 0; i<g_ItemList.Length; i++)
 		{
 			class_ItemList ItemTest;
