@@ -43,6 +43,7 @@ enum struct PlayerMissionInfo
 	int loaded;	//temp
 	int sp[5];
 	int vip;
+	int bonus;
 }
 ArrayList Current_Mission_Tasklist;
 bool g_ValidMission_Exist;
@@ -201,6 +202,7 @@ void LoadPlayerMissionInfoCallBack(Handle owner, Handle hndl, char[] error, any 
 		playermission_list[client].sp[3]=DbFetchInt(hndl,"SP4");
 		playermission_list[client].sp[4]=DbFetchInt(hndl,"SP5");
 		playermission_list[client].vip = DbFetchInt(hndl,"VIP");
+		playermission_list[client].bonus=DbFetchInt(hndl,"BONUS");
 		if(playermission_list[client].dataupdate_time<Current_Mission.daily_timestamp)
 		{
 			PlayerMissionDailyUpdate(client);
@@ -277,7 +279,7 @@ void UpdatePlayerMissionInfo(int client)
 	}
 	int current_time = GetTime();
 	PrintToServer("[任务系统][UID:%d]保存玩家%d数据",uid,client);
-	Format(query,sizeof(query),"UPDATE %s SET LVL = %d, EXP = %d, DINFECT = %d,DKILLZM = %d,DDMGTAKE = %d,DDMGMAKE = %d,DONLINE = %d, DPASS = %d, DLEAD = %d, DNADE = %d, WINFECT = %d, WKILLZM = %d, WDMGTAKE = %d, WDMGMAKE = %d, WNADE = %d, DT1ST = %d, DT2ST = %d, DT3ST = %d, DT4ST = %d, DT5ST =%d, DT6ST = %d, DT7ST = %d, DT8ST = %d, WT1ST = %d, WT2ST = %d, WT3ST = %d, WT4ST = %d, WT5ST = %d, TIMESTAMP = %d, SP1 = %d, SP2 = %d, SP3 = %d, SP4 = %d, SP5 = %d, VIP = %d WHERE UID = %d",Current_Mission.playerdbname,lvl,exp,taskdata[0],taskdata[1],taskdata[2],taskdata[3],taskdata[4],taskdata[5],taskdata[6],taskdata[7],taskdata[8],taskdata[9],taskdata[10],taskdata[11],taskdata[12],taskstage[0],taskstage[1],taskstage[2],taskstage[3],taskstage[4],taskstage[5],taskstage[6],taskstage[7],taskstage[8],taskstage[9],taskstage[10],taskstage[11],taskstage[12],current_time,sp1,sp2,sp3,sp4,sp5,playermission_list[client].vip,uid);
+	Format(query,sizeof(query),"UPDATE %s SET LVL = %d, EXP = %d, DINFECT = %d,DKILLZM = %d,DDMGTAKE = %d,DDMGMAKE = %d,DONLINE = %d, DPASS = %d, DLEAD = %d, DNADE = %d, WINFECT = %d, WKILLZM = %d, WDMGTAKE = %d, WDMGMAKE = %d, WNADE = %d, DT1ST = %d, DT2ST = %d, DT3ST = %d, DT4ST = %d, DT5ST =%d, DT6ST = %d, DT7ST = %d, DT8ST = %d, WT1ST = %d, WT2ST = %d, WT3ST = %d, WT4ST = %d, WT5ST = %d, TIMESTAMP = %d, SP1 = %d, SP2 = %d, SP3 = %d, SP4 = %d, SP5 = %d, VIP = %d, BONUS = %d WHERE UID = %d",Current_Mission.playerdbname,lvl,exp,taskdata[0],taskdata[1],taskdata[2],taskdata[3],taskdata[4],taskdata[5],taskdata[6],taskdata[7],taskdata[8],taskdata[9],taskdata[10],taskdata[11],taskdata[12],taskstage[0],taskstage[1],taskstage[2],taskstage[3],taskstage[4],taskstage[5],taskstage[6],taskstage[7],taskstage[8],taskstage[9],taskstage[10],taskstage[11],taskstage[12],current_time,sp1,sp2,sp3,sp4,sp5,playermission_list[client].vip,playermission_list[client].bonus,uid);
 	DbTQuery(DbQueryErrorCallback,query);
 }
 void MissionOnClientConnected(int client)
@@ -594,11 +596,11 @@ int MissionMenuHandler(Menu menu, MenuAction action, int client, int param)
 void DailyTaskMenu(int client)
 {
 	TASK task;
+	if(!playermission_list[client].loaded)		return;
+	if(client<=0||client>=65)					return;
 	Menu menu = CreateMenu(DailyTaskMenuHandler);
 	char buffer[256],buffer2[256];
 	int onlinetime;
-	if(!playermission_list[client].loaded)	return;
-	if(client<=0||client>=65)	return;
 	menu.SetTitle("每日任务-完成后请点击任务提交\n注意每日任务均有3档");
 	onlinetime = (MostActive_GetPlayTimeTotal(client) - playermission_list[client].taskdata[4])/60;
 	for(int i=0;i<Current_Mission_Tasklist.Length;i++)
@@ -705,11 +707,11 @@ int DailyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 
 void WeeklyTaskMenu(int client)
 {
+	if(!playermission_list[client].loaded)		return;
+	if(client<=0||client>=65)					return;
 	TASK task;
 	Menu menu = CreateMenu(WeeklyTaskMenuHandler);
 	char buffer[256],buffer2[256];
-	if(!playermission_list[client].loaded)	return;
-	if(client<=0||client>=65)	return;
 	menu.SetTitle("每周任务-完成后请点击任务提交");
 	for(int i=0;i<Current_Mission_Tasklist.Length;i++)
 	{
@@ -905,12 +907,16 @@ void CheckVIPBonus(int client)
 
 void SecretShopMenu(int client)
 {
-	Menu menu = CreateMenu(SecretShopHandler);
 	if(client<=0||client>=65)	return;
+	Menu menu = CreateMenu(SecretShopHandler);
 	int credits = Store_GetClientCredits(client);
+	int bonus_available = playermission_list[client].bonus;
 	menu.SetTitle("神秘商店\n您当前积分为:%d",credits);
 	menu.AddItem("","购买1大行动等级(2500积分)",credits>=2500?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
 	menu.AddItem("","购买10大行动等级(23000积分)",credits>=23000?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("","奖励包-购买10大行动等级(10000积分)\n限购一次",(credits>=10000&&bonus_available==0)?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("uid_nametag_s1half","初级赛季称号[LV50]");
+	menu.AddItem("uid_nametag_s1max","高级赛季称号[LV100");
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }
@@ -919,6 +925,8 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 {
 	if(client<=0||client>=65) return;
 	int credits = Store_GetClientCredits(client);
+	int titleid;
+	char item[256];
 	if(!playermission_list[client].loaded)
 	{
 		PrintToChat(client," \x05[任务系统]数据未载入，无法购买(请等待下一回合或换图)");
@@ -942,7 +950,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 			{
 				PrintToChat(client," \x05[任务系统]你的积分不足或你已满级!");
 			}
-		}
+	}
 		else if(param == 1)
 		{
 			if(credits>=23000&&playermission_list[client].lvl<100)
@@ -954,6 +962,37 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 			else
 			{
 				PrintToChat(client," \x05[任务系统]你的积分不足或你已满级!");
+			}
+		}
+		else if(param == 2)
+		{
+			if(credits>=10000&&playermission_list[client].lvl<100&&playermission_list[client].bonus==0)
+			{
+				playermission_list[client].bonus = 1;
+				GrantExp(client,10000);
+				PrintToChat(client," \x05[任务系统]消费积分购买了10大行动等级");
+				Store_SetClientCredits(client,credits-10000);
+			}
+			else
+			{
+				PrintToChat(client," \x05[任务系统]你的积分不足或你已满级!");				
+			}
+		}
+		else if(param == 3|| param==4)
+		{
+			if(playermission_list[client].lvl<(param*50-100))
+			{
+				PrintToChat(client," \x05[任务系统]\x01您当前等级不足，无法领取");
+			}
+			menu.GetItem(param,item,sizeof(item));
+			titleid = Store_GetItemIdbyUniqueId(item);
+			if(Store_HasClientItem(client,titleid))
+			{
+				PrintToChat(client," \x05[任务系统]\x01您已领取过该称号");
+			}
+			else
+			{
+				Store_GiveItem(client,titleid,0,0,0);
 			}
 		}
 		SecretShopMenu(client);

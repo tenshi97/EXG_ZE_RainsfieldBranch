@@ -2,35 +2,44 @@
 Map_Info Pmap;
 bool Current_Map_Loaded = false;
 ConVar Cvar_MP_TIMELIMIT;
+ConVar Cvar_InfectSpawnTimeMax;
+ConVar Cvar_InfectSpawnTimeMin;
 char g_current_nominator_name[PLATFORM_MAX_PATH];
 bool g_current_nominated;
 int g_Map_Interval_Count;
+bool g_Map_PlayerNum_Check=false;
+int g_Map_Round=0;
+bool g_Map_RuntimeUpdate_Checked;
 void MapInfoOnPluginStart(){
 	g_Map_Interval_Count = 0;
+	g_Map_PlayerNum_Check = false;
 	RegConsoleCmd("sm_mi", ActionMapInfoMenu);
 	RegConsoleCmd("sm_mapinfo", ActionMapInfoMenu);
 	Current_Map_Loaded = false;
 	Cvar_MP_TIMELIMIT = FindConVar("mp_timelimit");
+	Cvar_InfectSpawnTimeMin = FindConVar("zr_infect_spawntime_min");
+	Cvar_InfectSpawnTimeMax = FindConVar("zr_infect_spawntime_max");
+	g_Map_Round = 0;
+	g_Map_RuntimeUpdate_Checked = false;
 }
 void MapInfoOnMapStart(){
+	g_Map_Round = 0;
+	g_Map_RuntimeUpdate_Checked = false;
 	Current_Map_Loaded = false;
 	g_current_nominated = GetCurrentMapNominatorName(g_current_nominator_name);
 }
 void MapInfoOnDbConnected_MapStartPost(){
 	char map_name[64];
-	int Time_MapStart = 0;
 	if(Current_Map_Loaded)	return;
 	GetCurrentMap(map_name,sizeof(map_name));
 	int server_port = FindConVar("hostport").IntValue;
 	if(Maps.GetArray(map_name,Pmap,sizeof(Pmap)))
 	{
 		PrintToServer("[当前地图信息读取完毕]");
-		Time_MapStart = GetTime();
 		if(!Current_Map_Loaded)
 		{
 			//PrintToServer("疲劳计数:%d",g_Map_Interval_Count);
-			Pmap.last_run_time = Time_MapStart;
-			if(server_port == 27015)
+			if(server_port == 28015)
 			{
 				if(Pmap.difficulty>=2)
 				{
@@ -43,6 +52,14 @@ void MapInfoOnDbConnected_MapStartPost(){
 		Pmap.temp_cooldown = false;
 		MapCfgUpdate(Pmap);
 		Cvar_MP_TIMELIMIT.SetFloat(float(Pmap.timelimit),true,false);
+		if(Cvar_InfectSpawnTimeMin&&Cvar_InfectSpawnTimeMax)
+		{
+			if(Pmap.infecttime >0 )
+			{
+				Cvar_InfectSpawnTimeMin.SetFloat(Pmap.infecttime,true,false);
+				Cvar_InfectSpawnTimeMax.SetFloat(Pmap.infecttime,true,false);
+			}
+		}
 		Current_Map_Loaded = true;
 	}
 	else
@@ -124,6 +141,7 @@ int MapInfoMenuHandler(Menu menu, MenuAction action, int client, int param) {
 
 void MapInfoOnRoundEnd(int winner)
 {
+	Pmap_Reload();
 	if(winner==2)
 	{
 		Pmap.round++;	
@@ -133,6 +151,42 @@ void MapInfoOnRoundEnd(int winner)
 		Pmap.round++;
 		Pmap.wins++;
 	}
+	if(Cvar_InfectSpawnTimeMin&&Cvar_InfectSpawnTimeMax)
+	{
+		if(Pmap.infecttime >0 )
+		{
+			Cvar_InfectSpawnTimeMin.SetFloat(Pmap.infecttime,true,false);
+			Cvar_InfectSpawnTimeMax.SetFloat(Pmap.infecttime,true,false);
+		}
+	}
+	else
+	{
+		Cvar_InfectSpawnTimeMin = FindConVar("zr_infect_spawntime_min");
+		Cvar_InfectSpawnTimeMax = FindConVar("zr_infect_spawntime_max");		
+	}
 	MapCfgUpdate(Pmap);
 	return;
+}
+void MapInfoOnWarmUpEnd()
+{
+	if(!g_Map_RuntimeUpdate_Checked)
+	{
+		if(Current_Map_Loaded)
+		{
+			Pmap_Reload();
+			PrintToChatAll(" \x05[调试]\x01检测当前人数:%d",GetClientCount(true));
+			g_Map_RuntimeUpdate_Checked = true;
+			if(GetClientCount(true)>=20)
+			{
+				int Time_MapStart = GetTime();
+				PrintToChatAll(" \x05[地图系统]\x01玩家人数超过20，计入地图CD");
+				Pmap.last_run_time = Time_MapStart;			//Check PlayerNum When MapEnd and if PlayerNum>20,Count Last Run Time
+			}
+			else
+			{
+				PrintToChatAll(" \x05[地图系统]\x01玩家人数不足20, 不计入地图CD");				
+			}
+			MapCfgUpdate(Pmap);
+		}
+	}
 }

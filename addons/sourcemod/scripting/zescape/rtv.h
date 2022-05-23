@@ -227,6 +227,7 @@ public void OnMapTimeLeftChanged()
 {
 	int timeleft;
 	char buffer[256];
+	if(g_Nextmap_Selected)	return;
 	GetMapTimeLeft(timeleft);
 	Format(buffer,sizeof(buffer),"地图时间:%d秒",timeleft);
 	PrintToServer(buffer);
@@ -408,7 +409,7 @@ void CreateNextMapVote()
 			bool interval_status = true;
 			if(map.available&&map.exist&&map.download&&map.random)
 			{	
-				if(map.difficulty>=2&&server_port==27015)
+				if(map.difficulty>=2&&server_port==28015)
 				{
 					if(g_Map_Interval_Count>0)
 					{

@@ -17,7 +17,7 @@ enum struct Map_Info
 	int exist;
 	int roundtime;
 	int timelimit;
-	int infecttime;
+	float infecttime;
 	int random;
 	int extend;
 	bool temp_cooldown;
@@ -26,6 +26,8 @@ enum struct Map_Info
  	int nojk;
  	int nobhoplimit;
  	int interval;
+ 	int ego;	//EnableGo
+ 	int vis;	//Visable
 }
 char difficulty_name[5][10]={"简单","普通","困难","高难","极难"};
 //char label_name[10][10]={"FF","卤粉","闯关","娱乐","弹幕","方块","咸鱼","挑战","长征","感染"};
@@ -116,7 +118,6 @@ void MapDataLoadCallback(Handle owner, Handle hndl, char[] error, any data)
 		return;
 	}
 	else PrintToServer("DataLoading");
-	char buffer[512];
 	while (SQL_FetchRow(hndl)) {
 		Map_Info map;
 		Map_Log mapl;
@@ -139,7 +140,7 @@ void MapDataLoadCallback(Handle owner, Handle hndl, char[] error, any data)
 		map.download = DbFetchInt(hndl, "DOWNLOAD");		
 		map.roundtime = DbFetchInt(hndl, "ROUNDTIME");		
 		map.timelimit = DbFetchInt(hndl, "TIMELIMIT");		
-		map.infecttime = DbFetchInt(hndl, "INFECTTIME");	
+		map.infecttime = DbFetchFloat(hndl, "INFECTTIME");	
 		map.random = DbFetchInt(hndl, "RANDOM");			
 		map.exist = 0;
 		map.extend = DbFetchInt(hndl, "EXTEND");	
@@ -148,6 +149,8 @@ void MapDataLoadCallback(Handle owner, Handle hndl, char[] error, any data)
 		map.nojk = DbFetchInt(hndl,"NOJK");
 		map.nobhoplimit = DbFetchInt(hndl,"NOBHOPLIMIT");
 		map.interval = DbFetchInt(hndl,"FATIGUE"); 
+		map.ego = DbFetchInt(hndl,"EGO");
+		map.vis = DbFetchInt(hndl,"VIS");
 		Maps.SetArray(map.name, map, sizeof(map), true);
 //		Format(buffer,sizeof(buffer),"[MapDataLoad]Added Map List:%s",mapl.name);
 //		PrintToServer(buffer);
@@ -166,7 +169,6 @@ void MapFileReload()
 	char file_name[PLATFORM_MAX_PATH];
 	FileType type;
 	int index;
-	char buffer[512];
 	while(dl.GetNext(file_name,sizeof(file_name),type))
 	{
 		if(type!=FileType_File)	continue;
@@ -341,6 +343,12 @@ void MapAdminConfigMenu(int client,Map_Info map)
 		Format(buffer,sizeof(buffer),"疲劳回合:%d",map.interval);
 		menu.AddItem(map.name,buffer);
 	}
+	Format(buffer,sizeof(buffer),"开局传送:%s",map.ego?"开启":"关闭");
+	menu.AddItem(map.name,buffer);
+	Format(buffer,sizeof(buffer),"尸变时间:%f秒",map.infecttime);
+	menu.AddItem(map.name,buffer);
+	Format(buffer,sizeof(buffer),"预订显示:%s",map.vis?"显示":"隐藏");
+	menu.AddItem(map.name,buffer);
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param) 
@@ -450,12 +458,30 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 			MapCfgUpdate(map);
 			MapAdminConfigMenu(client,map);
 		}
+		if(param == 14)
+		{
+			if(map.ego == 0)	map.ego = 1;
+			else map.ego = 0;
+			MapCfgUpdate(map);
+			MapAdminConfigMenu(client,map);
+		}
+		if(param == 15)
+		{
+			MapInfectTimeMenu(client,map);
+		}
+		if(param == 16)
+		{
+			if(map.vis == 0)	map.vis = 1;
+			else map.vis = 0;
+			MapCfgUpdate(map);
+			MapAdminConfigMenu(client,map);
+		}
 	}	
 }
 void MapCfgUpdate(Map_Info map)
 {
 	char query[1024];
-	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d, WINS = %d, FATIGUE = %d WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.wins,map.interval,map.id,map.name);
+	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d, WINS = %d, FATIGUE = %d, INFECTTIME = %f,EGO = %d,VIS = %d WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.wins,map.interval,map.infecttime,map.ego,map.vis,map.id,map.name);
 	PrintToServer(query);
 	DbTQuery(DbQueryErrorCallback,query);	
 	Map_Log mapl;
@@ -482,6 +508,7 @@ Action MapNamecnCommand(int client,int args)
 	if(!Maps.GetArray(map.name,map,sizeof(map)))	return Plugin_Handled;
 	GetCmdArg(2, map.name_cn, sizeof(map.name_cn));
 	MapCfgUpdate(map);
+	PrintToChatAll(" \x05[地图管理]管理员修改%s的译名为%s",map.name,map.name_cn);
 	return Plugin_Handled;
 }
 
@@ -503,6 +530,7 @@ void MapCooldownMenu(int client,Map_Info map)
 	menu.AddItem(map.name,"+7天",map.cooldown<20160?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(map.name,"自定义");
 	menu.Display(client, MENU_TIME_FOREVER);
+
 }
 
 int MapCooldownCfgHandler(Menu menu, MenuAction action, int client, int param) 
@@ -535,7 +563,7 @@ int MapCooldownCfgHandler(Menu menu, MenuAction action, int client, int param)
 		}
 		MapCfgUpdate(map);
 		MapCooldownMenu(client,map);
-	}	
+	}
 }
 
 Action MapCooldownCommand(int client,int args)
@@ -669,5 +697,54 @@ int MapTimeLimitMenuHandler(Menu menu, MenuAction action, int client, int param)
 		else if (param == 7) map.timelimit = Max(10, map.timelimit-60);
 		MapCfgUpdate(map);
 		MapTimeLimitMenu(client,map);
+	}
+}
+
+void MapInfectTimeMenu(int client,Map_Info map)
+{
+	char title[256];
+	Menu menu = CreateMenu(MapInfectTimeHandler);
+	Format(title,sizeof(title),"地图尸变时间修改:\n%s\n当前尸变时间:%f秒",map.name,map.infecttime);
+	menu.SetTitle(title);
+	menu.AddItem(map.name,"+0.1秒",map.infecttime<60?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"+0.5秒",map.infecttime<60?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"+1秒",map.infecttime<60?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"+5秒",map.infecttime<60?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"+10秒",map.infecttime<60?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"-0.1秒",map.infecttime>1?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"-0.5秒",map.infecttime>1?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"-1秒",map.infecttime>1?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"-5秒",map.infecttime>1?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"-10秒",map.infecttime>1?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.AddItem(map.name,"无限(跑图设置)");
+	menu.AddItem(map.name,"默认(CFG设置)");
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+
+int MapInfectTimeHandler(Menu menu, MenuAction action, int client, int param) 
+{
+	char map_name[PLATFORM_MAX_PATH];
+	Map_Info map;
+	if (action == MenuAction_End)
+	{
+		menu.Close();
+	}
+	else if (action == MenuAction_Select) {
+		menu.GetItem(param,map_name,sizeof(map_name));
+		Maps.GetArray(map_name,map,sizeof(map));		
+		if (param == 0) map.infecttime = fMin(60.0, map.infecttime+0.1);
+		else if (param == 1) map.infecttime = fMin(60.0, map.infecttime+0.5);
+		else if (param == 2) map.infecttime = fMin(60.0, map.infecttime+1.0);
+		else if (param == 3) map.infecttime = fMin(60.0, map.infecttime+5.0);
+		else if (param == 4) map.infecttime = fMin(60.0, map.infecttime+10.0);
+		else if (param == 5) map.infecttime = fMax(1.0, map.infecttime-0.1);
+		else if (param == 6) map.infecttime = fMax(1.0, map.infecttime-0.5);
+		else if (param == 7) map.infecttime = fMax(1.0, map.infecttime-1.0);
+		else if (param == 8) map.infecttime = fMax(1.0, map.infecttime-5.0);
+		else if (param == 9) map.infecttime = fMax(1.0, map.infecttime-10.0);
+		else if (param == 10) map.infecttime = 99999.0;
+		else if (param == 11) map.infecttime = -1.0;
+		MapCfgUpdate(map);
+		MapInfectTimeMenu(client,map);
 	}
 }

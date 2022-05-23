@@ -84,12 +84,15 @@ void NominateMapMenu(int client,char trie_search[PLATFORM_MAX_PATH]="")
 {
 
 	Menu menu = CreateMenu(NominateMenuHandler);
-	Map_Info map;
+	Map_Log map;
+	Map_Info map_detail;
 	menu.SetTitle("预定地图");
 	for(int i = 0 ; i < Map_List.Length ; i++)
 	{
 		GetArrayArray(Map_List,i,map,sizeof(map));
 		if(strlen(trie_search) && StrContains(map.name,trie_search,false)==-1 && StrContains(map.name_cn,trie_search) == -1)	continue;
+		Maps.GetArray(map.name, map_detail, sizeof(map_detail));
+		if(map_detail.vis==0)	continue;
 		menu.AddItem(map.name,map.name);
 	}
 	if(strlen(trie_search))
@@ -104,8 +107,8 @@ void NominateMapMenu(int client,char trie_search[PLATFORM_MAX_PATH]="")
 		{
 			menu.GetItem(0, map.name, sizeof(map.name));
 			menu.Close();
-			Maps.GetArray(map.name,map,sizeof(map));
-			NomMapInfoMenu(client,map);
+			Maps.GetArray(map.name,map_detail,sizeof(map_detail));
+			NomMapInfoMenu(client,map_detail);
 		}
 		else if(menu.ItemCount > 1)
 		{
@@ -157,7 +160,7 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 	menu.SetTitle(buffer);
 	int server_port = FindConVar("hostport").IntValue;
 	bool g_Interval_Allow = true;
-	if(server_port == 27015)
+	if(server_port == 28015)
 	{
 		if(Tmap.difficulty>=2)
 		{
@@ -218,7 +221,7 @@ int NomMapInfoMenuHandler(Menu menu, MenuAction action, int client, int param)
 void NominateMap(int client,Map_Info map,int forcenom=0)
 {
 	char buffer[PLATFORM_MAX_PATH];
-	Nomlist_Log nommap;
+	Nomlist_Log nommap,nom_log;
 	int nom_index;
 	nom_index = is_Nominator(client);
 	nommap.id = map.id;
@@ -236,10 +239,13 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 		PrintCenterText(client,"[EMC]该地图已被预定!");
 		return;
 	}
+	int credits_temp=0;
 	if(credits>=map.cost||forcenom)
 	{
 		if(nom_index!=-1)
 		{	
+			GetArrayArray(Nom_Map_List,nom_index,nom_log,sizeof(nom_log));
+			credits_temp = nom_log.nom_cost;
 			CancelNom(nom_index,client);
 		}
 		nommap.nom_cost = 0;
@@ -255,7 +261,7 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 			{
 			nommap.nom_cost = map.cost;
 			}
-			Store_SetClientCredits(client,credits-nommap.nom_cost);
+			Store_SetClientCredits(client,credits-nommap.nom_cost+credits_temp);
 			Format(buffer,sizeof(buffer),"[EMC]消费积分%d",nommap.nom_cost);
 			PrintCenterText(client,buffer);
 		}
@@ -270,7 +276,7 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 		}
 		PrintToServer(buffer);
 		PrintToChatAll(buffer);
-		Format(buffer,sizeof(buffer)," \x05[EMC] \x01当前已预定 \x03%d张地图",Nom_Map_List.Length);
+		Format(buffer,sizeof(buffer)," \x05[EMC] \x01当前已预定 \x03%d \x01张地图",Nom_Map_List.Length);
 		PrintToChatAll(buffer);
 	}
 	else

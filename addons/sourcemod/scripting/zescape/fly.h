@@ -8,6 +8,11 @@ void FlyOnPluginStart() {
 }
 
 Action FlyCommand(int client, int args) {
+	if(!Pmap.ego)
+	{
+		PrintCenterText(client,"当前地图禁用开局传送");
+		return Plugin_Handled;
+	}
 	if (!IsClientInGame(client)) return Plugin_Handled;
 	if (!args) {
 		FlyMenu(client);
@@ -18,14 +23,21 @@ Action FlyCommand(int client, int args) {
 	FlyTarget(client, FindTarget(client, arg, true, false));
 	return Plugin_Handled;
 }
-/*
+
 public Action AimFly(int client, const char[] command, int argc)
 {
+	if(!Pmap.ego)
+	{
+		PrintCenterText(client,"当前地图禁用开局传送");
+		return Plugin_Handled;
+	}
+	if(!IsClientInGame(client))	return Plugin_Handled;
 	if (Round.Infected)	return Plugin_Handled;
 	int target;
 	target = GetClientAimTarget(client,true);
-	if(target>0)
+	if(target>0||target<=64)
 	{
+		if(!IsClientInGame(target))	return Plugin_Handled;
 		if (!IsClientInGame(target)) return Plugin_Handled;
 		if(IsValidHumanorBot(target))
 		{
@@ -34,8 +46,13 @@ public Action AimFly(int client, const char[] command, int argc)
 	}
 	return Plugin_Handled;
 }
-*/
+
 void FlyMenu(int client) {
+	if(!Pmap.ego)
+	{
+		PrintCenterText(client,"当前地图禁用开局传送");
+		return;
+	}
 	Menu menu = CreateMenu(FlyMenuHandler);
 	menu.SetTitle("开局传送-选择传送目标");
 	char index[4], name[64];

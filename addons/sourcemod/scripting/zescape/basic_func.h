@@ -44,6 +44,14 @@ int Min(int a,int b)
 {
 	return a<=b?a:b;
 }
+float fMax(float a,float b)
+{
+	return a>=b?a:b;
+}
+float fMin(float a,float b)
+{
+	return a<=b?a:b;
+}
 Action SetClientTeam(int client,int team)
 {
 	if(!IsClientInGame(client))	return;

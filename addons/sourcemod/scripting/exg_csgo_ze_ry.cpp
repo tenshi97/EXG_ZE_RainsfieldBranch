@@ -12,6 +12,7 @@
 #include <rainsfield>
 #include <leader>
 #include <mostactive>
+#include <sourcecomms>
 #pragma semicolon 1
 #pragma newdecls required
 #include "zescape/basic_func.h"
@@ -29,6 +30,8 @@
 #include "zescape/spec.h"
 #include "zescape/time.h"
 #include "zescape/mission.h"
+Handle g_Warmup_Timer;
+ConVar g_Cvar_Mp_Warmup_Time;
 public Plugin myinfo = {
 	name = " EXG_Zombie_Escape_RY",
 	author = "Rainsfield&WackoD",
@@ -69,12 +72,29 @@ public void OnMapStart()
 	//TriggerOutputOnMapStart();
 	MapInfoOnMapStart();
 	RTVOnMapStart();
-
+	WarmUpTimerBuild();
 	NominateOnMapStart();
 	//RoundOnMapStart();
 	if(!isDbConnected())	return;			//未连接，return，通过Db连接函数的函数执行Post，已连接则通直接Post使得换图后重载各插件数据
 	PrintToServer("DbOnDbConnected_MapStartPost");
 	DbOnDbConnected_MapStartPost();	
+}
+void WarmUpTimerBuild()
+{
+	g_Warmup_Timer = INVALID_HANDLE;
+	KillTimerSafe(g_Warmup_Timer);
+	float warmuptime=100.0;
+	g_Cvar_Mp_Warmup_Time = FindConVar("mp_warmuptime");
+	if(g_Cvar_Mp_Warmup_Time)
+	{
+		warmuptime = g_Cvar_Mp_Warmup_Time.FloatValue;
+	}
+	g_Warmup_Timer = CreateTimer(warmuptime,OnWarmUpEnd, _,TIMER_FLAG_NO_MAPCHANGE);
+
+}
+Action OnWarmUpEnd(Handle timer)
+{
+	MapInfoOnWarmUpEnd();
 }
 public void OnPluginEnd() 
 {

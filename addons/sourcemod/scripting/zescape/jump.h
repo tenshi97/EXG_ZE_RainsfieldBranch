@@ -55,18 +55,18 @@ void JumpServer(int client,char[] dest)
 	GetClientName(client,buffer,sizeof(buffer));
 	if(strcmp(dest,"1F")==0||strcmp(dest,"1f")==0)
 	{
-		RedirectClient(client,"110.42.10.91:27015");
+		RedirectClient(client,"43.248.185.108:28015");
 	}
 	else if(strcmp(dest,"2F")==0||strcmp(dest,"2f")==0)
 	{
-		RedirectClient(client,"110.42.10.91:27025");
+		RedirectClient(client,"43.248.185.108:28025");
 	}
 	else if(strcmp(dest,"3F")==0||strcmp(dest,"3f")==0)
 	{
-		RedirectClient(client,"110.42.10.91:27035");
+		RedirectClient(client,"43.248.185.108:28035");
 	}
 	else if(strcmp(dest,"4F")==0||strcmp(dest,"4f")==0)
 	{
-		RedirectClient(client,"110.42.10.91:27045");
+		RedirectClient(client,"43.248.185.108:28045");
 	}
 }
