@@ -9,7 +9,7 @@ void VoiceChatOnPluginStart()
 void VoiceChatOnClientConnected(int client)
 {
 	SetClientListeningFlags(client,VOICE_SPEAKALL);
-	CreateTimer(2.0,MuteCheck,client,TIMER_FLAG_NO_MAPCHANGE);
+	CreateTimer(30.0,MuteCheck,client,TIMER_FLAG_NO_MAPCHANGE);
 
 }
 Action MuteCheck(Handle timer,int client)
