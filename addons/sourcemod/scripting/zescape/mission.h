@@ -984,15 +984,18 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 			{
 				PrintToChat(client," \x05[任务系统]\x01您当前等级不足，无法领取");
 			}
-			menu.GetItem(param,item,sizeof(item));
-			titleid = Store_GetItemIdbyUniqueId(item);
-			if(Store_HasClientItem(client,titleid))
-			{
-				PrintToChat(client," \x05[任务系统]\x01您已领取过该称号");
-			}
 			else
 			{
-				Store_GiveItem(client,titleid,0,0,0);
+				menu.GetItem(param,item,sizeof(item));
+				titleid = Store_GetItemIdbyUniqueId(item);
+				if(Store_HasClientItem(client,titleid))
+				{
+					PrintToChat(client," \x05[任务系统]\x01您已领取过该称号");
+				}
+				else
+				{
+					Store_GiveItem(client,titleid,0,0,0);
+				}
 			}
 		}
 		SecretShopMenu(client);
