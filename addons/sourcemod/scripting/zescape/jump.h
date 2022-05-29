@@ -16,7 +16,7 @@ Action JumpCommand(int client,int args)
 	jump_self = 0;
 	if(args<=1)
 	{
-		PrintToChat(client," \x05[EXG-服务器跳转]用法:\x01!jump 玩家 1F/2F/3F/4F……");
+		PrintToChat(client," \x05[EXG-服务器跳转]用法:\x01!jump 玩家 1F/2F/3F/4F/5F……");
 		return Plugin_Handled;
 	}
 	else
@@ -68,5 +68,9 @@ void JumpServer(int client,char[] dest)
 	else if(strcmp(dest,"4F")==0||strcmp(dest,"4f")==0)
 	{
 		RedirectClient(client,"43.248.185.108:28045");
+	}
+	else if(strcmp(dest,"5F")==0||strcmp(dest,"5f")==0)
+	{
+		RedirectClient(client,"43.248.185.108:28055");
 	}
 }

@@ -44,6 +44,7 @@ enum struct PlayerMissionInfo
 	int sp[5];
 	int vip;
 	int bonus;
+	int nt[2]; //WIP
 }
 ArrayList Current_Mission_Tasklist;
 bool g_ValidMission_Exist;
@@ -916,7 +917,7 @@ void SecretShopMenu(int client)
 	menu.AddItem("","购买10大行动等级(23000积分)",credits>=23000?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
 	menu.AddItem("","奖励包-购买10大行动等级(10000积分)\n限购一次",(credits>=10000&&bonus_available==0)?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
 	menu.AddItem("uid_nametag_s1half","初级赛季称号[LV50]");
-	menu.AddItem("uid_nametag_s1max","高级赛季称号[LV100");
+	menu.AddItem("uid_nametag_s1max","高级赛季称号[LV100]");
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }
@@ -994,7 +995,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 				}
 				else
 				{
-					Store_GiveItem(client,titleid,0,0,0);
+					Store_GiveItem(client,titleid,0,0,1);
 				}
 			}
 		}

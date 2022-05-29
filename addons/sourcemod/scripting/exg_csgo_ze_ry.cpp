@@ -47,6 +47,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CreateNative("RY_MapProperty_NoBhopLimit",Native_RY_MapProperty_NoBhopLimit);
 	CreateNative("RY_Mission_GetClientMissionLevel",Native_RY_GetClientMissionLevel);
 	CreateNative("RY_Mission_GiveClientExp",Native_RY_GiveClientMissionExp);
+//	CreateNative("RY_Map_GetMapDataByMapName",Native_Map_GetMapDataByMapName);
+//	CreateNative("RY_MapProperty_GetMapPushBackFactor");	
+
 }
 public void OnPluginStart()	
 {

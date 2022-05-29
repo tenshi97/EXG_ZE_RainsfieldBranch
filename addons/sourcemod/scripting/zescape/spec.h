@@ -8,7 +8,7 @@ Action SpecCommand(int client,int args)
 	if (!IsClientInGame(client)) return Plugin_Handled;
 	if (args != 1)
 	{
-		PrintToChat(client, " \x04[观察系统] 用法:\x07 !spec 用户名");
+		PrintToChat(client, " \x04[观察系统] 用法:\x07 !gc 用户名");
 		return Plugin_Handled;
 	}
 	if (args == 1)

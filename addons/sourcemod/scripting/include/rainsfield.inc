@@ -1,7 +1,7 @@
-#if defined _voiceannounceex_included_
-	#endinput
+#if defined _rainsfield_included_
+    #endinput
 #endif
-#define _voiceannounceex_included_
+#define _rainsfield_included_
 
 
 /**
@@ -32,3 +32,9 @@ native int RY_Mission_GetClientMissionLevel(int client);
 
 native int RY_Mission_GiveClientExp(int client,int exp);
 
+forward RY_Daily_TimerCheck_Update(int start_time,int new_time,int days_delta);
+
+forward EMC_Forward_RTV_StartMapVote();
+forward EMC_Forward_NextmapSelected(char[] nextmap_name);
+forward EMC_Forward_RTV_Extended();
+forward EMC_Forward_RTV_Nochange();
