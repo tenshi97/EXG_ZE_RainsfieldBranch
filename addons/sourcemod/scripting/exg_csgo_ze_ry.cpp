@@ -30,6 +30,7 @@
 #include "zescape/spec.h"
 #include "zescape/time.h"
 #include "zescape/mission.h"
+#include "zescape/quest.h"
 Handle g_Warmup_Timer;
 ConVar g_Cvar_Mp_Warmup_Time;
 public Plugin myinfo = {
@@ -67,6 +68,7 @@ public void OnPluginStart()
 	SpecOnPluginStart();
 	TimeOnPluginStart();
 	MissionOnPluginStart();
+	QuestOnPluginStart();
 }
 
 public void OnMapStart() 
@@ -77,6 +79,7 @@ public void OnMapStart()
 	RTVOnMapStart();
 	WarmUpTimerBuild();
 	NominateOnMapStart();
+	QuestOnMapStart();
 	//RoundOnMapStart();
 	if(!isDbConnected())	return;			//未连接，return，通过Db连接函数的函数执行Post，已连接则通直接Post使得换图后重载各插件数据
 	PrintToServer("DbOnDbConnected_MapStartPost");
@@ -109,6 +112,7 @@ public void OnMapEnd()
 	NominateOnMapEnd();
 	RTVOnMapEnd();
 	MissionOnMapEnd();
+	QuestOnMapEnd();
 }
 public int ZR_OnClientInfected(int client, int attacker, bool motherInfect, bool respawnOverride, bool respawn) 
 {
@@ -121,6 +125,7 @@ public int ZR_OnClientInfected(int client, int attacker, bool motherInfect, bool
 		if(IsClientInGame(attacker)&&!IsFakeClient(attacker))
 		{
 			MissionZombieInfectHuman(attacker);
+			QuestZombieInfectHuman(attacker);
 		}
 	}
 }
@@ -130,11 +135,13 @@ public void OnClientDisconnect(int client)
 	NominateOnClientDisconnect(client);
 	RTVOnClientDisconnect(client);
 	MissionOnClientDisconnect(client);
+	QuestOnPlayerDisconnected(client);
 }
 public void OnClientPostAdminCheck(int client)
 {
 	VoiceChatOnClientConnected(client);
 	MissionOnClientConnected(client);
+	QuestOnPlayerConnected(client);
 }
 /*
 	int id;

@@ -34,7 +34,7 @@ native int RY_Mission_GiveClientExp(int client,int exp);
 
 forward RY_Daily_TimerCheck_Update(int start_time,int new_time,int days_delta);
 
-forward EMC_Forward_RTV_StartMapVote();
-forward EMC_Forward_NextmapSelected(char[] nextmap_name);
-forward EMC_Forward_RTV_Extended();
-forward EMC_Forward_RTV_Nochange();
+forward void EMC_Forward_RTV_StartMapVote();
+forward void EMC_Forward_NextmapSelected(char[] nextmap_name);
+forward void EMC_Forward_RTV_Extended();
+forward void EMC_Forward_RTV_Nochange();

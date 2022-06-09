@@ -143,7 +143,6 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 	bool cooldown_over;
 	cooldown_over = false;
 	current_time = GetTime();
-
 	FormatTime(ctime,64,NULL_STRING,Tmap.last_run_time);
 	if(!DiffTimeTransform1(cooldown_state,current_time,Tmap.last_run_time,Tmap.cooldown*60))
 	{
@@ -153,10 +152,8 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 	Format(buffer,sizeof(buffer),"地图预定:%s\n\
 		最后运行时间:%s\n\
 		冷却时间:%d分钟(%s)\n\
-		订价:%d积分[VIP减半]\n\
-		下载站:%s添加\n\
-		可预定:%s\n\
-		地图存在:%s",Tmap.name,ctime,Tmap.cooldown,cooldown_state,Tmap.cost,Tmap.download?"已":"未",Tmap.available?"是":"否",Tmap.exist?"是":"否");
+		订价:%d积分[VIP减半]%s\n\
+		地图译名:%s",Tmap.name,ctime,Tmap.cooldown,cooldown_state,Tmap.cost,IsInClockTimePeriod(0,12)?"[优惠时间:生效]":"[优惠时间:未生效]",Tmap.name_cn);
 	menu.SetTitle(buffer);
 	int server_port = FindConVar("hostport").IntValue;
 	bool g_Interval_Allow = true;
@@ -174,7 +171,24 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 	menu.AddItem(Tmap.name,"重置冷却",GetAdminFlag(GetUserAdmin(client),Admin_Generic) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(Tmap.name,"强制提名",GetAdminFlag(GetUserAdmin(client),Admin_Generic) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(Tmap.name,"强制更换",GetAdminFlag(GetUserAdmin(client),Admin_Generic) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"地图难度:%s",difficulty_name[Tmap.difficulty]);
+	menu.AddItem(Tmap.name,buffer,ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"地图标签:");
+	for(int i=0;i<=9;i++)
+	{
+		if(Tmap.tag&label_code[i])
+		{
+			Format(buffer,sizeof(buffer),"%s|%s|",buffer,label_name[i]);
+		}
+	}
+	menu.AddItem(Tmap.name,buffer,ITEMDRAW_DISABLED);
 	Format(buffer,sizeof(buffer),"疲劳状态:%d(+%d)\n仅对1F困难图生效",g_Map_Interval_Count,Tmap.interval);
+	menu.AddItem(Tmap.name,buffer,ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"预定设置:[开放预定:%s][下载站:%s添加]\n[文件存在:%s]",Tmap.available?"是":"否",Tmap.download?"已":"未",Tmap.exist?"是":"否");
+	if(Tmap.tag&label_code[9])
+	{
+		Format(buffer,sizeof(buffer),"%s[人数上限:35]",buffer);
+	}
 	menu.AddItem(Tmap.name,buffer,ITEMDRAW_DISABLED);
 	menu.Display(client,MENU_TIME_FOREVER);
 }
@@ -229,6 +243,14 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 	nommap.nominator_steamid = GetSteamAccountID(client,true);
 	GetClientName(client,nommap.nominator_name,sizeof(nommap.nominator_name));
 	int credits = Store_GetClientCredits(client);
+	if(map.tag&label_code[9])
+	{
+		if(GetClientCount(true)>35)
+		{
+			PrintToChat(client," \x05[地图系统]\x01人数超过\x09 35 \x01人，无法订阅该地图");
+			return;
+		}
+	}
 	if(!Nominate_ALLOW||Nom_Map_List.Length>=Nominate_Max_Num)
 	{
 		PrintCenterText(client,"[EMC]当前无法预定地图");
@@ -253,13 +275,20 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 		{
 			if (GetUserFlagBits(client) && ADMFLAG_RESERVATION)
 			{
-			PrintToServer("vip");
-			nommap.nom_cost = RoundFloat(map.cost * 0.5);
-			PrintToServer("%i",map.cost);
+				PrintToServer("vip");
+				nommap.nom_cost = RoundFloat(map.cost * 0.5);
+				PrintToServer("%i",map.cost);
 			}
 			else
 			{
-			nommap.nom_cost = map.cost;
+				if(IsInClockTimePeriod(0,12))
+				{
+					nommap.nom_cost = RoundFloat(map.cost * 0.5);
+				}
+				else
+				{
+					nommap.nom_cost = map.cost;
+				}
 			}
 			Store_SetClientCredits(client,credits-nommap.nom_cost+credits_temp);
 			Format(buffer,sizeof(buffer),"[EMC]消费积分%d",nommap.nom_cost);

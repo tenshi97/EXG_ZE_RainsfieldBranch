@@ -65,6 +65,7 @@ void MissionOnPluginStart()
 void MissionTimeCheck()
 {
 	int current_time = GetTime();
+	CheckValidMission();
 	if(Current_Mission.id<=0)	return;
 	bool Timestampdailychanged=false;
 	bool Timestampweeklychanged=false;
@@ -212,9 +213,9 @@ void LoadPlayerMissionInfoCallBack(Handle owner, Handle hndl, char[] error, any 
 		{
 			PlayerMissionWeeklyUpdate(client);
 		}
-		playermission_list[client].dataupdate_time = current_time;
 		Format(query,sizeof(query),"UPDATE %s SET TIMESTAMP = %d WHERE UID = %d",Current_Mission.playerdbname,current_time,uid);
 	}
+	playermission_list[client].dataupdate_time = current_time;
 	PrintToServer(query);
 	PrintToConsoleAll(query);
 	DbTQuery(DbQueryErrorCallback,query);
@@ -241,11 +242,11 @@ void ClearPlayerMissionInfo(int weekly=0)
 	char query[512];
 	if(weekly)
 	{
-		PrintToChatAll(" \x05[任务系统]清空每周任务数据....");
+		PrintToChatAll(" \x05[任务系统]清空大行动每周任务数据....");
 		Format(query,sizeof(query),"UPDATE %s SET WINFECT = 0,WKILLZM = 0,WDMGMAKE = 0,WDMGTAKE = 0,WNADE = 0,WT1ST = 0,WT2ST = 0,WT3ST =0,WT4ST = 0,WT5ST =0",Current_Mission.playerdbname);
 		DbTQuery(DbQueryErrorCallback,query);
 	}
-	PrintToChatAll(" \x05[任务系统]清空每日任务数据....");
+	PrintToChatAll(" \x05[任务系统]清空大行动每日任务数据....");
 	Format(query,sizeof(query),"UPDATE %s SET DINFECT = 0, DKILLZM = 0, DDMGTAKE=0, DDMGMAKE=0, DPASS=0, DLEAD=0, DNADE=0, DT1ST=0, DT2ST=0, DT3ST=0, DT4ST=0, DT5ST=0, DT6ST=0, DT7ST=0, DT8ST=0",Current_Mission.playerdbname);
 	DbTQuery(DbClearPlayerMissionInfoCallback,query);
 }
@@ -408,6 +409,7 @@ void CheckValidMissionCallBack(Handle owner, Handle hndl, char[] error, any data
 	int current_time = GetTime();
 	int start_time;
 	int end_time;
+	Current_Mission.id = 0;
 	while(SQL_FetchRow(hndl))
 	{
 		start_time = DbFetchInt(hndl,"STARTTIME");
@@ -551,6 +553,11 @@ Action MissionMenuCommand(int client,int args)
 
 void MissionMenuBuild(int client)
 {
+	if(Current_Mission.id<0)
+	{
+		PrintToChat(client," \x05[任务系统]\x01当前没有可用的赛季活动");
+		return;
+	}
 	Menu menu = CreateMenu(MissionMenuHandler);
 	char buffer[512];
 	Format(buffer,sizeof(buffer),"赛季活动\n%s\n%s\nLV.%d/%d\nEXP:%d/%d",Current_Mission.cnname,Current_Mission.name,playermission_list[client].lvl,Current_Mission.max_level,playermission_list[client].exp,Current_Mission.level_exp);

@@ -48,6 +48,7 @@ void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 	RTVOnRoundEnd();
 	MapInfoOnRoundEnd(winner);
 	MissionOnRoundEnd(winner);
+	QuestOnRoundEnd(winner);
 }
 void OnPlayerHurt(Event event, const char[] name, bool dontBroadcast)
 {
@@ -64,6 +65,7 @@ void OnPlayerHurt(Event event, const char[] name, bool dontBroadcast)
 		if(!IsPlayerAlive(victim)||ZR_IsClientZombie(victim))
 		{
 			MissionHumanDmgCount(attacker,victim,damage);
+			QuestHumanDmgCount(attacker,victim,damage);
 		}
 	}
 
@@ -79,6 +81,7 @@ void OnPlayerDeathPost(Event event, const char[] name, bool dontBroadcast)
 	if(ZR_IsClientHuman(attacker))
 	{
 		MissionHumanKillZombie(attacker);
+		QuestHumanKillZombie(attacker);
 	}
 }
 void OnGrenadeThrown(Event event, const char[] name, bool dontBroadcast)
@@ -88,4 +91,5 @@ void OnGrenadeThrown(Event event, const char[] name, bool dontBroadcast)
 	if(!IsClientInGame(client))	return;
 	if(IsFakeClient(client))	return;
 	MissionHumanNadeCount(client);
+	QuestHumanNadeCount(client);
 }

@@ -29,9 +29,10 @@ enum struct Map_Info
  	int ego;	//EnableGo
  	int vis;	//Visable
 }
+int tag_num=10;
 char difficulty_name[5][10]={"简单","普通","困难","高难","极难"};
-//char label_name[10][10]={"FF","卤粉","闯关","娱乐","弹幕","方块","咸鱼","挑战","长征","感染"};
-//int label_code[10]={1,2,4,8,16,32,64,128,256,512};
+char label_name[10][64]={"FF","卤粉","弹幕方块","经典","闯关","娱乐","休闲","对抗","长征","感染"};
+int label_code[10]={1,2,4,8,16,32,64,128,256,512};
 enum struct Map_Log
 {
 	int id;
@@ -350,6 +351,7 @@ void MapAdminConfigMenu(int client,Map_Info map)
 	menu.AddItem(map.name,buffer);
 	Format(buffer,sizeof(buffer),"预订显示:%s",map.vis?"显示":"隐藏");
 	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,"标签配置");
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param) 
@@ -477,12 +479,16 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 			MapCfgUpdate(map);
 			MapAdminConfigMenu(client,map);
 		}
+		if(param == 17)
+		{
+			MapTagConfigMenu(client,map);
+		}
 	}	
 }
 void MapCfgUpdate(Map_Info map)
 {
 	char query[1024];
-	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d, WINS = %d, FATIGUE = %d, INFECTTIME = %f,EGO = %d,VIS = %d WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.wins,map.interval,map.infecttime,map.ego,map.vis,map.id,map.name);
+	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d, WINS = %d, FATIGUE = %d, INFECTTIME = %f,EGO = %d,VIS = %d, TAG = %d WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.wins,map.interval,map.infecttime,map.ego,map.vis,map.tag,map.id,map.name);
 	PrintToServer(query);
 	DbTQuery(DbQueryErrorCallback,query);	
 	Map_Log mapl;
@@ -747,5 +753,48 @@ int MapInfectTimeHandler(Menu menu, MenuAction action, int client, int param)
 		else if (param == 11) map.infecttime = -1.0;
 		MapCfgUpdate(map);
 		MapInfectTimeMenu(client,map);
+	}
+}
+
+void MapTagConfigMenu(int client,Map_Info map)
+{
+	char buffer[64];
+	Menu menu = CreateMenu(MapTagConfigMenuHandler);
+	for(int i=0;i<tag_num;i++)
+	{
+		if(map.tag&label_code[i])
+		{
+			Format(buffer,sizeof(buffer),"[%s]",label_name[i]);
+			menu.AddItem(map.name,buffer);
+		}
+		else
+		{
+			menu.AddItem(map.name,label_name[i]);
+		}
+	}
+	menu.Display(client,MENU_TIME_FOREVER);
+}
+int MapTagConfigMenuHandler(Menu menu, MenuAction action, int client, int param)
+{
+	char map_name[PLATFORM_MAX_PATH];
+	Map_Info map;
+	if( action == MenuAction_End )
+	{
+		menu.Close();
+	}
+	else if (action == MenuAction_Select)
+	{
+		menu.GetItem(param,map_name,sizeof(map_name));
+		Maps.GetArray(map_name,map,sizeof(map));
+		if(map.tag&label_code[param])
+		{
+			map.tag-=label_code[param];
+		}
+		else
+		{
+			map.tag+=label_code[param];
+		}
+		MapCfgUpdate(map);
+		MapTagConfigMenu(client,map);
 	}
 }

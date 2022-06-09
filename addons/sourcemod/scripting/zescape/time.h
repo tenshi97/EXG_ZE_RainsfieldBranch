@@ -35,6 +35,7 @@ void DailyTimerCheckCallBack(Handle owner, Handle hndl, char[] error, any data)
 		if(strcmp(record_name,"Daily_Activity_Timer")==0)
 		{
 			daily_timestamp = DbFetchInt(hndl,"TIMESTAMP");
+			g_daily_timestamp = daily_timestamp;
 			daily_timestamp_found = true;
 		}
 	}
@@ -63,6 +64,7 @@ void daily_timercheck(int start_time)
 		Call_PushCell(days_delta);
 		Call_Finish();
 		TimerRecord_Update("Daily_Activity_Timer",new_timestamp);
+		QuestOnDailyUpdate();
 	}
 }
 void TimerRecord_Update(char[] record_name,int timestamp,int repeat=1,int period=0,int begin=0,int finish=0)

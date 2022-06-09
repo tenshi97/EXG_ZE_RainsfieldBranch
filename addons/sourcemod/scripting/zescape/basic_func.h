@@ -1,3 +1,4 @@
+const int g_const_midnight_timestamp=1654185600;
 bool IsValidHuman(int client)
 {
 	if(IsClientInGame(client))
@@ -98,4 +99,23 @@ void CloseHandleSafe(Handle& hndl) {
 	if (!hndl) return;
 	hndl.Close();
 	hndl = null;
+}
+
+bool IsInClockTimePeriod(int start_point,int end_point)
+{
+	int current_time_reduced = (GetTime()-g_const_midnight_timestamp)%86400;
+	int sp = start_point%24;
+	int ep = end_point%24;
+	int sp_t = sp*3600;
+	int ep_t = ep*3600;
+	if(sp_t<ep_t)
+	{
+		if(current_time_reduced>=sp_t&&current_time_reduced<=ep_t)	return true;
+		else return false;
+	}
+	else
+	{
+		if(current_time_reduced>=sp_t&&current_time_reduced<=ep_t)	return false;
+		else return true;
+	}
 }

@@ -407,6 +407,7 @@ void StartMapVote(MapChangeTime when)
 {
 	if(GetClientCount(true) == 0)	return;
 	Call_StartForward(g_RTV_Forward_StartMapVote);
+	Call_Finish();
 	Nominate_ALLOW = false;
 	g_MapVote_Initiated = true;
 	g_RTV_VotesNum = 0;
@@ -423,9 +424,6 @@ void StartMapVote(MapChangeTime when)
 Action g_Wtimer_Hndl(Handle timer,MapChangeTime when)
 {
 	char buffer[256];
-
-	Call_StartForward(g_RTV_Forward_StartMapVote);
-	Call_Finish();
 
 	if(g_WarningTime_BeforeVote>=0)
 	{
@@ -550,9 +548,11 @@ void CreateNextMapVote()
 	MapVoteLogClear();
 	for(int i=0;i<=5;i++)
 	{
-		GetMenuItem(menu,i+3,buffer,sizeof(buffer));
-		mapvote_log_array[i].map_param=i+3;
+		GetMenuItem(menu,i+2,buffer,sizeof(buffer));
+		mapvote_log_array[i].map_param=i+2;
 		strcopy(mapvote_log_array[i].mapvote_name,64,buffer);
+		if(strcmp(mapvote_log_array[i].mapvote_name,"NoChange")==0)		mapvote_log_array[i].mapvote_name = "不要更换";
+		if(strcmp(mapvote_log_array[i].mapvote_name,"Extend")==0)		mapvote_log_array[i].mapvote_name = "延长地图";
 	}
 	rtv_totalvotes=0;
 	SetVoteResultCallback(menu,MapVoteHandler);
@@ -630,7 +630,7 @@ int NextMapVoteHandler(Menu menu, MenuAction action, int param1, int param2)
 	else if (action == MenuAction_Select)
 	{
 		rtv_totalvotes++;
-		if(param2>=3)
+		if(param2>=2)
 		{
 			GetClientName(param1,voter_name,sizeof(voter_name));
 			GetMenuItem(menu,param2,votemap_name,sizeof(votemap_name));
