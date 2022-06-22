@@ -79,7 +79,7 @@ void RTVOnPluginStart()
 	}
 	if(g_RTV_Forward_NextMapSelected == null)
 	{
-		g_RTV_Forward_NextMapSelected = CreateGlobalForward("EMC_Forward_RTV_Nochange",ET_Ignore,Param_String);
+		g_RTV_Forward_NextMapSelected = CreateGlobalForward("EMC_Forward_NextmapSelected",ET_Ignore,Param_String);
 	}
 }
 
@@ -481,6 +481,7 @@ void CreateNextMapVote()
 			snap.GetKey(i, map.name, sizeof(map.name));
 			Maps.GetArray(map.name, map, sizeof(map));
 			bool interval_status = true;
+			bool playernum_limit = true;
 			if(map.available&&map.exist&&map.download&&map.random)
 			{	
 				if(map.difficulty>=2&&server_port==28015)
@@ -491,7 +492,14 @@ void CreateNextMapVote()
 						//PrintToConsoleAll("地图%s由于疲劳机制被剔出了随机队列",map.name);
 					}
 				}
-				if(!isNominated(map)&&isMapCoolDownOver(map)&&interval_status)
+				if(map.tag&label_code[9])
+				{
+					if(GetClientCount(true)>30)
+					{
+						playernum_limit = false;
+					}
+				}
+				if(!isNominated(map)&&isMapCoolDownOver(map)&&interval_status&&playernum_limit)
 				{
 					//PrintToConsoleAll("Random+ %s",map.name);
 					mapv.name = map.name;

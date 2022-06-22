@@ -187,7 +187,7 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 	Format(buffer,sizeof(buffer),"预定设置:[开放预定:%s][下载站:%s添加]\n[文件存在:%s]",Tmap.available?"是":"否",Tmap.download?"已":"未",Tmap.exist?"是":"否");
 	if(Tmap.tag&label_code[9])
 	{
-		Format(buffer,sizeof(buffer),"%s[人数上限:35]",buffer);
+		Format(buffer,sizeof(buffer),"%s[人数上限:30]",buffer);
 	}
 	menu.AddItem(Tmap.name,buffer,ITEMDRAW_DISABLED);
 	menu.Display(client,MENU_TIME_FOREVER);
@@ -245,7 +245,7 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 	int credits = Store_GetClientCredits(client);
 	if(map.tag&label_code[9])
 	{
-		if(GetClientCount(true)>35)
+		if(GetClientCount(true)>30)
 		{
 			PrintToChat(client," \x05[地图系统]\x01人数超过\x09 35 \x01人，无法订阅该地图");
 			return;

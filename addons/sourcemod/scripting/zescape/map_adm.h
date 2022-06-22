@@ -28,6 +28,9 @@ enum struct Map_Info
  	int interval;
  	int ego;	//EnableGo
  	int vis;	//Visable
+ 	float zm_tagging;
+ 	float zm_knockback;
+ 	float hm_weaponknockback;
 }
 int tag_num=10;
 char difficulty_name[5][10]={"简单","普通","困难","高难","极难"};
