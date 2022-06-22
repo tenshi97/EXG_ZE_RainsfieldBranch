@@ -13,8 +13,10 @@
 #include <leader>
 #include <mostactive>
 #include <sourcecomms>
+
 #pragma semicolon 1
 #pragma newdecls required
+
 #include "zescape/basic_func.h"
 #include "zescape/event.h"
 #include "zescape/db.h"
@@ -31,15 +33,20 @@
 #include "zescape/time.h"
 #include "zescape/mission.h"
 #include "zescape/quest.h"
+
 Handle g_Warmup_Timer;
 ConVar g_Cvar_Mp_Warmup_Time;
-public Plugin myinfo = {
-	name = " EXG_Zombie_Escape_RY",
-	author = "Rainsfield&WackoD",
+bool g_pStore = false;
+
+public Plugin myinfo = 
+{
+	name 		= "EXG_Zombie_Escape_RY",
+	author 		= "Rainsfield & WackoD & nullable",
 	description = "EXG ZombieEscape Rainsfield's Branch Plugins",
-	version = "1.0",
-	url = "https://zegod.cn"
+	version 	= "1.0",
+	url 		= "https://zegod.cn"
 };
+
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	CreateNative("RY_MapProperty_BanHumanSkills",Native_RY_MapProperty_BanHumanSkills);
@@ -51,7 +58,31 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 //	CreateNative("RY_Map_GetMapDataByMapName",Native_Map_GetMapDataByMapName);
 //	CreateNative("RY_MapProperty_GetMapPushBackFactor");	
 
+	MarkNativeAsOptional("Store_GetClientCredits");
+	MarkNativeAsOptional("Store_SetClientCredits");
+	MarkNativeAsOptional("Store_GetItemIdbyUniqueId");
+	MarkNativeAsOptional("Store_GiveItem");
+	MarkNativeAsOptional("Store_HasClientItem");
 }
+
+public void OnLibraryAdded(const char[] name)
+{
+	// Validate library
+	if (StrContains(sLibrary, "store", false) != -1)
+	{
+		g_pStore = (GetFeatureStatus(FeatureType_Native, "Store_GetClientCredits") == FeatureStatus_Available);
+	}
+}
+
+public void OnLibraryRemoved(const char[] name)
+{
+	// Validate library
+	if (StrContains(sLibrary, "store", false) != -1)
+	{
+		g_pStore = (GetFeatureStatus(FeatureType_Native, "Store_GetClientCredits") == FeatureStatus_Available);
+	}
+}
+
 public void OnPluginStart()	
 {
 	FlyOnPluginStart();
@@ -104,7 +135,7 @@ Action OnWarmUpEnd(Handle timer)
 }
 public void OnPluginEnd() 
 {
-    Db_Close();
+	Db_Close();
 }
 public void OnMapEnd() 
 {

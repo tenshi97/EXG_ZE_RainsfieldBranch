@@ -77,7 +77,7 @@ int QuestMenuHandler(Menu menu, MenuAction action, int client, int param)
 		if(param == 0)
 		{
 			DailyQuestMenu(client);
-		}    		
+		}
 		if(param == 1)
 		{
 			WeelyQuestMenu(client);
@@ -91,23 +91,24 @@ int QuestMenuHandler(Menu menu, MenuAction action, int client, int param)
 void DailyQuestMenu(int client)
 {
 	Menu menu = CreateMenu(DailyQuestMenuHandler);
-	menu.SetTitle("每日任务\n完成后请点击任务领取积分奖励");
+	menu.SetTitle("每日任务\n%s", (g_pStore) ? "完成后请点击任务领取积分奖励" : "未检测到商店插件, 禁用完成功能";
 	char buffer[256];
 	char questid[64];
 	QUEST quest;
+	int iStyle = (g_pStore) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED;
 	for(int i=0;i<=5;i++)
 	{
 		IntToString(i,questid,sizeof(questid));
 		GetArrayArray(QuestList,i,quest,sizeof(quest));
 		if(playerquest_list[client].taskcomplete[i]==1)
 		{
-			Format(buffer,sizeof(buffer),"%s[已完成]",quest.name);
+			Format(buffer,sizeof(buffer),"%s [已完成]",quest.name);
 			menu.AddItem(questid,buffer,ITEMDRAW_DISABLED);
 		}
 		else
 		{
 			Format(buffer,sizeof(buffer),"%s:%d/%d",quest.name,playerquest_list[client].taskdata[i],quest.num);
-			menu.AddItem(questid,buffer);			
+			menu.AddItem(questid, buffer, iStyle);			
 		}
 	}
 	menu.Display(client, MENU_TIME_FOREVER);
@@ -139,7 +140,7 @@ int DailyQuestMenuHandler(Menu menu, MenuAction action, int client, int param)
 			{
 				PrintToChat(client," \x05[任务系统]\x01完成了每日任务[%s]，获得%d积分",quest.name,quest.award);	
 				playerquest_list[client].taskcomplete[questid]=1;
-				Store_SetClientCredits(client,credits+quest.award);			
+				Store_SetClientCredits(client,credits+quest.award);
 			}
 			else
 			{

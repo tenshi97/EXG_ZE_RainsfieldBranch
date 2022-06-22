@@ -620,12 +620,18 @@ int NextMapVoteHandler(Menu menu, MenuAction action, int param1, int param2)
 			 	{
 			 		for(int j = 1; j <= 64 ; j++)
 			 		{
-			 			if(!IsClientInGame(j)||IsFakeClient(j))	continue;
+			 			if(!IsClientInGame(j) || IsFakeClient(j))
+							continue;
+						
 			 			if(GetSteamAccountID(j,true)==mapv.nominator_steamid)
 			 			{
-			 				nominator_credits = Store_GetClientCredits(j);
-			 				credits_return = RoundToFloor(mapv.nominate_cost * 0.5);
-							Store_SetClientCredits(j,nominator_credits+credits_return);
+							if (g_pStore)
+							{
+								nominator_credits = Store_GetClientCredits(j);
+								credits_return = RoundToFloor(mapv.nominate_cost * 0.5);
+								Store_SetClientCredits(j,nominator_credits+credits_return);
+							}
+
 							PrintToChatAll(" \x05[EMC] \x09%s \x01预定的 \x07%s \x01未选上，\x07%d \x01积分已退还",mapv.nominator_name,mapv.name,credits_return);	 				
 			 			}
 			 		}
@@ -666,9 +672,13 @@ void ClearNomMapList()
 		 	if(!IsClientInGame(j)||IsFakeClient(j))	continue;
 		 	if(GetSteamAccountID(j,true)==mapv.nominator_steamid)
 		 	{
-		 		int nominator_credits = Store_GetClientCredits(j);
-		 		int credits_return = RoundToFloor(mapv.nom_cost * 0.75);
-				Store_SetClientCredits(j,nominator_credits+credits_return);
+				if (g_pStore)
+				{
+					int nominator_credits = Store_GetClientCredits(j);
+					int credits_return = RoundToFloor(mapv.nom_cost * 0.75);
+					Store_SetClientCredits(j,nominator_credits+credits_return);
+				}
+
 				PrintToChatAll(" \x05[EMC] \x09%s \x01预定的 \x07%s \x01未选上，\x07%d \x01积分已退还",mapv.nominator_name,mapv.name,credits_return);	 				
 			}
 		}
@@ -736,9 +746,12 @@ public void MapVoteHandler(Menu menu, int num_votes, int num_clients, const int[
 		 			if(!IsClientInGame(j)||IsFakeClient(j))	continue;
 		 			if(GetSteamAccountID(j,true)==mapv.nominator_steamid)
 		 			{
-		 				nominator_credits = Store_GetClientCredits(j);
-		 				credits_return = RoundToFloor(mapv.nominate_cost * 0.5);
-						Store_SetClientCredits(j,nominator_credits+credits_return);
+						if (g_pStore)
+						{
+							nominator_credits = Store_GetClientCredits(j);
+							credits_return = RoundToFloor(mapv.nominate_cost * 0.5);
+							Store_SetClientCredits(j,nominator_credits+credits_return);
+						}
 						PrintToChatAll(" \x05[EMC] \x09%s \x01预定的 \x07%s \x01未选上，\x07%d \x01积分已退还",mapv.nominator_name,mapv.name,credits_return);	 				
 		 			}
 		 		}

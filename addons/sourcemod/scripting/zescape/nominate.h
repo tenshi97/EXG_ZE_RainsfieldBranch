@@ -242,7 +242,9 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 	strcopy(nommap.name,sizeof(nommap.name),map.name);
 	nommap.nominator_steamid = GetSteamAccountID(client,true);
 	GetClientName(client,nommap.nominator_name,sizeof(nommap.nominator_name));
-	int credits = Store_GetClientCredits(client);
+	int credits = 0;
+	if (g_pStore)
+		credits = Store_GetClientCredits(client);
 	if(map.tag&label_code[9])
 	{
 		if(GetClientCount(true)>30)
@@ -262,7 +264,7 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 		return;
 	}
 	int credits_temp=0;
-	if(credits>=map.cost||forcenom)
+	if(!g_pStore || credits>=map.cost || forcenom)
 	{
 		if(nom_index!=-1)
 		{	
@@ -290,9 +292,13 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 					nommap.nom_cost = map.cost;
 				}
 			}
-			Store_SetClientCredits(client,credits-nommap.nom_cost+credits_temp);
-			Format(buffer,sizeof(buffer),"[EMC]消费积分%d",nommap.nom_cost);
-			PrintCenterText(client,buffer);
+
+			if (g_pStore)
+			{
+				Store_SetClientCredits(client,credits-nommap.nom_cost+credits_temp);
+				Format(buffer,sizeof(buffer),"[EMC]消费积分%d",nommap.nom_cost);
+				PrintCenterText(client,buffer);
+			}
 		}
 		Nom_Map_List.PushArray(nommap,sizeof(nommap));
 		if(forcenom)
@@ -405,11 +411,14 @@ void CancelNom(int index,int opt)
 	nominator_index = -1;
 	if(nom_log.nominator_steamid==opt_steamid)
 	{
-
 		Format(buffer,sizeof(buffer)," \x05[EMC]\x09%s\x01取消了自己预定的\x09%s\x01,费用\x09%d\x01积分已归还",nom_log.nominator_name,nom_log.name,nom_log.nom_cost);
 		PrintToChatAll(buffer);
-		nominator_credits = Store_GetClientCredits(opt);
-		Store_SetClientCredits(opt,nominator_credits+nom_log.nom_cost);		
+		
+		if (g_pStore)
+		{
+			nominator_credits = Store_GetClientCredits(opt);
+			Store_SetClientCredits(opt,nominator_credits+nom_log.nom_cost);
+		}
 	}
 	else
 	{
@@ -427,9 +436,12 @@ void CancelNom(int index,int opt)
 		{
 			if(IsClientInGame(nominator_index))
 			{
-				nominator_credits = Store_GetClientCredits(nominator_index);
-				Store_SetClientCredits(nominator_index,nominator_credits+nom_log.nom_cost);	
-				PrintToChatAll("[EMC]费用已归还本人");
+				if (g_pStore)
+				{
+					nominator_credits = Store_GetClientCredits(nominator_index);
+					Store_SetClientCredits(nominator_index,nominator_credits+nom_log.nom_cost);	
+					PrintToChatAll("[EMC]费用已归还本人");
+				}
 			}
 		}
 
