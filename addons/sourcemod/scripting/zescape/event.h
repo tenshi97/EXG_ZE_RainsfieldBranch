@@ -49,6 +49,7 @@ void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 	MapInfoOnRoundEnd(winner);
 	MissionOnRoundEnd(winner);
 	QuestOnRoundEnd(winner);
+	HdOnRoundEnd(winner);
 }
 void OnPlayerHurt(Event event, const char[] name, bool dontBroadcast)
 {
