@@ -121,7 +121,7 @@ public int Native_RY_Map_GetCurrentMapInfo(Handle plugin, int numParams)
 {
 	Map_Info Map_Return;
 	Maps.GetArray(Pmap.name,Map_Return,sizeof(Map_Return));
-	SetNativeArray(2, view_as<int>(Map_Return), sizeof(Map_Info)); 
+	SetNativeArray(1, view_as<int>(Map_Return), sizeof(Map_Info)); 
 }
 
 Action ActionMapInfoMenu(int client,int args)

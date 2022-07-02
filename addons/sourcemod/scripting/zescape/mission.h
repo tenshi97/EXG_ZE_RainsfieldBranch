@@ -280,7 +280,7 @@ void UpdatePlayerMissionInfo(int client)
 	int sp3=playermission_list[client].sp[2];
 	int sp4=playermission_list[client].sp[3];
 	int sp5=playermission_list[client].sp[4];
-	for(int i =0;i<=12;i++)
+	for(int i =0;i<=14;i++)
 	{
 		taskdata[i]=playermission_list[client].taskdata[i];
 		taskstage[i]=playermission_list[client].taskstage[i];
@@ -450,7 +450,7 @@ void TEMP_OpHR_TasklistSet()
 	char buffer[256];
 	TASK task;
 	task.stage = 3;
-	task.num[0] = 5;task.num[1] = 10;task.num[2] = 20;
+	task.num[0] = 4;task.num[1] = 8;task.num[2] = 12;
 	task.exp_base = 80;
 	task.period = 1;
 	task.type = ZM_INFECT;
@@ -467,15 +467,15 @@ void TEMP_OpHR_TasklistSet()
 
 	task.stage = 3;
 	task.num[0] = 5;task.num[1] = 10;task.num[2] = 20;
-	task.exp_base = 150;
+	task.exp_base = 120;
 	task.period = 1;
 	task.type = ZM_DMGTAKE;
 	task.name = "[僵尸]承受伤害:";
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 3;
-	task.num[0] = 4;task.num[1] = 8;task.num[2] = 16;
-	task.exp_base = 160;
+	task.num[0] = 4;task.num[1] = 8;task.num[2] = 12;
+	task.exp_base = 140;
 	task.period = 1;
 	task.type = HM_DMGMAKE;
 	task.name = "[人类]造成伤害:";
@@ -490,7 +490,7 @@ void TEMP_OpHR_TasklistSet()
 	Current_Mission_Tasklist.PushArray(task);	
 
 	task.stage = 3;
-	task.num[0] = 5;task.num[1] = 10;task.num[2] = 15;
+	task.num[0] = 3;task.num[1] = 6;task.num[2] = 9;
 	task.exp_base = 70;
 	task.period = 1;
 	task.type = HM_PASS;
@@ -499,21 +499,21 @@ void TEMP_OpHR_TasklistSet()
 
 	task.stage = 3;
 	task.num[0] = 1;task.num[1] = 2;task.num[2] = 3;
-	task.exp_base = 100;
+	task.exp_base = 80;
 	task.period = 1;
 	task.type = HM_PASS;
 	task.difficulty = 2;
 	task.tag = -1;
-	task.name = "[人类]通关[困难]以上地图";
+	task.name = "[人类]通关[困难]以上地图:";
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 3;
 	task.num[0] = 1;task.num[1] = 3;task.num[2] = 5;
-	task.exp_base = 100;
+	task.exp_base = 80;
 	task.period = 1;
 	task.type = HM_PASS;
 	task.tag = 3;
-	Format(buffer,sizeof(buffer),"[人类]通关[%s]地图",label_name[task.tag]);
+	Format(buffer,sizeof(buffer),"[人类]通关[%s]地图:",label_name[task.tag]);
 	task.difficulty = -1;
 	strcopy(task.name,sizeof(task.name),buffer);
 	Current_Mission_Tasklist.PushArray(task);
@@ -527,7 +527,7 @@ void TEMP_OpHR_TasklistSet()
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 1;
-	task.num[0] = 120;
+	task.num[0] = 100;
 	task.exp_base = 2000;
 	task.period = 7;
 	task.type = ZM_INFECT;
@@ -535,7 +535,7 @@ void TEMP_OpHR_TasklistSet()
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 1;
-	task.num[0] = 50;
+	task.num[0] = 40;
 	task.exp_base = 2000;
 	task.period = 7;
 	task.type = HM_KILLZM;
@@ -551,7 +551,7 @@ void TEMP_OpHR_TasklistSet()
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 1;
-	task.num[0] = 180;
+	task.num[0] = 150;
 	task.exp_base = 2000;
 	task.period = 7;
 	task.type = HM_DMGMAKE;
@@ -559,7 +559,7 @@ void TEMP_OpHR_TasklistSet()
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 1;
-	task.num[0] = 300;
+	task.num[0] = 250;
 	task.exp_base = 2000;
 	task.period = 7;
 	task.type = HM_NADE;
@@ -567,7 +567,7 @@ void TEMP_OpHR_TasklistSet()
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 1;
-	task.num[0] = 20;
+	task.num[0] = 15;
 	task.exp_base = 2000;
 	task.period = 7;
 	task.type = HM_PASS;
