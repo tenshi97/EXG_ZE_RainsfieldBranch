@@ -1,4 +1,4 @@
-enum struct Map_Info
+/*enum struct Map_Info
 {
 	int id;
 	char name[PLATFORM_MAX_PATH];
@@ -28,14 +28,15 @@ enum struct Map_Info
  	int interval;
  	int ego;	//EnableGo
  	int vis;	//Visable
- 	float zm_tagging;
- 	float zm_knockback;
- 	float hm_weaponknockback;
-}
-int tag_num=10;
+ 	int tagscale;
+ 	float dmgscale;
+ 	float knockback;
+ 	int zmclass;
+}*/
+int tag_num=11;
 char difficulty_name[5][10]={"简单","普通","困难","高难","极难"};
-char label_name[10][64]={"FF","卤粉","弹幕方块","经典","闯关","娱乐","休闲","对抗","长征","感染"};
-int label_code[10]={1,2,4,8,16,32,64,128,256,512};
+char label_name[11][64]={"FF","卤粉","弹幕方块","经典","闯关","娱乐","休闲","对抗","长征","感染","活动"};
+int label_code[11]={1,2,4,8,16,32,64,128,256,512,1024};
 enum struct Map_Log
 {
 	int id;
@@ -156,6 +157,10 @@ void MapDataLoadCallback(Handle owner, Handle hndl, char[] error, any data)
 		map.interval = DbFetchInt(hndl,"FATIGUE"); 
 		map.ego = DbFetchInt(hndl,"EGO");
 		map.vis = DbFetchInt(hndl,"VIS");
+		map.dmgscale = DbFetchFloat(hndl,"DMGSCALE");
+		map.tagscale = DbFetchInt(hndl,"TAGSCALE");
+		map.knockback = DbFetchFloat(hndl,"KNOCKBACK");
+		map.zmclass = DbFetchInt(hndl,"ZMCLASS");
 		Maps.SetArray(map.name, map, sizeof(map), true);
 //		Format(buffer,sizeof(buffer),"[MapDataLoad]Added Map List:%s",mapl.name);
 //		PrintToServer(buffer);
@@ -221,7 +226,6 @@ void NewMapFileUpdate(Map_Info map)
 
 void ResetFileExist()
 {
-	PrintToServer("[test]3 MFE");
 	StringMapSnapshot snap= Maps.Snapshot();
 	Map_Info map;
 	char query[512];
@@ -355,6 +359,14 @@ void MapAdminConfigMenu(int client,Map_Info map)
 	Format(buffer,sizeof(buffer),"预订显示:%s",map.vis?"显示":"隐藏");
 	menu.AddItem(map.name,buffer);
 	menu.AddItem(map.name,"标签配置");
+	Format(buffer,sizeof(buffer),"伤害系数:%f",map.dmgscale);
+	menu.AddItem(map.name,buffer);
+	Format(buffer,sizeof(buffer),"定身系数:%d",map.tagscale);
+	menu.AddItem(map.name,buffer);
+	Format(buffer,sizeof(buffer),"击退系数:%f",map.knockback);
+	menu.AddItem(map.name,buffer);
+	Format(buffer,sizeof(buffer),"允许特殊僵尸:%s",map.zmclass?"是":"否");
+	menu.AddItem(map.name,buffer);
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param) 
@@ -486,12 +498,29 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 		{
 			MapTagConfigMenu(client,map);
 		}
+		if(param == 18)
+		{
+			MapDmgscaleConfigMenu(client,map);
+		}
+		if(param == 19)
+		{
+			MapTagscaleConfigMenu(client,map);
+		}
+		if(param == 20)
+		{
+			MapKnockbackConfigMenu(client,map);
+		}
+		if(param == 21)
+		{
+			if(map.zmclass != 0) map.zmclass = 0;
+			else map.zmclass = 1;
+		}
 	}	
 }
 void MapCfgUpdate(Map_Info map)
 {
 	char query[1024];
-	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d, WINS = %d, FATIGUE = %d, INFECTTIME = %f,EGO = %d,VIS = %d, TAG = %d WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.wins,map.interval,map.infecttime,map.ego,map.vis,map.tag,map.id,map.name);
+	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d, WINS = %d, FATIGUE = %d, INFECTTIME = %f,EGO = %d,VIS = %d, TAG = %d, DMGSCALE = %f, TAGSCALE = %d, KNOCKBACK = %f, ZMCLASS = %d WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.wins,map.interval,map.infecttime,map.ego,map.vis,map.tag,map.dmgscale,map.tagscale,map.knockback,map.zmclass,map.id,map.name);
 	PrintToServer(query);
 	DbTQuery(DbQueryErrorCallback,query);	
 	Map_Log mapl;
@@ -509,7 +538,6 @@ void MapCfgUpdate(Map_Info map)
 		}
 	}
 }
-
 Action MapNamecnCommand(int client,int args)
 {
 	if (args<2)		return Plugin_Handled;
@@ -799,5 +827,140 @@ int MapTagConfigMenuHandler(Menu menu, MenuAction action, int client, int param)
 		}
 		MapCfgUpdate(map);
 		MapTagConfigMenu(client,map);
+	}
+}
+
+void MapDmgscaleConfigMenu(int client,Map_Info map)
+{
+	char buffer[256];
+	Menu menu = CreateMenu(MapDmgScaleConfigMenuHandler);
+	Format(buffer,sizeof(buffer),"%s\n伤害系数:%f",map.name,map.dmgscale);
+	menu.SetTitle(buffer);
+	menu.AddItem(map.name,"+0.1");
+	menu.AddItem(map.name,"+0.5");
+	menu.AddItem(map.name,"+1.0");
+	menu.AddItem(map.name,"-0.1");
+	menu.AddItem(map.name,"-0.5");
+	menu.AddItem(map.name,"-1.0");
+	menu.ExitBackButton = true;
+	menu.Display(client,MENU_TIME_FOREVER);
+}
+
+int MapDmgScaleConfigMenuHandler(Menu menu, MenuAction action, int client, int param)
+{
+	char map_name[PLATFORM_MAX_PATH];
+	Map_Info map;
+	if( action == MenuAction_End )
+	{
+		menu.Close();
+	}
+	else if (action == MenuAction_Select)
+	{
+		menu.GetItem(param,map_name,sizeof(map_name));
+		Maps.GetArray(map_name,map,sizeof(map));
+		if(param==0)	map.dmgscale = fMin(3.0,map.dmgscale+0.1);
+		if(param==1)	map.dmgscale = fMin(3.0,map.dmgscale+0.5);
+		if(param==2)	map.dmgscale = fMin(3.0,map.dmgscale+1.0);
+		if(param==3)	map.dmgscale = fMax(0.1,map.dmgscale-0.1);
+		if(param==4)	map.dmgscale = fMax(0.1,map.dmgscale-0.5);
+		if(param==5)	map.dmgscale = fMax(0.1,map.dmgscale-1.0);
+		MapCfgUpdate(map);
+		MapDmgscaleConfigMenu(client,map);
+	}	
+	else if (param == MenuCancel_ExitBack)
+	{
+		menu.GetItem(0,map_name,sizeof(map_name));
+		Maps.GetArray(map_name,map,sizeof(map));
+		MapAdminConfigMenu(client,map);
+	}
+}
+
+void MapTagscaleConfigMenu(int client,Map_Info map)
+{
+	char buffer[256];
+	Menu menu = CreateMenu(MapTagscaleConfigMenuHandler);
+	Format(buffer,sizeof(buffer),"%s\n定身系数(数值越高定身越低):%d",map.name,map.tagscale);
+	menu.SetTitle(buffer);
+	menu.AddItem(map.name,"+1");
+	menu.AddItem(map.name,"+5");
+	menu.AddItem(map.name,"+10");
+	menu.AddItem(map.name,"-1");
+	menu.AddItem(map.name,"-5");
+	menu.AddItem(map.name,"-10");
+	menu.ExitBackButton = true;
+	menu.Display(client,MENU_TIME_FOREVER);
+}
+
+int MapTagscaleConfigMenuHandler(Menu menu, MenuAction action, int client, int param)
+{
+	char map_name[PLATFORM_MAX_PATH];
+	Map_Info map;
+	if( action == MenuAction_End )
+	{
+		menu.Close();
+	}
+	else if (action == MenuAction_Select)
+	{
+		menu.GetItem(param,map_name,sizeof(map_name));
+		Maps.GetArray(map_name,map,sizeof(map));
+		if(param==0)	map.tagscale = Min(100,map.tagscale+1);
+		if(param==1)	map.tagscale = Min(100,map.tagscale+5);
+		if(param==2)	map.tagscale = Min(100,map.tagscale+10);
+		if(param==3)	map.tagscale = Max(1,map.tagscale-1);
+		if(param==4)	map.tagscale = Max(1,map.tagscale-5);
+		if(param==5)	map.tagscale = Max(1,map.tagscale-10);
+		MapCfgUpdate(map);
+		MapTagscaleConfigMenu(client,map);
+	}	
+	else if (param == MenuCancel_ExitBack)
+	{
+		menu.GetItem(0,map_name,sizeof(map_name));
+		Maps.GetArray(map_name,map,sizeof(map));
+		MapAdminConfigMenu(client,map);
+	}
+}
+
+void MapKnockbackConfigMenu(int client,Map_Info map)
+{
+	char buffer[256];
+	Menu menu = CreateMenu(MapKnockbackConfigMenuHandler);
+	Format(buffer,sizeof(buffer),"%s\n击退系数:%f",map.name,map.knockback);
+	menu.SetTitle(buffer);
+	menu.AddItem(map.name,"+0.1");
+	menu.AddItem(map.name,"+0.5");
+	menu.AddItem(map.name,"+1.0");
+	menu.AddItem(map.name,"-0.1");
+	menu.AddItem(map.name,"-0.5");
+	menu.AddItem(map.name,"-1.0");
+	menu.ExitBackButton = true;
+	menu.Display(client,MENU_TIME_FOREVER);
+}
+
+int MapKnockbackConfigMenuHandler(Menu menu, MenuAction action, int client, int param)
+{
+	char map_name[PLATFORM_MAX_PATH];
+	Map_Info map;
+	if( action == MenuAction_End )
+	{
+		menu.Close();
+	}
+	else if (action == MenuAction_Select)
+	{
+		menu.GetItem(param,map_name,sizeof(map_name));
+		Maps.GetArray(map_name,map,sizeof(map));
+		if(param==0)	map.knockback = fMin(3.0,map.knockback+0.1);
+		if(param==1)	map.knockback = fMin(3.0,map.knockback+0.5);
+		if(param==2)	map.knockback = fMin(3.0,map.knockback+1.0);
+		if(param==3)	map.knockback = fMax(0.1,map.knockback-0.1);
+		if(param==4)	map.knockback = fMax(0.1,map.knockback-0.5);
+		if(param==5)	map.knockback = fMax(0.1,map.knockback-1.0);
+		MapCfgUpdate(map);
+		MapKnockbackConfigMenu(client,map);
+	}	
+	else if (param == MenuCancel_ExitBack)
+	{
+		menu.GetItem(0,map_name,sizeof(map_name));
+		Maps.GetArray(map_name,map,sizeof(map));
+		MapAdminConfigMenu(client,map);
 	}
 }

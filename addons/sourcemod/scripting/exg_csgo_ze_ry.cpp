@@ -1,3 +1,4 @@
+bool g_pStore = false;
 #include <clientprefs>
 #include <cstrike>
 #include <sdktools>
@@ -13,10 +14,8 @@
 #include <leader>
 #include <mostactive>
 #include <sourcecomms>
-
 #pragma semicolon 1
 #pragma newdecls required
-
 #include "zescape/basic_func.h"
 #include "zescape/event.h"
 #include "zescape/db.h"
@@ -33,20 +32,17 @@
 #include "zescape/time.h"
 #include "zescape/mission.h"
 #include "zescape/quest.h"
-
+#include "zescape/hd.h"
 Handle g_Warmup_Timer;
 ConVar g_Cvar_Mp_Warmup_Time;
-bool g_pStore = false;
 
-public Plugin myinfo = 
-{
-	name 		= "EXG_Zombie_Escape_RY",
-	author 		= "Rainsfield & WackoD & nullable",
+public Plugin myinfo = {
+	name = " EXG_Zombie_Escape_RY",
+	author = "Rainsfield&WackoD",
 	description = "EXG ZombieEscape Rainsfield's Branch Plugins",
-	version 	= "1.0",
-	url 		= "https://zegod.cn"
+	version = "1.0",
+	url = "https://zegod.cn"
 };
-
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	CreateNative("RY_MapProperty_BanHumanSkills",Native_RY_MapProperty_BanHumanSkills);
@@ -55,6 +51,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CreateNative("RY_MapProperty_NoBhopLimit",Native_RY_MapProperty_NoBhopLimit);
 	CreateNative("RY_Mission_GetClientMissionLevel",Native_RY_GetClientMissionLevel);
 	CreateNative("RY_Mission_GiveClientExp",Native_RY_GiveClientMissionExp);
+	CreateNative("RY_Map_GetMapInfo",Native_RY_Map_GetMapInfo);
+	CreateNative("RY_Map_GetCurrentMapInfo",Native_RY_Map_GetCurrentMapInfo);
 //	CreateNative("RY_Map_GetMapDataByMapName",Native_Map_GetMapDataByMapName);
 //	CreateNative("RY_MapProperty_GetMapPushBackFactor");	
 
@@ -64,11 +62,10 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	MarkNativeAsOptional("Store_GiveItem");
 	MarkNativeAsOptional("Store_HasClientItem");
 }
-
 public void OnLibraryAdded(const char[] name)
 {
 	// Validate library
-	if (StrContains(sLibrary, "store", false) != -1)
+	if (StrContains(name, "store", false) != -1)
 	{
 		g_pStore = (GetFeatureStatus(FeatureType_Native, "Store_GetClientCredits") == FeatureStatus_Available);
 	}
@@ -77,7 +74,7 @@ public void OnLibraryAdded(const char[] name)
 public void OnLibraryRemoved(const char[] name)
 {
 	// Validate library
-	if (StrContains(sLibrary, "store", false) != -1)
+	if (StrContains(name, "store", false) != -1)
 	{
 		g_pStore = (GetFeatureStatus(FeatureType_Native, "Store_GetClientCredits") == FeatureStatus_Available);
 	}
@@ -100,6 +97,7 @@ public void OnPluginStart()
 	TimeOnPluginStart();
 	MissionOnPluginStart();
 	QuestOnPluginStart();
+	HdOnPluginStart();
 }
 
 public void OnMapStart() 
@@ -111,6 +109,7 @@ public void OnMapStart()
 	WarmUpTimerBuild();
 	NominateOnMapStart();
 	QuestOnMapStart();
+	HdOnMapStart();
 	//RoundOnMapStart();
 	if(!isDbConnected())	return;			//未连接，return，通过Db连接函数的函数执行Post，已连接则通直接Post使得换图后重载各插件数据
 	PrintToServer("DbOnDbConnected_MapStartPost");
@@ -135,7 +134,7 @@ Action OnWarmUpEnd(Handle timer)
 }
 public void OnPluginEnd() 
 {
-	Db_Close();
+    Db_Close();
 }
 public void OnMapEnd() 
 {

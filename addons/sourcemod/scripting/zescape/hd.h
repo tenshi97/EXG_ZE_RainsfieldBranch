@@ -290,10 +290,10 @@ void HdOnRoundEnd(int winner)
 	{
 		if(passbonus_status)
 		{
-			/*if(GetClientCount(true)<30)
+			if(GetClientCount(true)<30)
 			{
 				PrintToChatAll(" \x05[活动系统}人数不足30，无法完成!");
-			}*/
+			}
 			if(passbonus_type)
 			{
 				PrintToChatAll(" \x05[活动系统]\x01地图伐木活动完成");
@@ -449,3 +449,4 @@ int RandomDropMenuHandler(Menu menu, MenuAction action, int client, int param)
 	}
 	else if (param == MenuCancel_ExitBack) 	CreateHdConfigMenu(client);		
 }
+

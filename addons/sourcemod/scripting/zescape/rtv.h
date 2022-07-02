@@ -677,9 +677,12 @@ void ClearNomMapList()
 					int nominator_credits = Store_GetClientCredits(j);
 					int credits_return = RoundToFloor(mapv.nom_cost * 0.75);
 					Store_SetClientCredits(j,nominator_credits+credits_return);
+					PrintToChatAll(" \x05[EMC] \x09%s \x01预定的 \x07%s \x01未选上，\x07%d \x01积分已退还",mapv.nominator_name,mapv.name,credits_return);	 				
 				}
-
-				PrintToChatAll(" \x05[EMC] \x09%s \x01预定的 \x07%s \x01未选上，\x07%d \x01积分已退还",mapv.nominator_name,mapv.name,credits_return);	 				
+				else
+				{
+					PrintToChatAll(" \x05[EMC] \x09%s \x01预定的 \x07%s \x01未选上",mapv.nominator_name,mapv.name);	 				
+				}
 			}
 		}
 	}

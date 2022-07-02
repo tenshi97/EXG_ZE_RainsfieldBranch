@@ -40,6 +40,7 @@ void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 {
 	PrintToServer("[RoundStart]");
 	RTVOnRoundStart();
+	MapInfoOnRoundStart();
 }
 void OnRoundEnd(Event event, const char[] name, bool dontBroadcast) 
 {

@@ -91,7 +91,7 @@ int QuestMenuHandler(Menu menu, MenuAction action, int client, int param)
 void DailyQuestMenu(int client)
 {
 	Menu menu = CreateMenu(DailyQuestMenuHandler);
-	menu.SetTitle("每日任务\n%s", (g_pStore) ? "完成后请点击任务领取积分奖励" : "未检测到商店插件, 禁用完成功能";
+	menu.SetTitle("每日任务\n%s", (g_pStore) ? "完成后请点击任务领取积分奖励" : "未检测到商店插件, 禁用完成功能");
 	char buffer[256];
 	char questid[64];
 	QUEST quest;

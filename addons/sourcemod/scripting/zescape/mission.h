@@ -17,6 +17,8 @@ enum struct TASK
 	int period;
 	char name[64];
 	TASK_TYPE type;
+	int difficulty;	//PASS
+	int tag;	//PASS
 }
 enum struct Missions
 {
@@ -43,7 +45,7 @@ enum struct PlayerMissionInfo
 	int loaded;	//temp
 	int sp[5];
 	int vip;
-	int bonus;
+	int emoney;
 	int nt[2]; //WIP
 }
 ArrayList Current_Mission_Tasklist;
@@ -55,9 +57,9 @@ void MissionOnPluginStart()
 {
 	g_ValidMission_Exist = false;
 	Current_Mission.id = 0;
-	RegConsoleCmd("sm_mission",MissionMenuCommand);
-	RegConsoleCmd("sm_ms",MissionMenuCommand);
-	RegConsoleCmd("sm_dxd",MissionMenuCommand);	//Just For Fun!
+	RegAdminCmd("sm_mission",MissionMenuCommand,ADMFLAG_GENERIC);
+	RegAdminCmd("sm_ms",MissionMenuCommand,ADMFLAG_GENERIC);
+	RegAdminCmd("sm_dxd",MissionMenuCommand,ADMFLAG_GENERIC);	//Just For Fun!
 	if(!isDbConnected())	return;			//未连接，return，通过Db连接函数的函数执行Post，已连接则通直接Post使得换图后重载各插件数据
 	CheckValidMission();
 	ReloadAllPlayerMissionInfo();
@@ -180,31 +182,35 @@ void LoadPlayerMissionInfoCallBack(Handle owner, Handle hndl, char[] error, any 
 		playermission_list[client].taskstage[5]=DbFetchInt(hndl,"DT6ST");
 		playermission_list[client].taskstage[6]=DbFetchInt(hndl,"DT7ST");
 		playermission_list[client].taskstage[7]=DbFetchInt(hndl,"DT8ST");
-		playermission_list[client].taskstage[8]=DbFetchInt(hndl,"WT1ST");
-		playermission_list[client].taskstage[9]=DbFetchInt(hndl,"WT2ST");
-		playermission_list[client].taskstage[10]=DbFetchInt(hndl,"WT3ST");
-		playermission_list[client].taskstage[11]=DbFetchInt(hndl,"WT4ST");
-		playermission_list[client].taskstage[12]=DbFetchInt(hndl,"WT5ST");
-		playermission_list[client].taskdata[0]=DbFetchInt(hndl,"DINFECT");  //complete
-		playermission_list[client].taskdata[1]=DbFetchInt(hndl,"DKILLZM");  //complete
-		playermission_list[client].taskdata[2]=DbFetchInt(hndl,"DDMGTAKE");	//complete
-		playermission_list[client].taskdata[3]=DbFetchInt(hndl,"DDMGMAKE");	//complete
+		playermission_list[client].taskstage[8]=DbFetchInt(hndl,"DT9ST");
+		playermission_list[client].taskstage[9]=DbFetchInt(hndl,"WT1ST");
+		playermission_list[client].taskstage[10]=DbFetchInt(hndl,"WT2ST");
+		playermission_list[client].taskstage[11]=DbFetchInt(hndl,"WT3ST");
+		playermission_list[client].taskstage[12]=DbFetchInt(hndl,"WT4ST");
+		playermission_list[client].taskstage[13]=DbFetchInt(hndl,"WT5ST");
+		playermission_list[client].taskstage[14]=DbFetchInt(hndl,"WT6ST");
+		playermission_list[client].taskdata[0]=DbFetchInt(hndl,"DINFECT");  
+		playermission_list[client].taskdata[1]=DbFetchInt(hndl,"DKILLZM");  
+		playermission_list[client].taskdata[2]=DbFetchInt(hndl,"DDMGTAKE");	
+		playermission_list[client].taskdata[3]=DbFetchInt(hndl,"DDMGMAKE");	
 		playermission_list[client].taskdata[4]=DbFetchInt(hndl,"DONLINE");	
-		playermission_list[client].taskdata[5]=DbFetchInt(hndl,"DPASS");	//complete
-		playermission_list[client].taskdata[6]=DbFetchInt(hndl,"DLEAD");	//complete
-		playermission_list[client].taskdata[7]=DbFetchInt(hndl,"DNADE");	
-		playermission_list[client].taskdata[8]=DbFetchInt(hndl,"WINFECT");	//complete
-		playermission_list[client].taskdata[9]=DbFetchInt(hndl,"WKILLZM");	//complete
-		playermission_list[client].taskdata[10]=DbFetchInt(hndl,"WDMGTAKE");	//complete
-		playermission_list[client].taskdata[11]=DbFetchInt(hndl,"WDMGMAKE");	//complete
-		playermission_list[client].taskdata[12]=DbFetchInt(hndl,"WNADE");	
+		playermission_list[client].taskdata[5]=DbFetchInt(hndl,"DPASS");	
+		playermission_list[client].taskdata[6]=DbFetchInt(hndl,"DPASS2");	
+		playermission_list[client].taskdata[7]=DbFetchInt(hndl,"DPASS3");	
+		playermission_list[client].taskdata[8]=DbFetchInt(hndl,"DNADE");	
+		playermission_list[client].taskdata[9]=DbFetchInt(hndl,"WINFECT");	
+		playermission_list[client].taskdata[10]=DbFetchInt(hndl,"WKILLZM");	
+		playermission_list[client].taskdata[11]=DbFetchInt(hndl,"WDMGTAKE");	
+		playermission_list[client].taskdata[12]=DbFetchInt(hndl,"WDMGMAKE");	
+		playermission_list[client].taskdata[13]=DbFetchInt(hndl,"WNADE");	
+		playermission_list[client].taskdata[14]=DbFetchInt(hndl,"WPASS");	
+		playermission_list[client].emoney = DbFetchInt(hndl,"EMONEY");
 		playermission_list[client].sp[0]=DbFetchInt(hndl,"SP1");
 		playermission_list[client].sp[1]=DbFetchInt(hndl,"SP2");
 		playermission_list[client].sp[2]=DbFetchInt(hndl,"SP3");
 		playermission_list[client].sp[3]=DbFetchInt(hndl,"SP4");
 		playermission_list[client].sp[4]=DbFetchInt(hndl,"SP5");
 		playermission_list[client].vip = DbFetchInt(hndl,"VIP");
-		playermission_list[client].bonus=DbFetchInt(hndl,"BONUS");
 		if(playermission_list[client].dataupdate_time<Current_Mission.daily_timestamp)
 		{
 			PlayerMissionDailyUpdate(client);
@@ -243,11 +249,11 @@ void ClearPlayerMissionInfo(int weekly=0)
 	if(weekly)
 	{
 		PrintToChatAll(" \x05[任务系统]清空大行动每周任务数据....");
-		Format(query,sizeof(query),"UPDATE %s SET WINFECT = 0,WKILLZM = 0,WDMGMAKE = 0,WDMGTAKE = 0,WNADE = 0,WT1ST = 0,WT2ST = 0,WT3ST =0,WT4ST = 0,WT5ST =0",Current_Mission.playerdbname);
+		Format(query,sizeof(query),"UPDATE %s SET WINFECT = 0,WKILLZM = 0,WDMGMAKE = 0,WDMGTAKE = 0,WNADE = 0,WPASS = 0,WT1ST = 0,WT2ST = 0,WT3ST =0,WT4ST = 0,WT5ST =0,WT6ST = 0",Current_Mission.playerdbname);
 		DbTQuery(DbQueryErrorCallback,query);
 	}
 	PrintToChatAll(" \x05[任务系统]清空大行动每日任务数据....");
-	Format(query,sizeof(query),"UPDATE %s SET DINFECT = 0, DKILLZM = 0, DDMGTAKE=0, DDMGMAKE=0, DPASS=0, DLEAD=0, DNADE=0, DT1ST=0, DT2ST=0, DT3ST=0, DT4ST=0, DT5ST=0, DT6ST=0, DT7ST=0, DT8ST=0",Current_Mission.playerdbname);
+	Format(query,sizeof(query),"UPDATE %s SET DINFECT = 0, DKILLZM = 0, DDMGTAKE=0, DDMGMAKE=0, DONLINE=0, DPASS=0, DPASS2=0, DPASS3=0, DNADE=0, DT1ST=0, DT2ST=0, DT3ST=0, DT4ST=0, DT5ST=0, DT6ST=0, DT7ST=0, DT8ST=0, DT9ST=0",Current_Mission.playerdbname);
 	DbTQuery(DbClearPlayerMissionInfoCallback,query);
 }
 
@@ -281,7 +287,7 @@ void UpdatePlayerMissionInfo(int client)
 	}
 	int current_time = GetTime();
 	PrintToServer("[任务系统][UID:%d]保存玩家%d数据",uid,client);
-	Format(query,sizeof(query),"UPDATE %s SET LVL = %d, EXP = %d, DINFECT = %d,DKILLZM = %d,DDMGTAKE = %d,DDMGMAKE = %d,DONLINE = %d, DPASS = %d, DLEAD = %d, DNADE = %d, WINFECT = %d, WKILLZM = %d, WDMGTAKE = %d, WDMGMAKE = %d, WNADE = %d, DT1ST = %d, DT2ST = %d, DT3ST = %d, DT4ST = %d, DT5ST =%d, DT6ST = %d, DT7ST = %d, DT8ST = %d, WT1ST = %d, WT2ST = %d, WT3ST = %d, WT4ST = %d, WT5ST = %d, TIMESTAMP = %d, SP1 = %d, SP2 = %d, SP3 = %d, SP4 = %d, SP5 = %d, VIP = %d, BONUS = %d WHERE UID = %d",Current_Mission.playerdbname,lvl,exp,taskdata[0],taskdata[1],taskdata[2],taskdata[3],taskdata[4],taskdata[5],taskdata[6],taskdata[7],taskdata[8],taskdata[9],taskdata[10],taskdata[11],taskdata[12],taskstage[0],taskstage[1],taskstage[2],taskstage[3],taskstage[4],taskstage[5],taskstage[6],taskstage[7],taskstage[8],taskstage[9],taskstage[10],taskstage[11],taskstage[12],current_time,sp1,sp2,sp3,sp4,sp5,playermission_list[client].vip,playermission_list[client].bonus,uid);
+	Format(query,sizeof(query),"UPDATE %s SET LVL = %d, EXP = %d, DINFECT = %d,DKILLZM = %d,DDMGTAKE = %d,DDMGMAKE = %d,DONLINE = %d, DPASS = %d, DPASS2 = %d, DPASS3 = %d, DNADE = %d, WINFECT = %d, WKILLZM = %d, WDMGTAKE = %d, WDMGMAKE = %d, WNADE = %d, WPASS = %d, DT1ST = %d, DT2ST = %d, DT3ST = %d, DT4ST = %d, DT5ST =%d, DT6ST = %d, DT7ST = %d, DT8ST = %d, DT9ST = %d, WT1ST = %d, WT2ST = %d, WT3ST = %d, WT4ST = %d, WT5ST = %d, WT6ST = %d, TIMESTAMP = %d, SP1 = %d, SP2 = %d, SP3 = %d, SP4 = %d, SP5 = %d, VIP = %d, EMONEY = %d WHERE UID = %d",Current_Mission.playerdbname,lvl,exp,taskdata[0],taskdata[1],taskdata[2],taskdata[3],taskdata[4],taskdata[5],taskdata[6],taskdata[7],taskdata[8],taskdata[9],taskdata[10],taskdata[11],taskdata[12],taskdata[13],taskdata[14],taskstage[0],taskstage[1],taskstage[2],taskstage[3],taskstage[4],taskstage[5],taskstage[6],taskstage[7],taskstage[8],taskstage[9],taskstage[10],taskstage[11],taskstage[12],taskstage[13],taskstage[14],current_time,sp1,sp2,sp3,sp4,sp5,playermission_list[client].vip,playermission_list[client].emoney,uid);
 	DbTQuery(DbQueryErrorCallback,query);
 }
 void MissionOnClientConnected(int client)
@@ -305,18 +311,23 @@ void MissionOnRoundEnd(int winner)
 		{
 			if(!IsFakeClient(i))
 			{
-				if(winner==3&&IsPlayerAlive(i)&&ZR_IsClientHuman(i)&&player_num>=10)
+				if(winner==3&&IsPlayerAlive(i)&&ZR_IsClientHuman(i)&&player_num>=1)
 				{
 					if(playermission_list[i].taskdata[5]<=10000)
 					{
 						playermission_list[i].taskdata[5]++;
 					}
-				}
-				if(winner==3&&i==Leader_CurrentLeader()&&player_num>=10)
-				{
-					if(playermission_list[i].taskdata[6]<=10000)
+					if(playermission_list[i].taskdata[6]<=10000&&Pmap.difficulty>=2)
 					{
 						playermission_list[i].taskdata[6]++;
+					}
+					if(playermission_list[i].taskdata[7]<=10000&&Pmap.tag&label_code[3])
+					{
+						playermission_list[i].taskdata[7]++;
+					}
+					if(playermission_list[i].taskdata[14]<=10000&&Pmap.tag&label_code[10])
+					{
+						playermission_list[i].taskdata[14]++;
 					}
 				}
 				UpdatePlayerMissionInfo(i);
@@ -350,58 +361,58 @@ void CheckValidMission()
 }
 void MissionHumanDmgCount(int attacker,int victim,int dmg)
 {
-	if(GetClientCount(true)<10)	return;
+	if(GetClientCount(true)<1)	return;
 	if(playermission_list[attacker].taskdata[3]<=10000000)
 	{
 		playermission_list[attacker].taskdata[3]+=dmg;
 	}
-	if(playermission_list[attacker].taskdata[11]<=10000000)
+	if(playermission_list[attacker].taskdata[12]<=10000000)
 	{
-		playermission_list[attacker].taskdata[11]+=dmg;
+		playermission_list[attacker].taskdata[12]+=dmg;
 	}
 	if(playermission_list[victim].taskdata[2]<=10000000)
 	{
 		playermission_list[victim].taskdata[2]+=dmg;
 	}
-	if(playermission_list[victim].taskdata[10]<=10000000)
+	if(playermission_list[victim].taskdata[11]<=10000000)
 	{
-		playermission_list[victim].taskdata[10]+=dmg;
+		playermission_list[victim].taskdata[11]+=dmg;
 	}
 }
 void MissionHumanKillZombie(int attacker)
 {
-	if(GetClientCount(true)<10)	return;
+	if(GetClientCount(true)<1)	return;
 	if(playermission_list[attacker].taskdata[1]<=1000)
 	{
 		playermission_list[attacker].taskdata[1]++;
+	}
+	if(playermission_list[attacker].taskdata[10]<=1000)
+	{
+		playermission_list[attacker].taskdata[10]++;
+	}
+}
+void MissionZombieInfectHuman(int attacker)
+{
+	if(GetClientCount(true)<1)	return;
+	if(playermission_list[attacker].taskdata[0]<=1000)
+	{
+		playermission_list[attacker].taskdata[0]++;
 	}
 	if(playermission_list[attacker].taskdata[9]<=1000)
 	{
 		playermission_list[attacker].taskdata[9]++;
 	}
 }
-void MissionZombieInfectHuman(int attacker)
-{
-	if(GetClientCount(true)<10)	return;
-	if(playermission_list[attacker].taskdata[0]<=1000)
-	{
-		playermission_list[attacker].taskdata[0]++;
-	}
-	if(playermission_list[attacker].taskdata[8]<=1000)
-	{
-		playermission_list[attacker].taskdata[8]++;
-	}
-}
 void MissionHumanNadeCount(int client)
 {
-	if(GetClientCount(true)<=10)	return;
-	if(playermission_list[client].taskdata[7]<=1000)
+	if(GetClientCount(true)<1)	return;
+	if(playermission_list[client].taskdata[8]<=1000)
 	{
-		playermission_list[client].taskdata[7]++;
+		playermission_list[client].taskdata[8]++;
 	}
-	if(playermission_list[client].taskdata[12]<=1000)
+	if(playermission_list[client].taskdata[13]<=1000)
 	{
-		playermission_list[client].taskdata[12]++;
+		playermission_list[client].taskdata[13]++;
 	}
 }
 void CheckValidMissionCallBack(Handle owner, Handle hndl, char[] error, any data)
@@ -436,6 +447,7 @@ void CheckValidMissionCallBack(Handle owner, Handle hndl, char[] error, any data
 
 void TEMP_OpHR_TasklistSet()
 {
+	char buffer[256];
 	TASK task;
 	task.stage = 3;
 	task.num[0] = 5;task.num[1] = 10;task.num[2] = 20;
@@ -486,11 +498,24 @@ void TEMP_OpHR_TasklistSet()
 	Current_Mission_Tasklist.PushArray(task);	
 
 	task.stage = 3;
-	task.num[0] = 1;task.num[1] = 3;task.num[2] = 5;
-	task.exp_base = 80;
+	task.num[0] = 1;task.num[1] = 2;task.num[2] = 3;
+	task.exp_base = 100;
 	task.period = 1;
-	task.type = HM_LEAD;
-	task.name = "[人类]指挥通关:";
+	task.type = HM_PASS;
+	task.difficulty = 2;
+	task.tag = -1;
+	task.name = "[人类]通关[困难]以上地图";
+	Current_Mission_Tasklist.PushArray(task);
+
+	task.stage = 3;
+	task.num[0] = 1;task.num[1] = 3;task.num[2] = 5;
+	task.exp_base = 100;
+	task.period = 1;
+	task.type = HM_PASS;
+	task.tag = 3;
+	Format(buffer,sizeof(buffer),"[人类]通关[%s]地图",label_name[task.tag]);
+	task.difficulty = -1;
+	strcopy(task.name,sizeof(task.name),buffer);
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 3;
@@ -503,7 +528,7 @@ void TEMP_OpHR_TasklistSet()
 
 	task.stage = 1;
 	task.num[0] = 120;
-	task.exp_base = 1500;
+	task.exp_base = 2000;
 	task.period = 7;
 	task.type = ZM_INFECT;
 	task.name = "[僵尸]感染人类:";
@@ -511,7 +536,7 @@ void TEMP_OpHR_TasklistSet()
 
 	task.stage = 1;
 	task.num[0] = 50;
-	task.exp_base = 1500;
+	task.exp_base = 2000;
 	task.period = 7;
 	task.type = HM_KILLZM;
 	task.name = "[人类]击杀僵尸:";
@@ -519,7 +544,7 @@ void TEMP_OpHR_TasklistSet()
 
 	task.stage = 1;
 	task.num[0] = 250;
-	task.exp_base = 3000;
+	task.exp_base = 2000;
 	task.period = 7;
 	task.type = ZM_DMGTAKE;
 	task.name = "[僵尸]承受伤害:";
@@ -527,7 +552,7 @@ void TEMP_OpHR_TasklistSet()
 
 	task.stage = 1;
 	task.num[0] = 180;
-	task.exp_base = 3000;
+	task.exp_base = 2000;
 	task.period = 7;
 	task.type = HM_DMGMAKE;
 	task.name = "[人类]造成伤害:";
@@ -535,10 +560,20 @@ void TEMP_OpHR_TasklistSet()
 
 	task.stage = 1;
 	task.num[0] = 300;
-	task.exp_base = 1500;
+	task.exp_base = 2000;
 	task.period = 7;
 	task.type = HM_NADE;
 	task.name = "[人类]投掷手雷:";
+	Current_Mission_Tasklist.PushArray(task);
+
+	task.stage = 1;
+	task.num[0] = 20;
+	task.exp_base = 2000;
+	task.period = 7;
+	task.type = HM_PASS;
+	task.difficulty = -1;
+	task.tag = 10;
+	task.name = "[人类]通关[活动]地图:";
 	Current_Mission_Tasklist.PushArray(task);
 }
 
@@ -674,6 +709,8 @@ int DailyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 			{
 				playermission_list[client].taskstage[taskid]++;
 				GrantExp(client,task.exp_base*(playermission_list[client].taskstage[taskid]));
+				playermission_list[client].emoney+=1;
+				PrintToChat(client," \x05[任务系统]\x01完成日常任务，获得1碎片");
 			}
 			else
 			{
@@ -688,6 +725,8 @@ int DailyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 				{
 					playermission_list[client].taskstage[taskid]++;
 					GrantExp(client,task.exp_base*(playermission_list[client].taskstage[taskid]));
+					playermission_list[client].emoney+=1;
+					PrintToChat(client," \x05[任务系统]\x01完成日常任务，获得1碎片");
 				}
 				else
 				{
@@ -700,6 +739,8 @@ int DailyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 				{
 					playermission_list[client].taskstage[taskid]++;
 					GrantExp(client,task.exp_base*(playermission_list[client].taskstage[taskid]));
+					playermission_list[client].emoney+=1;
+					PrintToChat(client," \x05[任务系统]\x01完成日常任务，获得1碎片");
 				}
 				else
 				{
@@ -773,6 +814,8 @@ int WeeklyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 			{
 				playermission_list[client].taskstage[taskid]++;
 				GrantExp(client,task.exp_base*(playermission_list[client].taskstage[taskid]));
+				playermission_list[client].emoney+=5;
+				PrintToChat(client," \x05[任务系统]\x01完成周常任务，获得5碎片");
 			}
 			else
 			{
@@ -785,6 +828,8 @@ int WeeklyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 			{
 				playermission_list[client].taskstage[taskid]++;
 				GrantExp(client,task.exp_base*(playermission_list[client].taskstage[taskid]));
+				playermission_list[client].emoney+=5;
+				PrintToChat(client," \x05[任务系统]\x01完成周常任务，获得5碎片");
 			}
 			else
 			{
@@ -828,11 +873,11 @@ void AwardMenu(int client)
 {
 	Menu menu = CreateMenu(AwardMenuHandle);
 	menu.SetTitle("特典奖励领取\n点击对应选项领取奖励");
-	menu.AddItem("uid_wepskin_cso2axe","近战武器-极寒咆哮[LV20]");
-	menu.AddItem("uid_model_xinhai","人物模型-心海[LV40]");
-	menu.AddItem("uid_wepskin_dualg18","双枪-双持格洛克[LV60]");
-	menu.AddItem("uid_wepskin_carbizon","野牛-CAR 斯卡蒂[LV80]");
-	menu.AddItem("uid_model_lemalin","人物模型-恶毒[LV100]");
+	menu.AddItem("uid_lootbox_freecase1","活动箱子+5000积分[LV20]");
+	menu.AddItem("uid_wepskin_aquatmp","TMP-海洋之心[LV40]");
+	menu.AddItem("uid_wepskin_waterknifered","海豹短刀-浮翠流丹[LV60]");
+	menu.AddItem("uid_wepskin_apexbs","小帮手[LV80]");
+	menu.AddItem("uid_model_kokuriruru","人物模型-狐九里露露[LV100]");
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }
@@ -849,6 +894,7 @@ int AwardMenuHandle(Menu menu, MenuAction action, int client, int param)
 	}
 	else if(action == MenuAction_Select)
 	{
+		int client_credits = Store_GetClientCredits(client);
 		menu.GetItem(param,item,sizeof(item));
 		if(playermission_list[client].sp[param])
 		{
@@ -863,7 +909,7 @@ int AwardMenuHandle(Menu menu, MenuAction action, int client, int param)
 		item_id = Store_GetItemIdbyUniqueId(item);
 		if(item_id!=-1)
 		{
-			if(param==1||param==4)
+			if(param==4)
 			{
 				Store_GiveItem(client,item_id,0,0,0);
 				playermission_list[client].sp[param]=1;
@@ -871,10 +917,27 @@ int AwardMenuHandle(Menu menu, MenuAction action, int client, int param)
 			}
 			else
 			{
-				expdate = current_time+180*86400;
-				Store_GiveItem(client,item_id,0,expdate,0);
-				playermission_list[client].sp[param]=1;
-				UpdatePlayerMissionInfo(client);
+				if(param==0)
+				{
+					if(!Store_HasClientItem(client,item_id))
+					{
+						Store_SetClientCredits(client,client_credits+5000);
+						Store_GiveItem(client,item_id,0,expdate,0);		
+						playermission_list[client].sp[param]=1;
+						UpdatePlayerMissionInfo(client);
+					}
+					else
+					{
+						PrintToChat(client," \x05[任务系统]\x01请打开你已有的活动箱子再领取!");
+					}
+				}	
+				else
+				{
+					expdate = current_time+180*86400;
+					Store_GiveItem(client,item_id,0,expdate,0);
+					playermission_list[client].sp[param]=1;
+					UpdatePlayerMissionInfo(client);
+				}
 			}
 		}	
 	}		
@@ -918,13 +981,9 @@ void SecretShopMenu(int client)
 	if(client<=0||client>=65)	return;
 	Menu menu = CreateMenu(SecretShopHandler);
 	int credits = Store_GetClientCredits(client);
-	int bonus_available = playermission_list[client].bonus;
-	menu.SetTitle("神秘商店\n您当前积分为:%d",credits);
-	menu.AddItem("","购买1大行动等级(2500积分)",credits>=2500?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
-	menu.AddItem("","购买10大行动等级(23000积分)",credits>=23000?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
-	menu.AddItem("","奖励包-购买10大行动等级(10000积分)\n限购一次",(credits>=10000&&bonus_available==0)?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
-	menu.AddItem("uid_nametag_s1half","初级赛季称号[LV50]");
-	menu.AddItem("uid_nametag_s1max","高级赛季称号[LV100]");
+	menu.SetTitle("神秘商店\n您当前积分为:%d\n您当前持有的碎片为:%d",credits,playermission_list[client].emoney);
+	menu.AddItem("","购买1大行动等级(2500积分)",credits>=3000?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("","购买10大行动等级(23000积分)",credits>=25000?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }
@@ -933,8 +992,6 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 {
 	if(client<=0||client>=65) return;
 	int credits = Store_GetClientCredits(client);
-	int titleid;
-	char item[256];
 	if(!playermission_list[client].loaded)
 	{
 		PrintToChat(client," \x05[任务系统]数据未载入，无法购买(请等待下一回合或换图)");
@@ -948,62 +1005,28 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 	{
 		if(param == 0)
 		{
-			if(credits>=2500&&playermission_list[client].lvl<100)
+			if(credits>=3000&&playermission_list[client].lvl<100)
 			{
 				GrantExp(client,1000);	
-				Store_SetClientCredits(client,credits-2500);
+				Store_SetClientCredits(client,credits-3000);
 				PrintToChat(client," \x05[任务系统]消费积分购买了1大行动等级");
 			}
 			else
 			{
 				PrintToChat(client," \x05[任务系统]你的积分不足或你已满级!");
 			}
-	}
+		}
 		else if(param == 1)
 		{
-			if(credits>=23000&&playermission_list[client].lvl<100)
+			if(credits>=25000&&playermission_list[client].lvl<100)
 			{
 				GrantExp(client,10000);	
-				Store_SetClientCredits(client,credits-23000);
+				Store_SetClientCredits(client,credits-25000);
 				PrintToChat(client," \x05[任务系统]消费积分购买了10大行动等级");
 			}
 			else
 			{
 				PrintToChat(client," \x05[任务系统]你的积分不足或你已满级!");
-			}
-		}
-		else if(param == 2)
-		{
-			if(credits>=10000&&playermission_list[client].lvl<100&&playermission_list[client].bonus==0)
-			{
-				playermission_list[client].bonus = 1;
-				GrantExp(client,10000);
-				PrintToChat(client," \x05[任务系统]消费积分购买了10大行动等级");
-				Store_SetClientCredits(client,credits-10000);
-			}
-			else
-			{
-				PrintToChat(client," \x05[任务系统]你的积分不足或你已满级!");				
-			}
-		}
-		else if(param == 3|| param==4)
-		{
-			if(playermission_list[client].lvl<(param*50-100))
-			{
-				PrintToChat(client," \x05[任务系统]\x01您当前等级不足，无法领取");
-			}
-			else
-			{
-				menu.GetItem(param,item,sizeof(item));
-				titleid = Store_GetItemIdbyUniqueId(item);
-				if(Store_HasClientItem(client,titleid))
-				{
-					PrintToChat(client," \x05[任务系统]\x01您已领取过该称号");
-				}
-				else
-				{
-					Store_GiveItem(client,titleid,0,0,1);
-				}
 			}
 		}
 		SecretShopMenu(client);
