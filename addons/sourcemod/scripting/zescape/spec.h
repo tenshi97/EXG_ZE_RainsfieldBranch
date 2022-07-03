@@ -48,12 +48,12 @@ Action SpecCommand(int client,int args)
 			{
 				ChangeClientTeam(client, 1);
 				ForcePlayerSuicide(client);
-
+			}
 				DataPack dp = new DataPack();
 				dp.WriteCell(target);
 				dp.WriteCell(target);
 				RequestFrame(RFC_SetObsTarget, dp);
-			}
+			
 		}
 	}
 	return Plugin_Handled;
