@@ -9,12 +9,12 @@ void VoiceChatOnPluginStart()
 void VoiceChatOnClientConnected(int client)
 {
 	SetClientListeningFlags(client,VOICE_SPEAKALL);
-	CreateTimer(30.0,MuteCheck,client,TIMER_FLAG_NO_MAPCHANGE);
+	CreateTimer(10.0,MuteCheck,client,TIMER_FLAG_NO_MAPCHANGE);
 
 }
 Action MuteCheck(Handle timer,int client)
 {
-	if(SourceComms_GetClientMuteType(client))
+	if(IsClientInGame(client) && SourceComms_GetClientMuteType(client))
 	{
 		PrintToChat(client," \x05[语音管理]\x01您当前处于被禁麦状态");
 		SetClientListeningFlags(client,VOICE_MUTED);
