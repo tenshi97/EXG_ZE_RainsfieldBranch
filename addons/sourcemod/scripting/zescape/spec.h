@@ -65,6 +65,6 @@ public void RFC_SetObsTarget(DataPack dp)
 	int client = dp.ReadCell();
 	int target = dp.ReadCell();
 
-	SetEntPropEnt(client, Prop_Data, "m_hObserverTarget", target);
+	SetEntPropEnt(client, Prop_Send, "m_hObserverTarget", target); 
 	delete dp;
 }
