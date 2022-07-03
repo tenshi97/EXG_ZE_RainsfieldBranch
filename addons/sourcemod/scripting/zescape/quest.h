@@ -62,7 +62,7 @@ Action QuestCommand(int client,int args)
 	menu.SetTitle("任务系统");
 	menu.AddItem("","每日任务");
 	menu.AddItem("","每周任务",ITEMDRAW_DISABLED);
-	menu.AddItem("","赛季任务",ITEMDRAW_DISABLED);
+	menu.AddItem("","赛季任务");
 	menu.Display(client, MENU_TIME_FOREVER);
 	return Plugin_Handled;
 }

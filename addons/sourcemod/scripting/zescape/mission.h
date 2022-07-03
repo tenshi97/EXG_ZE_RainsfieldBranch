@@ -872,12 +872,15 @@ void GrantExp(int client,int exp)
 void AwardMenu(int client)
 {
 	Menu menu = CreateMenu(AwardMenuHandle);
-	menu.SetTitle("特典奖励领取\n点击对应选项领取奖励");
-	menu.AddItem("uid_lootbox_freecase1","活动箱子+5000积分[LV20]");
-	menu.AddItem("uid_wepskin_aquatmp","TMP-海洋之心[LV40]");
-	menu.AddItem("uid_wepskin_waterknifered","海豹短刀-浮翠流丹[LV60]");
-	menu.AddItem("uid_wepskin_apexbs","小帮手[LV80]");
-	menu.AddItem("uid_model_kokuriruru","人物模型-狐九里露露[LV100]");
+	int iStyle = (g_pStore) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED;
+	menu.SetTitle("特典奖励领取\n%s", (g_pStore) ? "点击对应选项领取奖励" : "商店插件未加载, 请稍后再试");
+
+	menu.AddItem("uid_lootbox_freecase1","活动箱子+5000积分[LV20]", iStyle);
+	menu.AddItem("uid_wepskin_aquatmp","TMP-海洋之心[LV40]", iStyle);
+	menu.AddItem("uid_wepskin_waterknifered","海豹短刀-浮翠流丹[LV60]", iStyle);
+	menu.AddItem("uid_wepskin_apexbs","小帮手[LV80]", iStyle);
+	menu.AddItem("uid_model_kokuriruru","人物模型-狐九里露露[LV100]", iStyle);
+
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }
@@ -939,7 +942,8 @@ int AwardMenuHandle(Menu menu, MenuAction action, int client, int param)
 					UpdatePlayerMissionInfo(client);
 				}
 			}
-		}	
+		}
+		AwardMenu(client);
 	}		
 	else if (param == MenuCancel_ExitBack) MissionMenuBuild(client);
 }
