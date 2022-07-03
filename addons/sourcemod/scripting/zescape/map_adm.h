@@ -514,6 +514,8 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 		{
 			if(map.zmclass != 0) map.zmclass = 0;
 			else map.zmclass = 1;
+			MapCfgUpdate(map);
+			MapAdminConfigMenu(client,map);
 		}
 	}	
 }

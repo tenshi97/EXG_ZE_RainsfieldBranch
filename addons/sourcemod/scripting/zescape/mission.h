@@ -311,7 +311,7 @@ void MissionOnRoundEnd(int winner)
 		{
 			if(!IsFakeClient(i))
 			{
-				if(winner==3&&IsPlayerAlive(i)&&ZR_IsClientHuman(i)&&player_num>=1)
+				if(winner==3&&IsPlayerAlive(i)&&ZR_IsClientHuman(i)&&player_num>=10)
 				{
 					if(playermission_list[i].taskdata[5]<=10000)
 					{
@@ -361,7 +361,7 @@ void CheckValidMission()
 }
 void MissionHumanDmgCount(int attacker,int victim,int dmg)
 {
-	if(GetClientCount(true)<1)	return;
+	if(GetClientCount(true)<10)	return;
 	if(playermission_list[attacker].taskdata[3]<=10000000)
 	{
 		playermission_list[attacker].taskdata[3]+=dmg;
@@ -381,7 +381,7 @@ void MissionHumanDmgCount(int attacker,int victim,int dmg)
 }
 void MissionHumanKillZombie(int attacker)
 {
-	if(GetClientCount(true)<1)	return;
+	if(GetClientCount(true)<10)	return;
 	if(playermission_list[attacker].taskdata[1]<=1000)
 	{
 		playermission_list[attacker].taskdata[1]++;
@@ -393,7 +393,7 @@ void MissionHumanKillZombie(int attacker)
 }
 void MissionZombieInfectHuman(int attacker)
 {
-	if(GetClientCount(true)<1)	return;
+	if(GetClientCount(true)<10)	return;
 	if(playermission_list[attacker].taskdata[0]<=1000)
 	{
 		playermission_list[attacker].taskdata[0]++;
@@ -405,7 +405,7 @@ void MissionZombieInfectHuman(int attacker)
 }
 void MissionHumanNadeCount(int client)
 {
-	if(GetClientCount(true)<1)	return;
+	if(GetClientCount(true)<10)	return;
 	if(playermission_list[client].taskdata[8]<=1000)
 	{
 		playermission_list[client].taskdata[8]++;
