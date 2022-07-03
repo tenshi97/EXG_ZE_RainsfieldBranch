@@ -61,6 +61,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	MarkNativeAsOptional("Store_GetItemIdbyUniqueId");
 	MarkNativeAsOptional("Store_GiveItem");
 	MarkNativeAsOptional("Store_HasClientItem");
+
+	RegPluginLibrary("exg_csgo_ze_ry");
 }
 public void OnLibraryAdded(const char[] name)
 {
