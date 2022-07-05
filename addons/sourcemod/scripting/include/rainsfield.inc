@@ -71,6 +71,8 @@ native int RY_Mission_GiveClientExp(int client,int exp);
 native int RY_Map_GetMapInfo(char[] map_name,any output[sizeof(Map_Info)]);
 native void RY_Map_GetCurrentMapInfo(any output[sizeof(Map_Info)]);
 
+forward void RY_Map_OnMapConfigLoaded();
+
 forward RY_Daily_TimerCheck_Update(int start_time,int new_time,int days_delta);
 
 forward void EMC_Forward_RTV_StartMapVote();
