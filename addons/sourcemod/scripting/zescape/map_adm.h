@@ -548,7 +548,7 @@ Action MapNamecnCommand(int client,int args)
 	if(!Maps.GetArray(map.name,map,sizeof(map)))	return Plugin_Handled;
 	GetCmdArg(2, map.name_cn, sizeof(map.name_cn));
 	MapCfgUpdate(map);
-	PrintToChatAll(" \x05[地图管理]管理员修改%s的译名为%s",map.name,map.name_cn);
+	PrintToChatAll(" \x05[地图管理] 管理员修改%s的译名为%s",map.name,map.name_cn);
 	return Plugin_Handled;
 }
 
@@ -965,4 +965,21 @@ int MapKnockbackConfigMenuHandler(Menu menu, MenuAction action, int client, int 
 		Maps.GetArray(map_name,map,sizeof(map));
 		MapAdminConfigMenu(client,map);
 	}
+}
+
+char[] MapAdmGetMapTag(Map_Info map)
+{
+	char buffer[64];
+	for(int i=0; i<tag_num ;i++)
+	{
+		if (map.tag & label_code[i])
+		{
+			Format(buffer, sizeof(buffer),"%s[%s]",buffer, label_name[i]);
+		}
+		else
+		{
+			Format(buffer, sizeof(buffer),"[%s]",buffer, label_name[i]);
+		}
+	}
+	return buffer;
 }

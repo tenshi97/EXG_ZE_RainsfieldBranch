@@ -89,10 +89,17 @@ void NominateMapMenu(int client,char trie_search[PLATFORM_MAX_PATH]="")
 	menu.SetTitle("预定地图");
 	for(int i = 0 ; i < Map_List.Length ; i++)
 	{
-		GetArrayArray(Map_List,i,map,sizeof(map));
-		if(strlen(trie_search) && StrContains(map.name,trie_search,false)==-1 && StrContains(map.name_cn,trie_search) == -1)	continue;
+		GetArrayArray(Map_List, i, map, sizeof(map));
+
+		// 有长度 && 地图名不包含 && 中文名不包含 && 标签不包含
+		if(strlen(trie_search) && StrContains(map.name,trie_search,false) == -1 && StrContains(map.name_cn,trie_search) == -1 && StrContains(MapAdmGetMapTag(map), trie_search) == -1)
+			continue;
+		
 		Maps.GetArray(map.name, map_detail, sizeof(map_detail));
-		if(map_detail.vis==0)	continue;
+
+		if (map_detail.vis == 0)
+			continue;
+		
 		menu.AddItem(map.name,map.name);
 	}
 	if(strlen(trie_search))
