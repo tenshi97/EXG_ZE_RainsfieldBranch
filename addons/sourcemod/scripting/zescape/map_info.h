@@ -1,19 +1,25 @@
 //Maps:Global Map StringMap in map_adm.h
 Map_Info Pmap;
 bool Current_Map_Loaded = false;
+
 ConVar Cvar_MP_TIMELIMIT;
 ConVar Cvar_InfectSpawnTimeMax;
 ConVar Cvar_InfectSpawnTimeMin;
 ConVar Cvar_DamageScale_1;
 ConVar Cvar_DamageScale_2;
 ConVar Cvar_Tagging_Scale;
+
 char g_current_nominator_name[PLATFORM_MAX_PATH];
 bool g_current_nominated;
 int g_Map_Interval_Count;
 bool g_Map_PlayerNum_Check=false;
 int g_Map_Round=0;
 bool g_Map_RuntimeUpdate_Checked;
-void MapInfoOnPluginStart(){
+
+GlobalForward hOnMapConfigLoaded;
+
+void MapInfoOnPluginStart()
+{
 	g_Map_Interval_Count = 0;
 	g_Map_PlayerNum_Check = false;
 	RegConsoleCmd("sm_mi", ActionMapInfoMenu);
@@ -27,14 +33,19 @@ void MapInfoOnPluginStart(){
 	Cvar_DamageScale_2 = FindConVar("mp_damage_scale_t_head");
 	g_Map_Round = 0;
 	g_Map_RuntimeUpdate_Checked = false;
+	hOnMapConfigLoaded = new GlobalForward("RY_Map_OnMapConfigLoaded", ET_Ignore);
 }
-void MapInfoOnMapStart(){
+
+void MapInfoOnMapStart()
+{
 	g_Map_Round = 0;
 	g_Map_RuntimeUpdate_Checked = false;
 	Current_Map_Loaded = false;
 	g_current_nominated = GetCurrentMapNominatorName(g_current_nominator_name);
 }
-void MapInfoOnDbConnected_MapStartPost(){
+
+void MapInfoOnDbConnected_MapStartPost()
+{
 	char map_name[64];
 	if(Current_Map_Loaded)	return;
 	GetCurrentMap(map_name,sizeof(map_name));
@@ -73,6 +84,9 @@ void MapInfoOnDbConnected_MapStartPost(){
 		PrintToServer("[地图信息读取失败:地图信息不存在]");		
 		Current_Map_Loaded = false;
 	}
+
+	Call_StartForward(hOnMapConfigLoaded);
+	Call_Finish();
 }
 void Pmap_Reload()
 {
