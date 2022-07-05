@@ -978,7 +978,7 @@ char[] MapAdmGetMapTag(Map_Info map)
 		}
 		else
 		{
-			Format(buffer, sizeof(buffer),"[%s]",buffer, label_name[i]);
+			Format(buffer, sizeof(buffer),"[%s]", label_name[i]);
 		}
 	}
 	return buffer;
