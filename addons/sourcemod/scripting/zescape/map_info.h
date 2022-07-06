@@ -7,7 +7,6 @@ ConVar Cvar_InfectSpawnTimeMax;
 ConVar Cvar_InfectSpawnTimeMin;
 ConVar Cvar_DamageScale_1;
 ConVar Cvar_DamageScale_2;
-ConVar Cvar_Tagging_Scale;
 
 char g_current_nominator_name[PLATFORM_MAX_PATH];
 bool g_current_nominated;
@@ -28,7 +27,6 @@ void MapInfoOnPluginStart()
 	Cvar_MP_TIMELIMIT = FindConVar("mp_timelimit");
 	Cvar_InfectSpawnTimeMin = FindConVar("zr_infect_spawntime_min");
 	Cvar_InfectSpawnTimeMax = FindConVar("zr_infect_spawntime_max");
-	Cvar_Tagging_Scale = FindConVar("mp_tagging_scale");
 	Cvar_DamageScale_1 = FindConVar("mp_damage_scale_t_body");
 	Cvar_DamageScale_2 = FindConVar("mp_damage_scale_t_head");
 	g_Map_Round = 0;
@@ -182,7 +180,6 @@ int MapInfoMenuHandler(Menu menu, MenuAction action, int client, int param) {
 }
 void MapInfoOnRoundStart()
 {
-	Cvar_Tagging_Scale.SetFloat(float(Pmap.tagscale),true,false);
 	Cvar_DamageScale_1.SetFloat(Pmap.dmgscale,true,false);
 	Cvar_DamageScale_2.SetFloat(Pmap.dmgscale,true,false);
 }

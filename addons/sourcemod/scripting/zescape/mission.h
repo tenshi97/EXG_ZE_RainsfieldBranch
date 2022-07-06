@@ -47,6 +47,7 @@ enum struct PlayerMissionInfo
 	int vip;
 	int emoney;
 	int nt[2]; //WIP
+	int challenge[3];
 }
 ArrayList Current_Mission_Tasklist;
 bool g_ValidMission_Exist;
@@ -57,9 +58,9 @@ void MissionOnPluginStart()
 {
 	g_ValidMission_Exist = false;
 	Current_Mission.id = 0;
-	RegAdminCmd("sm_mission",MissionMenuCommand,ADMFLAG_GENERIC);
-	RegAdminCmd("sm_ms",MissionMenuCommand,ADMFLAG_GENERIC);
-	RegAdminCmd("sm_dxd",MissionMenuCommand,ADMFLAG_GENERIC);	//Just For Fun!
+	RegConsoleCmd("sm_mission",MissionMenuCommand);
+	RegConsoleCmd("sm_ms",MissionMenuCommand);
+	RegConsoleCmd("sm_dxd",MissionMenuCommand);	//Just For Fun!
 	if(!isDbConnected())	return;			//未连接，return，通过Db连接函数的函数执行Post，已连接则通直接Post使得换图后重载各插件数据
 	CheckValidMission();
 	ReloadAllPlayerMissionInfo();
@@ -130,6 +131,9 @@ void PlayerMissionWeeklyUpdate(int client)
 		playermission_list[client].taskdata[i]=0;
 		playermission_list[client].taskstage[i]=0;		
 	}
+	playermission_list[client].challenge[0]=0;
+	playermission_list[client].challenge[1]=0;
+	playermission_list[client].challenge[2]=0;
 	playermission_list[client].loaded = 1;
 	UpdatePlayerMissionInfo(client);
 }
@@ -211,6 +215,9 @@ void LoadPlayerMissionInfoCallBack(Handle owner, Handle hndl, char[] error, any 
 		playermission_list[client].sp[3]=DbFetchInt(hndl,"SP4");
 		playermission_list[client].sp[4]=DbFetchInt(hndl,"SP5");
 		playermission_list[client].vip = DbFetchInt(hndl,"VIP");
+		playermission_list[client].challenge[0] = DbFetchInt(hndl,"CH1");
+		playermission_list[client].challenge[1] = DbFetchInt(hndl,"CH2");
+		playermission_list[client].challenge[2] = DbFetchInt(hndl,"CH");
 		if(playermission_list[client].dataupdate_time<Current_Mission.daily_timestamp)
 		{
 			PlayerMissionDailyUpdate(client);
@@ -249,7 +256,7 @@ void ClearPlayerMissionInfo(int weekly=0)
 	if(weekly)
 	{
 		PrintToChatAll(" \x05[任务系统]清空大行动每周任务数据....");
-		Format(query,sizeof(query),"UPDATE %s SET WINFECT = 0,WKILLZM = 0,WDMGMAKE = 0,WDMGTAKE = 0,WNADE = 0,WPASS = 0,WT1ST = 0,WT2ST = 0,WT3ST =0,WT4ST = 0,WT5ST =0,WT6ST = 0",Current_Mission.playerdbname);
+		Format(query,sizeof(query),"UPDATE %s SET WINFECT = 0,WKILLZM = 0,WDMGMAKE = 0,WDMGTAKE = 0,WNADE = 0,WPASS = 0,WT1ST = 0,WT2ST = 0,WT3ST =0,WT4ST = 0,WT5ST =0,WT6ST = 0,CH1 = 0,CH2 = 0,CH = 0",Current_Mission.playerdbname);
 		DbTQuery(DbQueryErrorCallback,query);
 	}
 	PrintToChatAll(" \x05[任务系统]清空大行动每日任务数据....");
@@ -287,7 +294,7 @@ void UpdatePlayerMissionInfo(int client)
 	}
 	int current_time = GetTime();
 	PrintToServer("[任务系统][UID:%d]保存玩家%d数据",uid,client);
-	Format(query,sizeof(query),"UPDATE %s SET LVL = %d, EXP = %d, DINFECT = %d,DKILLZM = %d,DDMGTAKE = %d,DDMGMAKE = %d,DONLINE = %d, DPASS = %d, DPASS2 = %d, DPASS3 = %d, DNADE = %d, WINFECT = %d, WKILLZM = %d, WDMGTAKE = %d, WDMGMAKE = %d, WNADE = %d, WPASS = %d, DT1ST = %d, DT2ST = %d, DT3ST = %d, DT4ST = %d, DT5ST =%d, DT6ST = %d, DT7ST = %d, DT8ST = %d, DT9ST = %d, WT1ST = %d, WT2ST = %d, WT3ST = %d, WT4ST = %d, WT5ST = %d, WT6ST = %d, TIMESTAMP = %d, SP1 = %d, SP2 = %d, SP3 = %d, SP4 = %d, SP5 = %d, VIP = %d, EMONEY = %d WHERE UID = %d",Current_Mission.playerdbname,lvl,exp,taskdata[0],taskdata[1],taskdata[2],taskdata[3],taskdata[4],taskdata[5],taskdata[6],taskdata[7],taskdata[8],taskdata[9],taskdata[10],taskdata[11],taskdata[12],taskdata[13],taskdata[14],taskstage[0],taskstage[1],taskstage[2],taskstage[3],taskstage[4],taskstage[5],taskstage[6],taskstage[7],taskstage[8],taskstage[9],taskstage[10],taskstage[11],taskstage[12],taskstage[13],taskstage[14],current_time,sp1,sp2,sp3,sp4,sp5,playermission_list[client].vip,playermission_list[client].emoney,uid);
+	Format(query,sizeof(query),"UPDATE %s SET LVL = %d, EXP = %d, DINFECT = %d,DKILLZM = %d,DDMGTAKE = %d,DDMGMAKE = %d,DONLINE = %d, DPASS = %d, DPASS2 = %d, DPASS3 = %d, DNADE = %d, WINFECT = %d, WKILLZM = %d, WDMGTAKE = %d, WDMGMAKE = %d, WNADE = %d, WPASS = %d, DT1ST = %d, DT2ST = %d, DT3ST = %d, DT4ST = %d, DT5ST =%d, DT6ST = %d, DT7ST = %d, DT8ST = %d, DT9ST = %d, WT1ST = %d, WT2ST = %d, WT3ST = %d, WT4ST = %d, WT5ST = %d, WT6ST = %d, TIMESTAMP = %d, SP1 = %d, SP2 = %d, SP3 = %d, SP4 = %d, SP5 = %d, VIP = %d, EMONEY = %d, CH1 = %d, CH2 = %d, CH = %d WHERE UID = %d",Current_Mission.playerdbname,lvl,exp,taskdata[0],taskdata[1],taskdata[2],taskdata[3],taskdata[4],taskdata[5],taskdata[6],taskdata[7],taskdata[8],taskdata[9],taskdata[10],taskdata[11],taskdata[12],taskdata[13],taskdata[14],taskstage[0],taskstage[1],taskstage[2],taskstage[3],taskstage[4],taskstage[5],taskstage[6],taskstage[7],taskstage[8],taskstage[9],taskstage[10],taskstage[11],taskstage[12],taskstage[13],taskstage[14],current_time,sp1,sp2,sp3,sp4,sp5,playermission_list[client].vip,playermission_list[client].emoney,playermission_list[client].challenge[0],playermission_list[client].challenge[1],playermission_list[client].challenge[2],uid);
 	DbTQuery(DbQueryErrorCallback,query);
 }
 void MissionOnClientConnected(int client)
@@ -305,6 +312,8 @@ void MissionOnClientDisconnect(int client)
 void MissionOnRoundEnd(int winner)
 {
 	int player_num = GetClientCount(true);
+	char map_name[64];
+	GetCurrentMap(map_name,sizeof(map_name));
 	for(int i=1;i<=64;i++)
 	{
 		if(IsClientInGame(i))
@@ -328,6 +337,16 @@ void MissionOnRoundEnd(int winner)
 					if(playermission_list[i].taskdata[14]<=10000&&Pmap.tag&label_code[10])
 					{
 						playermission_list[i].taskdata[14]++;
+					}
+					if(strcmp(map_name,"ze_lotr_isengard_csgo1")==0&&playermission_list[i].challenge[0]!=1)
+					{
+						PrintToChat(i," \x05[任务系统]\x01恭喜你完成了本周挑战任务的\x07条件1");
+						playermission_list[i].challenge[0]=1;
+					}
+					if(strcmp(map_name,"ze_lotr_mount_doom_p3")==0&&playermission_list[i].challenge[1]!=1)
+					{
+						PrintToChat(i," \x05[任务系统]\x01恭喜你完成了本周挑战任务的\x07条件2");
+						playermission_list[i].challenge[1]=1;
 					}
 				}
 				UpdatePlayerMissionInfo(i);
@@ -458,7 +477,7 @@ void TEMP_OpHR_TasklistSet()
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 3;
-	task.num[0] = 1;task.num[1] = 3;task.num[2] = 5;
+	task.num[0] = 3;task.num[1] = 6;task.num[2] = 9;
 	task.exp_base = 80;
 	task.period = 1;
 	task.type = HM_KILLZM;
@@ -466,7 +485,7 @@ void TEMP_OpHR_TasklistSet()
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 3;
-	task.num[0] = 5;task.num[1] = 10;task.num[2] = 20;
+	task.num[0] = 6;task.num[1] = 12;task.num[2] = 24;
 	task.exp_base = 120;
 	task.period = 1;
 	task.type = ZM_DMGTAKE;
@@ -475,7 +494,7 @@ void TEMP_OpHR_TasklistSet()
 
 	task.stage = 3;
 	task.num[0] = 4;task.num[1] = 8;task.num[2] = 12;
-	task.exp_base = 140;
+	task.exp_base = 120;
 	task.period = 1;
 	task.type = HM_DMGMAKE;
 	task.name = "[人类]造成伤害:";
@@ -535,7 +554,7 @@ void TEMP_OpHR_TasklistSet()
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 1;
-	task.num[0] = 40;
+	task.num[0] = 50;
 	task.exp_base = 2000;
 	task.period = 7;
 	task.type = HM_KILLZM;
@@ -543,7 +562,7 @@ void TEMP_OpHR_TasklistSet()
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 1;
-	task.num[0] = 250;
+	task.num[0] = 300;
 	task.exp_base = 2000;
 	task.period = 7;
 	task.type = ZM_DMGTAKE;
@@ -551,7 +570,7 @@ void TEMP_OpHR_TasklistSet()
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 1;
-	task.num[0] = 150;
+	task.num[0] = 200;
 	task.exp_base = 2000;
 	task.period = 7;
 	task.type = HM_DMGMAKE;
@@ -601,7 +620,8 @@ void MissionMenuBuild(int client)
 	menu.AddItem("","每周挑战");
 	menu.AddItem("","奖励兑换");
 	menu.AddItem("","VIP奖励");    
-	menu.AddItem("","神秘商店");                
+	menu.AddItem("","神秘商店");          
+	menu.AddItem("","挑战任务");      
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
@@ -632,6 +652,10 @@ int MissionMenuHandler(Menu menu, MenuAction action, int client, int param)
 		else if (param == 4)
 		{
 			SecretShopMenu(client);
+		}
+		else if (param == 5)
+		{
+			ChallengeTask(client);
 		}
 	}
 }
@@ -985,9 +1009,16 @@ void SecretShopMenu(int client)
 	if(client<=0||client>=65)	return;
 	Menu menu = CreateMenu(SecretShopHandler);
 	int credits = Store_GetClientCredits(client);
+	int emoney = playermission_list[client].emoney;
 	menu.SetTitle("神秘商店\n您当前积分为:%d\n您当前持有的碎片为:%d",credits,playermission_list[client].emoney);
-	menu.AddItem("","购买1大行动等级(2500积分)",credits>=3000?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
-	menu.AddItem("","购买10大行动等级(23000积分)",credits>=25000?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("","购买1大行动等级(3000积分)",credits>=3000?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("","购买10大行动等级(25000积分)",credits>=25000?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("uid_wepskin_cso2axe","兑换[第一赛季-极寒咆哮]\n期限:120天 价格:150碎片",emoney>=150?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("uid_wepskin_carbizon","兑换[第一赛季-CAR 浊心斯卡蒂]\n期限:120天 价格:200碎片",emoney>=200?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("uid_wepskin_dualg18","兑换[第一赛季-双持GLOCK]\n期限:120天 价格:250碎片",emoney>=250?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("uid_model_xinhai","兑换[第一赛季-心海]\n期限:永久 价格:500碎片",emoney>=500?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("uid_model_lemalin","兑换[第一赛季-恶毒]\n期限：永久 价格:1000碎片",emoney>=1000?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("","兑换积分:100碎片=500积分",emoney>=100?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }
@@ -996,6 +1027,11 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 {
 	if(client<=0||client>=65) return;
 	int credits = Store_GetClientCredits(client);
+	int emoney = playermission_list[client].emoney;
+	int current_time = GetTime();
+	int expdate;
+	int item_id;
+	char item[256];
 	if(!playermission_list[client].loaded)
 	{
 		PrintToChat(client," \x05[任务系统]数据未载入，无法购买(请等待下一回合或换图)");
@@ -1033,6 +1069,114 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 				PrintToChat(client," \x05[任务系统]你的积分不足或你已满级!");
 			}
 		}
+		else if(param>=2&&param<=6)
+		{
+			menu.GetItem(param,item,sizeof(item));
+			item_id = Store_GetItemIdbyUniqueId(item);
+			if(param==2)
+			{
+				if(!Store_HasClientItem(client,item_id))
+				{
+					if(emoney<150)
+					{
+						PrintToChat(client," \x05[任务系统]\x01你持有的碎片不足!");
+					}
+					else
+					{
+						expdate = current_time+120*86400;
+						Store_GiveItem(client,item_id,0,expdate,0);
+						playermission_list[client].emoney-=150;						
+					}
+				}
+				else
+				{
+					PrintToChat(client," \x05[任务系统]\x01你已拥有该道具，请勿重复兑换");
+				}
+			}
+			if(param==3)
+			{
+				if(!Store_HasClientItem(client,item_id))
+				{
+					if(emoney<200)
+					{
+						PrintToChat(client," \x05[任务系统]\x01你持有的碎片不足!");
+					}
+					else
+					{
+						expdate = current_time+120*86400;
+						Store_GiveItem(client,item_id,0,expdate,0);
+						playermission_list[client].emoney-=200;						
+					}
+				}
+				else
+				{
+					PrintToChat(client," \x05[任务系统]\x01你已拥有该道具，请勿重复兑换");
+				}
+			}
+			if(param==4)
+			{
+				if(!Store_HasClientItem(client,item_id))
+				{
+					if(emoney<250)
+					{
+						PrintToChat(client," \x05[任务系统]\x01你持有的碎片不足!");
+					}
+					else
+					{
+						expdate = current_time+120*86400;
+						Store_GiveItem(client,item_id,0,expdate,0);
+						playermission_list[client].emoney-=250;
+					}
+				}
+				else
+				{
+					PrintToChat(client," \x05[任务系统]\x01你已拥有该道具，请勿重复兑换");
+				}
+			}
+			if(param==5)
+			{
+				if(!Store_HasClientItem(client,item_id))
+				{
+					if(emoney<500)
+					{
+						PrintToChat(client," \x05[任务系统]\x01你持有的碎片不足!");
+					}
+					else
+					{
+						Store_GiveItem(client,item_id,0,0,0);
+						playermission_list[client].emoney-=500;						
+					}
+				}
+				else
+				{
+					PrintToChat(client," \x05[任务系统]\x01你已拥有该道具，请勿重复兑换");
+				}
+			}
+			if(param==6)
+			{
+				if(!Store_HasClientItem(client,item_id))
+				{
+					if(emoney<1000)
+					{
+						PrintToChat(client," \x05[任务系统]\x01你持有的碎片不足!");
+					}
+					else
+					{
+						Store_GiveItem(client,item_id,0,0,0);
+						playermission_list[client].emoney-=1000;
+					}
+				}
+				else
+				{
+					PrintToChat(client," \x05[任务系统]\x01你已拥有该道具，请勿重复兑换");
+				}
+			}
+		}
+		else if(param==7)
+		{
+			Store_SetClientCredits(client,credits+500);
+			playermission_list[client].emoney-=100;
+		}
 		SecretShopMenu(client);
 	}		
 	else if (param == MenuCancel_ExitBack) MissionMenuBuild(client);
@@ -1059,4 +1203,53 @@ public int Native_RY_GiveClientMissionExp(Handle plugin, int numParams)
 	if(!playermission_list[client].loaded)	return -1;
 	GrantExp(client,exp);
 	return 0;
+}
+void ChallengeTask(int client)
+{
+	char buffer[256];
+	Menu menu = CreateMenu(ChallengeTaskMenuHandler);
+	menu.SetTitle("挑战任务\n请结合提示自行探索或与玩家交流\n找到任务的完成条件吧");
+	menu.AddItem("","本周挑战任务:双塔奇兵\n提示:为了守护中土世界的和平，勇者们兵分两路...",ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"条件1:%s",(playermission_list[client].challenge[0]==1)?"通关地图魔戒:艾辛格\n已完成":"???\n未完成");
+	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"条件2:%s",(playermission_list[client].challenge[1]==1)?"通关地图魔戒:末日火山\n已完成":"???\n未完成");
+	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+	menu.AddItem("","提交任务[奖励:500碎片]",(playermission_list[client].challenge[2]==1)?ITEMDRAW_DISABLED:ITEMDRAW_DEFAULT);
+	menu.ExitBackButton = true;
+	menu.Display(client,MENU_TIME_FOREVER);
+}	
+
+int ChallengeTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
+{
+	if(client<=0||client>=65) return;
+	if(!playermission_list[client].loaded)
+	{
+		PrintToChat(client," \x05[任务系统]数据未载入，无法购买(请等待下一回合或换图)");
+		menu.Close();
+	}
+	if (action == MenuAction_End||client<=0||client>=65)
+	{
+		menu.Close();
+	}
+	else if(action == MenuAction_Select)
+	{
+		if(playermission_list[client].challenge[2]!=1)
+		{
+			if((playermission_list[client].challenge[0]==1)&&(playermission_list[client].challenge[1]==1))
+			{
+				playermission_list[client].challenge[2]=1;
+				playermission_list[client].emoney+=500;
+				PrintToChat(client," \x05[任务系统]\x01完成挑战任务，获得500碎片!");
+			}
+			else
+			{
+				PrintToChat(client," \x05[任务系统]\x01你还未达成所有条件!");				
+			}
+		}
+		else
+		{
+			PrintToChat(client," \x05[任务系统]\x01你已经提交过任务，请勿重复提交!");
+		}
+	}	
+	else if (param == MenuCancel_ExitBack) MissionMenuBuild(client);
 }
