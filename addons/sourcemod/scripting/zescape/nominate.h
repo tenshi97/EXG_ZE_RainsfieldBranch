@@ -92,10 +92,13 @@ void NominateMapMenu(int client,char trie_search[PLATFORM_MAX_PATH]="")
 		GetArrayArray(Map_List, i, map, sizeof(map));
 
 		// 有长度 && 地图名不包含 && 中文名不包含 && 标签不包含
-		if(strlen(trie_search) && StrContains(map.name,trie_search,false) == -1 && StrContains(map.name_cn,trie_search) == -1 && StrContains(MapAdmGetMapTag(map), trie_search) == -1)
+		if (strlen(trie_search) && StrContains(map.name,trie_search,false) == -1 && StrContains(map.name_cn,trie_search) == -1)
 			continue;
 		
 		Maps.GetArray(map.name, map_detail, sizeof(map_detail));
+
+		if (strlen(trie_search) && StrContains(MapAdmGetMapTag(map_detail), trie_search) == -1)
+			continue;
 
 		if (map_detail.vis == 0)
 			continue;
