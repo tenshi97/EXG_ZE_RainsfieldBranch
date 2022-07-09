@@ -1013,10 +1013,10 @@ void SecretShopMenu(int client)
 	menu.SetTitle("神秘商店\n您当前积分为:%d\n您当前持有的碎片为:%d",credits,playermission_list[client].emoney);
 	menu.AddItem("","购买1大行动等级(3000积分)",credits>=3000?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
 	menu.AddItem("","购买10大行动等级(25000积分)",credits>=25000?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
-	menu.AddItem("uid_wepskin_cso2axe","兑换[第一赛季-极寒咆哮]\n期限:120天 价格:150碎片",emoney>=150?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
-	menu.AddItem("uid_wepskin_carbizon","兑换[第一赛季-CAR 浊心斯卡蒂]\n期限:120天 价格:200碎片",emoney>=200?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
-	menu.AddItem("uid_wepskin_dualg18","兑换[第一赛季-双持GLOCK]\n期限:120天 价格:250碎片",emoney>=250?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
-	menu.AddItem("uid_model_xinhai","兑换[第一赛季-心海]\n期限:永久 价格:500碎片",emoney>=500?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("uid_wepskin_cso2axe","兑换[第一赛季-极寒咆哮]\n期限:120天 价格:200碎片",emoney>=200?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("uid_wepskin_carbizon","兑换[第一赛季-CAR 浊心斯卡蒂]\n期限:120天 价格:250碎片",emoney>=250?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("uid_wepskin_dualg18","兑换[第一赛季-双持GLOCK]\n期限:120天 价格:300碎片",emoney>=300?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("uid_model_xinhai","兑换[第一赛季-心海]\n期限:永久 价格:600碎片",emoney>=600?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
 	menu.AddItem("uid_model_lemalin","兑换[第一赛季-恶毒]\n期限：永久 价格:1000碎片",emoney>=1000?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
 	menu.AddItem("","兑换积分:100碎片=500积分",emoney>=100?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
 	menu.ExitBackButton = true;
@@ -1077,26 +1077,6 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 			{
 				if(!Store_HasClientItem(client,item_id))
 				{
-					if(emoney<150)
-					{
-						PrintToChat(client," \x05[任务系统]\x01你持有的碎片不足!");
-					}
-					else
-					{
-						expdate = current_time+120*86400;
-						Store_GiveItem(client,item_id,0,expdate,0);
-						playermission_list[client].emoney-=150;						
-					}
-				}
-				else
-				{
-					PrintToChat(client," \x05[任务系统]\x01你已拥有该道具，请勿重复兑换");
-				}
-			}
-			if(param==3)
-			{
-				if(!Store_HasClientItem(client,item_id))
-				{
 					if(emoney<200)
 					{
 						PrintToChat(client," \x05[任务系统]\x01你持有的碎片不足!");
@@ -1113,7 +1093,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 					PrintToChat(client," \x05[任务系统]\x01你已拥有该道具，请勿重复兑换");
 				}
 			}
-			if(param==4)
+			if(param==3)
 			{
 				if(!Store_HasClientItem(client,item_id))
 				{
@@ -1125,7 +1105,27 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 					{
 						expdate = current_time+120*86400;
 						Store_GiveItem(client,item_id,0,expdate,0);
-						playermission_list[client].emoney-=250;
+						playermission_list[client].emoney-=250;						
+					}
+				}
+				else
+				{
+					PrintToChat(client," \x05[任务系统]\x01你已拥有该道具，请勿重复兑换");
+				}
+			}
+			if(param==4)
+			{
+				if(!Store_HasClientItem(client,item_id))
+				{
+					if(emoney<300)
+					{
+						PrintToChat(client," \x05[任务系统]\x01你持有的碎片不足!");
+					}
+					else
+					{
+						expdate = current_time+120*86400;
+						Store_GiveItem(client,item_id,0,expdate,0);
+						playermission_list[client].emoney-=300;
 					}
 				}
 				else
@@ -1137,14 +1137,14 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 			{
 				if(!Store_HasClientItem(client,item_id))
 				{
-					if(emoney<500)
+					if(emoney<600)
 					{
 						PrintToChat(client," \x05[任务系统]\x01你持有的碎片不足!");
 					}
 					else
 					{
 						Store_GiveItem(client,item_id,0,0,0);
-						playermission_list[client].emoney-=500;						
+						playermission_list[client].emoney-=600;						
 					}
 				}
 				else
@@ -1208,13 +1208,13 @@ void ChallengeTask(int client)
 {
 	char buffer[256];
 	Menu menu = CreateMenu(ChallengeTaskMenuHandler);
-	menu.SetTitle("挑战任务\n请结合提示自行探索或与玩家交流\n找到任务的完成条件吧");
-	menu.AddItem("","本周挑战任务:双塔奇兵\n提示:为了守护中土世界的和平，勇者们兵分两路...",ITEMDRAW_DISABLED);
+	menu.SetTitle("挑战任务\n暂未更新");
+	/*menu.AddItem("","本周挑战任务:双塔奇兵\n提示:为了守护中土世界的和平，勇者们兵分两路...",ITEMDRAW_DISABLED);
 	Format(buffer,sizeof(buffer),"条件1:%s",(playermission_list[client].challenge[0]==1)?"通关地图魔戒:艾辛格\n已完成":"???\n未完成");
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 	Format(buffer,sizeof(buffer),"条件2:%s",(playermission_list[client].challenge[1]==1)?"通关地图魔戒:末日火山\n已完成":"???\n未完成");
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-	menu.AddItem("","提交任务[奖励:500碎片]",(playermission_list[client].challenge[2]==1)?ITEMDRAW_DISABLED:ITEMDRAW_DEFAULT);
+	menu.AddItem("","提交任务[奖励:500碎片]",ITEMDRAW_DISABLED:ITEMDRAW_DEFAULT);*/
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }	
