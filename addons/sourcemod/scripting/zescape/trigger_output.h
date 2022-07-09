@@ -37,18 +37,64 @@ void ButtonOnPressed(const char[] output, int caller, int activator, float delay
 		return;
 	}
 	CreateTimer(5.0, ButtonOnPressedCallback, activator, TIMER_FLAG_NO_MAPCHANGE);
+
 	char activator_name[64];
-	char button_name[64];
 	GetClientName(activator,activator_name,sizeof(activator_name));
+
+	char activator_auth[64];
+	GetClientAuthId(activator, AuthId_Steam2, activator_auth, sizeof(activator_auth), true);
+	ReplaceString(activator_auth, sizeof(activator_auth), "STEAM_1:", "", false);
+
+	char button_name[64];
 	GetEntPropString(caller, Prop_Data, "m_iName", button_name, sizeof(button_name));
-	PrintToChatAll(" \x04[触发检测] \x09%s \x01触发了 \x06按钮%s", activator_name,button_name);
-	PrintToConsoleAll("[触发检测]%s触发了按钮%s", activator_name,button_name);
+	
+	PrintToChatAll(" \x04[触发检测] \x09%s(%s) \x01触发了 \x06按钮%s", activator_name, activator_auth, button_name);
+	PrintToConsoleAll("[触发检测] %s(%s) 触发了 按钮(Button)%s", activator_name, activator_auth, button_name);
 }
 
 Action ButtonOnPressedCallback(Handle timer, int activator) {
 	if (!Button_Spam_Client[activator]) return Plugin_Handled;
 	Button_Spam_Client[activator] = false;
 	return Plugin_Handled;
+}
+
+void TriggerOnEntityCreated(int entity, const char[] classname)
+{
+	if (strcmp(classname, "trigger_once", false) != 0 && strcmp(classname, "trigger_multiple", false) != 0)
+		return;
+
+	if (IsValidEntity(entity))
+	{
+		SDKHook(entity, SDKHook_SpawnPost, TriggerOnEntitySpawnPost);
+	}
+}
+
+public void TriggerOnEntitySpawnPost(int entity)
+{
+	if (!IsValidEntity(entity))
+		return;
+
+	SDKHook(entity, SDKHook_StartTouch, TriggerOnStartTouch);
+}
+
+public Action TriggerOnStartTouch(int entity, int toucher)
+{
+	SDKUnhook(entity, SDKHook_StartTouch, TriggerOnStartTouch);
+
+	char activator_name[64];
+	GetClientName(toucher, activator_name, sizeof(activator_name));
+
+	char activator_auth[64];
+	GetClientAuthId(toucher, AuthId_Steam2, activator_auth, sizeof(activator_auth), true);
+	ReplaceString(activator_auth, sizeof(activator_auth), "STEAM_1:", "", false);
+
+	char button_name[64];
+	GetEntPropString(entity, Prop_Data, "m_iName", button_name, sizeof(button_name));
+	
+	PrintToChatAll(" \x04[触发检测] \x09%s(%s) \x01触发了 \x06机关%s", activator_name, activator_auth, button_name);
+	PrintToConsoleAll("[触发检测] %s(%s) 触发了 机关(Trigger)%s", activator_name, activator_auth, button_name);
+
+	return Plugin_Continue;
 }
 
 /*void TriggerOnTouch(const char[] output, int caller, int activator, float delay)

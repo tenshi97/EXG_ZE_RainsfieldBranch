@@ -64,6 +64,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 	RegPluginLibrary("exg_csgo_ze_ry");
 }
+
 public void OnLibraryAdded(const char[] name)
 {
 	// Validate library
@@ -117,6 +118,12 @@ public void OnMapStart()
 	PrintToServer("DbOnDbConnected_MapStartPost");
 	DbOnDbConnected_MapStartPost();	
 }
+
+public void OnEntityCreated(int entity, const char[] classname)
+{
+	TriggerOnEntityCreated(entity, classname);
+}
+
 void WarmUpTimerBuild()
 {
 	g_Warmup_Timer = INVALID_HANDLE;
@@ -128,16 +135,18 @@ void WarmUpTimerBuild()
 		warmuptime = g_Cvar_Mp_Warmup_Time.FloatValue;
 	}
 	g_Warmup_Timer = CreateTimer(warmuptime,OnWarmUpEnd, _,TIMER_FLAG_NO_MAPCHANGE);
-
 }
+
 Action OnWarmUpEnd(Handle timer)
 {
 	MapInfoOnWarmUpEnd();
 }
+
 public void OnPluginEnd() 
 {
     Db_Close();
 }
+
 public void OnMapEnd() 
 {
 	MapAdmOnMapEnd();
@@ -146,6 +155,7 @@ public void OnMapEnd()
 	MissionOnMapEnd();
 	QuestOnMapEnd();
 }
+
 public int ZR_OnClientInfected(int client, int attacker, bool motherInfect, bool respawnOverride, bool respawn) 
 {
 	if(motherInfect)
