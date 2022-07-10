@@ -80,7 +80,8 @@ public void TriggerOnEntitySpawnPost(int entity)
 public Action TriggerOnStartTouch(int entity, int toucher)
 {
 	SDKUnhook(entity, SDKHook_StartTouch, TriggerOnStartTouch);
-
+	if (IsClientInGame(toucher))
+	{
 	char activator_name[64];
 	GetClientName(toucher, activator_name, sizeof(activator_name));
 
@@ -93,7 +94,7 @@ public Action TriggerOnStartTouch(int entity, int toucher)
 	
 	PrintToChatAll(" \x04[触发检测] \x09%s(%s) \x01触发了 \x06机关%s", activator_name, activator_auth, button_name);
 	PrintToConsoleAll("[触发检测] %s(%s) 触发了 机关(Trigger)%s", activator_name, activator_auth, button_name);
-
+}
 	return Plugin_Continue;
 }
 
