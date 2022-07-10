@@ -47,7 +47,7 @@ enum struct PlayerMissionInfo
 	int vip;
 	int emoney;
 	int nt[2]; //WIP
-	int challenge[3];
+	int challenge[5];
 }
 ArrayList Current_Mission_Tasklist;
 bool g_ValidMission_Exist;
@@ -134,6 +134,8 @@ void PlayerMissionWeeklyUpdate(int client)
 	playermission_list[client].challenge[0]=0;
 	playermission_list[client].challenge[1]=0;
 	playermission_list[client].challenge[2]=0;
+	playermission_list[client].challenge[3]=0;
+	playermission_list[client].challenge[4]=0;
 	playermission_list[client].loaded = 1;
 	UpdatePlayerMissionInfo(client);
 }
@@ -215,9 +217,11 @@ void LoadPlayerMissionInfoCallBack(Handle owner, Handle hndl, char[] error, any 
 		playermission_list[client].sp[3]=DbFetchInt(hndl,"SP4");
 		playermission_list[client].sp[4]=DbFetchInt(hndl,"SP5");
 		playermission_list[client].vip = DbFetchInt(hndl,"VIP");
-		playermission_list[client].challenge[0] = DbFetchInt(hndl,"CH1");
-		playermission_list[client].challenge[1] = DbFetchInt(hndl,"CH2");
-		playermission_list[client].challenge[2] = DbFetchInt(hndl,"CH");
+		playermission_list[client].challenge[1] = DbFetchInt(hndl,"CH1");
+		playermission_list[client].challenge[2] = DbFetchInt(hndl,"CH2");
+		playermission_list[client].challenge[3] = DbFetchInt(hndl,"CH3");
+		playermission_list[client].challenge[4] = DbFetchInt(hndl,"CH4");
+		playermission_list[client].challenge[0] = DbFetchInt(hndl,"CH");
 		if(playermission_list[client].dataupdate_time<Current_Mission.daily_timestamp)
 		{
 			PlayerMissionDailyUpdate(client);
@@ -256,7 +260,7 @@ void ClearPlayerMissionInfo(int weekly=0)
 	if(weekly)
 	{
 		PrintToChatAll(" \x05[任务系统]清空大行动每周任务数据....");
-		Format(query,sizeof(query),"UPDATE %s SET WINFECT = 0,WKILLZM = 0,WDMGMAKE = 0,WDMGTAKE = 0,WNADE = 0,WPASS = 0,WT1ST = 0,WT2ST = 0,WT3ST =0,WT4ST = 0,WT5ST =0,WT6ST = 0,CH1 = 0,CH2 = 0,CH = 0",Current_Mission.playerdbname);
+		Format(query,sizeof(query),"UPDATE %s SET WINFECT = 0,WKILLZM = 0,WDMGMAKE = 0,WDMGTAKE = 0,WNADE = 0,WPASS = 0,WT1ST = 0,WT2ST = 0,WT3ST =0,WT4ST = 0,WT5ST =0,WT6ST = 0,CH1 = 0,CH2 = 0,CH3 = 0,CH4 = 0,CH = 0",Current_Mission.playerdbname);
 		DbTQuery(DbQueryErrorCallback,query);
 	}
 	PrintToChatAll(" \x05[任务系统]清空大行动每日任务数据....");
@@ -294,7 +298,7 @@ void UpdatePlayerMissionInfo(int client)
 	}
 	int current_time = GetTime();
 	PrintToServer("[任务系统][UID:%d]保存玩家%d数据",uid,client);
-	Format(query,sizeof(query),"UPDATE %s SET LVL = %d, EXP = %d, DINFECT = %d,DKILLZM = %d,DDMGTAKE = %d,DDMGMAKE = %d,DONLINE = %d, DPASS = %d, DPASS2 = %d, DPASS3 = %d, DNADE = %d, WINFECT = %d, WKILLZM = %d, WDMGTAKE = %d, WDMGMAKE = %d, WNADE = %d, WPASS = %d, DT1ST = %d, DT2ST = %d, DT3ST = %d, DT4ST = %d, DT5ST =%d, DT6ST = %d, DT7ST = %d, DT8ST = %d, DT9ST = %d, WT1ST = %d, WT2ST = %d, WT3ST = %d, WT4ST = %d, WT5ST = %d, WT6ST = %d, TIMESTAMP = %d, SP1 = %d, SP2 = %d, SP3 = %d, SP4 = %d, SP5 = %d, VIP = %d, EMONEY = %d, CH1 = %d, CH2 = %d, CH = %d WHERE UID = %d",Current_Mission.playerdbname,lvl,exp,taskdata[0],taskdata[1],taskdata[2],taskdata[3],taskdata[4],taskdata[5],taskdata[6],taskdata[7],taskdata[8],taskdata[9],taskdata[10],taskdata[11],taskdata[12],taskdata[13],taskdata[14],taskstage[0],taskstage[1],taskstage[2],taskstage[3],taskstage[4],taskstage[5],taskstage[6],taskstage[7],taskstage[8],taskstage[9],taskstage[10],taskstage[11],taskstage[12],taskstage[13],taskstage[14],current_time,sp1,sp2,sp3,sp4,sp5,playermission_list[client].vip,playermission_list[client].emoney,playermission_list[client].challenge[0],playermission_list[client].challenge[1],playermission_list[client].challenge[2],uid);
+	Format(query,sizeof(query),"UPDATE %s SET LVL = %d, EXP = %d, DINFECT = %d,DKILLZM = %d,DDMGTAKE = %d,DDMGMAKE = %d,DONLINE = %d, DPASS = %d, DPASS2 = %d, DPASS3 = %d, DNADE = %d, WINFECT = %d, WKILLZM = %d, WDMGTAKE = %d, WDMGMAKE = %d, WNADE = %d, WPASS = %d, DT1ST = %d, DT2ST = %d, DT3ST = %d, DT4ST = %d, DT5ST =%d, DT6ST = %d, DT7ST = %d, DT8ST = %d, DT9ST = %d, WT1ST = %d, WT2ST = %d, WT3ST = %d, WT4ST = %d, WT5ST = %d, WT6ST = %d, TIMESTAMP = %d, SP1 = %d, SP2 = %d, SP3 = %d, SP4 = %d, SP5 = %d, VIP = %d, EMONEY = %d, CH1 = %d, CH2 = %d, CH3 = %d, CH4 = %d, CH = %d WHERE UID = %d",Current_Mission.playerdbname,lvl,exp,taskdata[0],taskdata[1],taskdata[2],taskdata[3],taskdata[4],taskdata[5],taskdata[6],taskdata[7],taskdata[8],taskdata[9],taskdata[10],taskdata[11],taskdata[12],taskdata[13],taskdata[14],taskstage[0],taskstage[1],taskstage[2],taskstage[3],taskstage[4],taskstage[5],taskstage[6],taskstage[7],taskstage[8],taskstage[9],taskstage[10],taskstage[11],taskstage[12],taskstage[13],taskstage[14],current_time,sp1,sp2,sp3,sp4,sp5,playermission_list[client].vip,playermission_list[client].emoney,playermission_list[client].challenge[1],playermission_list[client].challenge[2],playermission_list[client].challenge[3],playermission_list[client].challenge[4],playermission_list[client].challenge[0],uid);
 	DbTQuery(DbQueryErrorCallback,query);
 }
 void MissionOnClientConnected(int client)
@@ -338,16 +342,26 @@ void MissionOnRoundEnd(int winner)
 					{
 						playermission_list[i].taskdata[14]++;
 					}
-					if(strcmp(map_name,"ze_lotr_isengard_csgo1")==0&&playermission_list[i].challenge[0]!=1)
+					if((strcmp(map_name,"ze_ffxii_salikawood_v1_6f")==0||strcmp(map_name,"ze_ffxii_feywood_b6_1k")==0)&&playermission_list[i].challenge[1]!=1)
 					{
 						PrintToChat(i," \x05[任务系统]\x01恭喜你完成了本周挑战任务的\x07条件1");
-						playermission_list[i].challenge[0]=1;
-					}
-					if(strcmp(map_name,"ze_lotr_mount_doom_p3")==0&&playermission_list[i].challenge[1]!=1)
-					{
-						PrintToChat(i," \x05[任务系统]\x01恭喜你完成了本周挑战任务的\x07条件2");
 						playermission_list[i].challenge[1]=1;
 					}
+					if(strcmp(map_name,"ze_rabanastre_royal_t5")==0&&playermission_list[i].challenge[2]!=1)
+					{
+						PrintToChat(i," \x05[任务系统]\x01恭喜你完成了本周挑战任务的\x07条件2");
+						playermission_list[i].challenge[2]=1;
+					}
+					if(strcmp(map_name,"ze_ffxii_paramina_rift_v1_4_a8t")==0&&playermission_list[i].challenge[3]!=1)
+					{
+						PrintToChat(i," \x05[任务系统]\x01恭喜你完成了本周挑战任务的\x07条件3");
+						playermission_list[i].challenge[3]=1;
+					}		
+					if((strcmp(map_name,"ze_ffxii_westersand_v7_z9")==0||strcmp(map_name,"ze_ffxii_westersand_v8zeta1k")==0)&&playermission_list[i].challenge[4]!=1)
+					{
+						PrintToChat(i," \x05[任务系统]\x01恭喜你完成了本周挑战任务的\x07条件4");
+						playermission_list[i].challenge[4]=1;
+					}				
 				}
 				UpdatePlayerMissionInfo(i);
 			}
@@ -1208,13 +1222,17 @@ void ChallengeTask(int client)
 {
 	char buffer[256];
 	Menu menu = CreateMenu(ChallengeTaskMenuHandler);
-	menu.SetTitle("挑战任务\n暂未更新");
-	/*menu.AddItem("","本周挑战任务:双塔奇兵\n提示:为了守护中土世界的和平，勇者们兵分两路...",ITEMDRAW_DISABLED);
-	Format(buffer,sizeof(buffer),"条件1:%s",(playermission_list[client].challenge[0]==1)?"通关地图魔戒:艾辛格\n已完成":"???\n未完成");
+	menu.SetTitle("挑战任务");
+	menu.AddItem("","本周挑战任务:黄道年代~伊瓦利斯的冒险\n提示:森林、皇都与下水道、雪域峡谷、沙漠与飞空艇",ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"条件1:%s",(playermission_list[client].challenge[1]==1)?"通关地图FF12:萨莉卡树林或幻妖森林\n已完成":"???\n未完成");
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-	Format(buffer,sizeof(buffer),"条件2:%s",(playermission_list[client].challenge[1]==1)?"通关地图魔戒:末日火山\n已完成":"???\n未完成");
+	Format(buffer,sizeof(buffer),"条件2:%s",(playermission_list[client].challenge[2]==1)?"通关地图拉巴纳斯塔\n已完成":"???\n未完成");
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-	menu.AddItem("","提交任务[奖励:500碎片]",ITEMDRAW_DISABLED:ITEMDRAW_DEFAULT);*/
+	Format(buffer,sizeof(buffer),"条件3:%s",(playermission_list[client].challenge[3]==1)?"通关地图FF12:帕拉米娜大峡谷\n已完成":"???\n未完成");
+	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"条件4:%s",(playermission_list[client].challenge[4]==1)?"通关地图FF12:西部沙漠\n已完成":"???\n未完成");
+	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+	menu.AddItem("","提交任务[奖励:400碎片]",(playermission_list[client].challenge[0]==1)?ITEMDRAW_DISABLED:ITEMDRAW_DEFAULT);
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }	
@@ -1233,11 +1251,11 @@ int ChallengeTaskMenuHandler(Menu menu, MenuAction action, int client, int param
 	}
 	else if(action == MenuAction_Select)
 	{
-		if(playermission_list[client].challenge[2]!=1)
+		if(playermission_list[client].challenge[0]!=1)
 		{
-			if((playermission_list[client].challenge[0]==1)&&(playermission_list[client].challenge[1]==1))
+			if((playermission_list[client].challenge[1]==1)&&(playermission_list[client].challenge[2]==1)&&(playermission_list[client].challenge[3]==1)&&(playermission_list[client].challenge[4]==1))
 			{
-				playermission_list[client].challenge[2]=1;
+				playermission_list[client].challenge[0]=1;
 				playermission_list[client].emoney+=500;
 				PrintToChat(client," \x05[任务系统]\x01完成挑战任务，获得500碎片!");
 			}
