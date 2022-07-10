@@ -188,11 +188,12 @@ void LoadPlayerQuestInfo(int client)
 }
 void LoadPlayerQuestInfoCallBack(Handle owner, Handle hndl, char[] error, any data)
 {	
+
 	char query[512];
 	int client = data;
 	char client_authid[64];
 	char client_name[64];
-	if(client<=0||client>=65)	return;
+	if(!IsClientInGame(client))	return;
 	GetClientName(client,client_name,sizeof(client_name));
 	GetClientAuthId(client,AuthId_Steam3,client_authid,sizeof(client_authid),true);
 	int current_time = GetTime();
