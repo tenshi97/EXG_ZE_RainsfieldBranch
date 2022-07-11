@@ -539,6 +539,9 @@ void MapCfgUpdate(Map_Info map)
 			break;
 		}
 	}
+
+	Call_StartForward(hOnMapConfigLoaded);
+	Call_Finish();
 }
 Action MapNamecnCommand(int client,int args)
 {
