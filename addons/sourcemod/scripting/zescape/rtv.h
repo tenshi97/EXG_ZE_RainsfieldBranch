@@ -26,6 +26,8 @@ enum struct Maps_VoteInfo
 	bool nominated;
 	char nominator_name[PLATFORM_MAX_PATH];
 	int nominator_steamid;
+	char nominator_steamauth[PLATFORM_MAX_PATH];
+	char nominator_steampage[PLATFORM_MAX_PATH];
 	int difficulty;
 	int nominate_cost;
 }
@@ -173,12 +175,13 @@ public bool isMapCoolDownOver(Map_Info map)
 	}
 	return false;
 }
-public bool GetCurrentMapNominatorName(char ret_name[PLATFORM_MAX_PATH])
+public bool GetCurrentMapNominatorName(char nominator_name[PLATFORM_MAX_PATH],char nominator_steamauth[PLATFORM_MAX_PATH])
 {
 	if(g_LastRound_MapVoteSave.nominated)
 	{
 		PrintToServer(g_LastRound_MapVoteSave.nominator_name);
-		strcopy(ret_name,sizeof(ret_name),g_LastRound_MapVoteSave.nominator_name);
+		strcopy(nominator_name,sizeof(nominator_name),g_LastRound_MapVoteSave.nominator_name);
+		strcopy(nominator_steamauth,sizeof(nominator_steamauth),g_LastRound_MapVoteSave.nominator_steamauth);
 		return true;
 	}
 	return false;
@@ -465,6 +468,7 @@ void CreateNextMapVote()
 		mapv.nominated = true;
 		mapv.nominator_name = nomlog.nominator_name;
 		mapv.nominator_steamid = nomlog.nominator_steamid;
+		strcopy(mapv.nominator_steamauth,sizeof(mapv.nominator_steamauth),nomlog.nominator_steamauth);
 		mapv.name_cn = map.name_cn;
 		mapv.difficulty = map.difficulty;
 		mapv.nominate_cost = map.cost;

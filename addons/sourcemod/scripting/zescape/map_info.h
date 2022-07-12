@@ -9,13 +9,13 @@ ConVar Cvar_DamageScale_1;
 ConVar Cvar_DamageScale_2;
 
 char g_current_nominator_name[PLATFORM_MAX_PATH];
+char g_current_nominator_steamauth[PLATFORM_MAX_PATH];
 bool g_current_nominated;
 int g_Map_Interval_Count;
 bool g_Map_PlayerNum_Check=false;
 int g_Map_Round=0;
 bool g_Map_RuntimeUpdate_Checked;
 
-GlobalForward hOnMapConfigLoaded;
 
 void MapInfoOnPluginStart()
 {
@@ -31,7 +31,6 @@ void MapInfoOnPluginStart()
 	Cvar_DamageScale_2 = FindConVar("mp_damage_scale_t_head");
 	g_Map_Round = 0;
 	g_Map_RuntimeUpdate_Checked = false;
-	hOnMapConfigLoaded = new GlobalForward("RY_Map_OnMapConfigLoaded", ET_Ignore);
 }
 
 void MapInfoOnMapStart()
@@ -39,7 +38,7 @@ void MapInfoOnMapStart()
 	g_Map_Round = 0;
 	g_Map_RuntimeUpdate_Checked = false;
 	Current_Map_Loaded = false;
-	g_current_nominated = GetCurrentMapNominatorName(g_current_nominator_name);
+	g_current_nominated = GetCurrentMapNominatorName(g_current_nominator_name,g_current_nominator_steamauth);
 }
 
 void MapInfoOnDbConnected_MapStartPost()
@@ -83,7 +82,7 @@ void MapInfoOnDbConnected_MapStartPost()
 		Current_Map_Loaded = false;
 	}
 
-	Call_StartForward(hOnMapConfigLoaded);
+	Call_StartForward(g_MapConfigLoaded);
 	Call_Finish();
 }
 void Pmap_Reload()
@@ -167,6 +166,7 @@ void MakeMapInfoMenu(int client){
 	{
 		Format(title,sizeof(title),"预定者:%s",g_current_nominator_name);
 		menu.AddItem("",title,ITEMDRAW_DISABLED);
+		menu.AddItem("",g_current_nominator_steamauth);
 	}
 	else
 	{
@@ -177,6 +177,10 @@ void MakeMapInfoMenu(int client){
 
 int MapInfoMenuHandler(Menu menu, MenuAction action, int client, int param) {
 	if (action == MenuAction_End) menu.Close();
+	else if(action == MenuAction_Select)
+	{
+		PrintToChat(client,g_current_nominator_steamauth);
+	}
 }
 void MapInfoOnRoundStart()
 {

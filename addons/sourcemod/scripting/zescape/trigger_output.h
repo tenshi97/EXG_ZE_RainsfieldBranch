@@ -60,7 +60,7 @@ public Action ButtonOnPressed(const char[] output, int caller, int activator, fl
 	
 	int hammerid = GetEntProp(caller, Prop_Data, "m_iHammerID");
 
-	PrintToChatAll(" \x04[触发检测] \x09%s(%s) \x01触发了 \x06按钮%s(%d)", activator_name, activator_auth, button_name, hammerid);
+	//PrintToChatAll(" \x04[触发检测] \x09%s(%s) \x01触发了 \x06按钮%s(%d)", activator_name, activator_auth, button_name, hammerid);
 	PrintToConsoleAll("[触发检测] %s(%s) 触发了 按钮(Button)%s(%d)", activator_name, activator_auth, button_name, hammerid);
 
 	return Plugin_Continue;
@@ -94,8 +94,8 @@ public void TriggerOnButtonSpawnPost(int entity)
 
 	SDKUnhook(entity, SDKHook_SpawnPost, TriggerOnButtonSpawnPost);
 
-	HookSingleEntityOutput(entity, "func_button", "OnPressed", ButtonOnPressed, true);
-	HookSingleEntityOutput(entity, "func_button", "OnDamaged", ButtonOnPressed, true);
+	HookSingleEntityOutput(entity, "OnPressed", ButtonOnPressed, true);
+	HookSingleEntityOutput(entity, "OnDamaged", ButtonOnPressed, true);
 }
 
 public void TriggerOnTriggerSpawnPost(int entity)
@@ -111,7 +111,7 @@ public void TriggerOnTriggerSpawnPost(int entity)
 public Action TriggerOnStartTouch(int entity, int toucher)
 {
 	SDKUnhook(entity, SDKHook_StartTouch, TriggerOnStartTouch);
-
+	if(toucher<=0||toucher>64)	return Plugin_Continue;
 	if (IsClientInGame(toucher))
 	{
 		char activator_name[64];
@@ -131,7 +131,7 @@ public Action TriggerOnStartTouch(int entity, int toucher)
 		
 		int hammerid = GetEntProp(entity, Prop_Data, "m_iHammerID");
 
-		PrintToChatAll(" \x04[触发检测] \x09%s(%s) \x01触发了 \x06机关%s(%d)", activator_name, activator_auth, button_name, hammerid);
+		//PrintToChatAll(" \x04[触发检测] \x09%s(%s) \x01触发了 \x06机关%s(%d)", activator_name, activator_auth, button_name, hammerid);
 		PrintToConsoleAll("[触发检测] %s(%s) 触发了 机关(Trigger)%s(%d)", activator_name, activator_auth, button_name, hammerid);
 	}
 

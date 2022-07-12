@@ -4,6 +4,8 @@ enum struct Nomlist_Log
 	char name[64];
 	int nominator_steamid;
 	char nominator_name[64];
+	char nominator_steamauth[PLATFORM_MAX_PATH];
+	char nominator_steampage[PLATFORM_MAX_PATH];
 	int nom_cost;
 }
 const int Nominate_Max_Num = 5;
@@ -192,7 +194,7 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 	Format(buffer,sizeof(buffer),"预定设置:[开放预定:%s][下载站:%s添加]\n[文件存在:%s]",Tmap.available?"是":"否",Tmap.download?"已":"未",Tmap.exist?"是":"否");
 	if(Tmap.tag&label_code[9])
 	{
-		Format(buffer,sizeof(buffer),"%s[人数上限:30]",buffer);
+		Format(buffer,sizeof(buffer),"%s[人数上限:35]",buffer);
 	}
 	menu.AddItem(Tmap.name,buffer,ITEMDRAW_DISABLED);
 	menu.Display(client,MENU_TIME_FOREVER);
@@ -246,13 +248,14 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 	nommap.id = map.id;
 	strcopy(nommap.name,sizeof(nommap.name),map.name);
 	nommap.nominator_steamid = GetSteamAccountID(client,true);
+	GetClientAuthId(client,AuthId_Steam2,nommap.nominator_steamauth,sizeof(nommap.nominator_steamauth),true);
 	GetClientName(client,nommap.nominator_name,sizeof(nommap.nominator_name));
 	int credits = 0;
 	if (g_pStore)
 		credits = Store_GetClientCredits(client);
-	if(map.tag&label_code[9])
+	if(map.tag&label_code[9]&&forcenom==0)
 	{
-		if(GetClientCount(true)>30)
+		if(GetClientCount(true)>35)
 		{
 			PrintToChat(client," \x05[地图系统]\x01人数超过\x09 35 \x01人，无法订阅该地图");
 			return;
@@ -308,13 +311,13 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 		Nom_Map_List.PushArray(nommap,sizeof(nommap));
 		if(forcenom)
 		{
-			Format(buffer,sizeof(buffer)," \x05[EMC] \x09%s \x01强制预定了地图 \x07%s",nommap.nominator_name,nommap.name);
+			Format(buffer,sizeof(buffer)," \x05[EMC] \x09%s\x06[\x07%s\x06] \x01强制预定了地图 \x07%s",nommap.nominator_name,nommap.nominator_steamauth,nommap.name);
 		}
 		else
 		{
-			Format(buffer,sizeof(buffer)," \x05[EMC] \x09%s \x01预定了地图 \x07%s",nommap.nominator_name,nommap.name);
+			Format(buffer,sizeof(buffer)," \x05[EMC] \x09%s\x06[\x07%s\x06] \x01预定了地图 \x07%s",nommap.nominator_name,nommap.nominator_steamauth,nommap.name);
 		}
-		PrintToServer(buffer);
+		PrintToConsoleAll(buffer);
 		PrintToChatAll(buffer);
 		Format(buffer,sizeof(buffer)," \x05[EMC] \x01当前已预定 \x03%d \x01张地图",Nom_Map_List.Length);
 		PrintToChatAll(buffer);

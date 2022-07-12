@@ -37,6 +37,7 @@ int tag_num=11;
 char difficulty_name[5][10]={"简单","普通","困难","高难","极难"};
 char label_name[11][64]={"FF","卤粉","弹幕方块","经典","闯关","娱乐","休闲","对抗","长征","感染","活动"};
 int label_code[11]={1,2,4,8,16,32,64,128,256,512,1024};
+Handle g_MapConfigLoaded;
 enum struct Map_Log
 {
 	int id;
@@ -81,6 +82,10 @@ void MapAdmOnPluginStart()
 	RegAdminCmd("sm_mapcd_update",MapCooldownCommand,ADMFLAG_GENERIC);
 	RegAdminCmd("sm_mapcost_update",MapCostCommand,ADMFLAG_GENERIC);
 	RegAdminCmd("sm_resetma",MapAdminResetCommand,ADMFLAG_GENERIC);
+	if(g_MapConfigLoaded == null)
+	{
+		g_MapConfigLoaded = CreateGlobalForward("EMC_Forward_MapConfigLoaded",ET_Ignore);
+	}
 
 }
 void MapAdmOnDbConnected_MapStartPost()
@@ -539,9 +544,6 @@ void MapCfgUpdate(Map_Info map)
 			break;
 		}
 	}
-
-	Call_StartForward(hOnMapConfigLoaded);
-	Call_Finish();
 }
 Action MapNamecnCommand(int client,int args)
 {
