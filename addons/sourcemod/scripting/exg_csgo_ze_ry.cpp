@@ -26,7 +26,7 @@ bool g_pStore = false;
 #include "zescape/round.h"
 #include "zescape/fly.h"
 #include "zescape/jump.h"
-#include "zescape/trigger_output.h"
+//#include "zescape/trigger_output.h"
 #include "zescape/voice_chat.h"
 #include "zescape/spec.h"
 #include "zescape/time.h"
@@ -118,10 +118,10 @@ public void OnMapStart()
 	DbOnDbConnected_MapStartPost();	
 }
 
-public void OnEntityCreated(int entity, const char[] classname)
+/*public void OnEntityCreated(int entity, const char[] classname)
 {
 	TriggerOnEntityCreated(entity, classname);
-}
+}*/
 
 void WarmUpTimerBuild()
 {

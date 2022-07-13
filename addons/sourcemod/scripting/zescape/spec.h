@@ -9,16 +9,30 @@ Action SpecCommand(int client,int args)
 
 	if (!IsClientInGame(client))
 		return Plugin_Handled;
-	
+	char target_name[64];
 	if (args != 1)
 	{
-		PrintToChat(client, " \x04[观察系统] \x07用法: !gc \"用户名\"");
+		Menu menu =CreateMenu(SpecMenuHandler);
+
+		for(int i=1;i<=64;i++)
+		{
+			if(IsClientInGame(i))
+			{
+				if(!IsFakeClient(i))
+				{
+					char index[4];
+					IntToString(i, index, sizeof(index));
+					GetClientName(i, target_name, sizeof(target_name));
+					menu.AddItem(index,target_name);
+				}
+			}
+		}
+		menu.Display(client, MENU_TIME_FOREVER);
 		return Plugin_Handled;
 	}
 
 	if (args == 1)
 	{
-		char target_name[64];
 		GetCmdArgString(target_name,sizeof(target_name));
 		ReplaceString(target_name, sizeof(target_name), "\"", "");
 
@@ -50,7 +64,7 @@ Action SpecCommand(int client,int args)
 				ForcePlayerSuicide(client);
 			}
 			DataPack dp = new DataPack();
-			dp.WriteCell(target);
+			dp.WriteCell(client);
 			dp.WriteCell(target);
 			RequestFrame(RFC_SetObsTarget, dp);
 		}
@@ -58,12 +72,40 @@ Action SpecCommand(int client,int args)
 	return Plugin_Handled;
 }
 
+int SpecMenuHandler(Menu menu, MenuAction action, int client, int param) {
+	if (action == MenuAction_End) menu.Close();
+	else if (action == MenuAction_Select) {
+		char index[4];
+		menu.GetItem(param, index, sizeof(index));
+		int target = StringToInt(index);
+		if(!IsPlayerAlive(target))
+		{
+			PrintToChat(client, " \x04[观察系统] \x07目标玩家必须存活!");
+			return;				
+		}
+		if(client == target)
+		{
+			PrintToChat(client," \x04[观察系统] \x07不能观察自己!");
+			return;
+		}
+		if (GetClientTeam(client) != 1)
+		{
+			ChangeClientTeam(client, 1);
+			ForcePlayerSuicide(client);
+		}
+		DataPack dp =new DataPack();
+		dp.WriteCell(client);
+		dp.WriteCell(target);
+		RequestFrame(RFC_SetObsTarget,dp);
+	}
+}
+
 public void RFC_SetObsTarget(DataPack dp)
 {
 	dp.Reset();
 	int client = dp.ReadCell();
 	int target = dp.ReadCell();
-
 	SetEntPropEnt(client, Prop_Send, "m_hObserverTarget", target); 
 	delete dp;
 }
+
