@@ -117,12 +117,10 @@ public void OnMapStart()
 	PrintToServer("DbOnDbConnected_MapStartPost");
 	DbOnDbConnected_MapStartPost();	
 }
-
 /*public void OnEntityCreated(int entity, const char[] classname)
 {
 	TriggerOnEntityCreated(entity, classname);
 }*/
-
 void WarmUpTimerBuild()
 {
 	g_Warmup_Timer = INVALID_HANDLE;
