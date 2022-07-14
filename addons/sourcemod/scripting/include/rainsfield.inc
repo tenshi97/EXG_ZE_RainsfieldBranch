@@ -37,6 +37,11 @@ enum struct Map_Info
     float dmgscale;
     float knockback;
     int zmclass;
+    float zmhpscale;
+    int mr;
+    float mrx;
+    float mry;
+    float mrz;
 }
 
 /**
@@ -79,3 +84,5 @@ forward void EMC_Forward_RTV_StartMapVote();
 forward void EMC_Forward_NextmapSelected(char[] nextmap_name);
 forward void EMC_Forward_RTV_Extended();
 forward void EMC_Forward_RTV_Nochange();
+
+forward void EMC_Forward_MapConfigLoaded();

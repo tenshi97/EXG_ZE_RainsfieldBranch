@@ -25,18 +25,15 @@ int SuperChatCheckQueryCallBack(Handle owner, Handle hndl, char[] error, any dat
 {
 	if(!hndl)
 	{
-		PrintToServer("test1");
 		return;
 	}
 	if (!SQL_GetRowCount(hndl)) {
-		PrintToServer("test2");
 		return;
 	}
 	int broadcastag;
 	int server_port = FindConVar("hostport").IntValue;
 	int server_order = (server_port-28005)/10;
 	int server_tag = 1<<(server_order-1);
-	PrintToServer("test3");
 	while(SQL_FetchRow(hndl))
 	{
 		broadcastag = DbFetchInt(hndl,"BROADCASTAG");
@@ -77,6 +74,6 @@ Action SuperChatCommand(int client,int args)
 	}	
 	else
 	{
-		PrintToChat(client," \x05[公告系统]全服聊天格式不正确，用法:/sc \"你想说的话\"");
+		PrintToChat(client," \x05[公告系统]全服聊天格式不正确，用法:/sch \"你想说的话\"");
 	}
 }

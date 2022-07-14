@@ -21,6 +21,7 @@ bool g_pStore = false;
 #include "zescape/db.h"
 #include "zescape/map_adm.h"
 #include "zescape/map_info.h"
+#include "zescape/map_room.h"
 #include "zescape/nominate.h"
 #include "zescape/rtv.h"
 #include "zescape/round.h"
@@ -100,6 +101,7 @@ public void OnPluginStart()
 	MissionOnPluginStart();
 	QuestOnPluginStart();
 	HdOnPluginStart();
+	MapRoomOnPluginStart();
 }
 
 public void OnMapStart() 

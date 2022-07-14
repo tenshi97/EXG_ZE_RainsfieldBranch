@@ -32,6 +32,10 @@
  	float dmgscale;
  	float knockback;
  	int zmclass;
+ 	int mr;
+ 	float mrx;
+ 	float mry;
+ 	float mrz;
 }*/
 int tag_num=11;
 char difficulty_name[5][10]={"简单","普通","困难","高难","极难"};
@@ -166,6 +170,10 @@ void MapDataLoadCallback(Handle owner, Handle hndl, char[] error, any data)
 		map.tagscale = DbFetchInt(hndl,"TAGSCALE");
 		map.knockback = DbFetchFloat(hndl,"KNOCKBACK");
 		map.zmclass = DbFetchInt(hndl,"ZMCLASS");
+		map.mr = DbFetchInt(hndl,"MR");
+		map.mrx = DbFetchFloat(hndl,"MRX");
+		map.mry = DbFetchFloat(hndl,"MRY");
+		map.mrz = DbFetchFloat(hndl,"MRZ");
 		Maps.SetArray(map.name, map, sizeof(map), true);
 //		Format(buffer,sizeof(buffer),"[MapDataLoad]Added Map List:%s",mapl.name);
 //		PrintToServer(buffer);
@@ -526,8 +534,8 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 }
 void MapCfgUpdate(Map_Info map)
 {
-	char query[1024];
-	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d, WINS = %d, FATIGUE = %d, INFECTTIME = %f,EGO = %d,VIS = %d, TAG = %d, DMGSCALE = %f, TAGSCALE = %d, KNOCKBACK = %f, ZMCLASS = %d WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.wins,map.interval,map.infecttime,map.ego,map.vis,map.tag,map.dmgscale,map.tagscale,map.knockback,map.zmclass,map.id,map.name);
+	char query[2048];
+	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d, WINS = %d, FATIGUE = %d, INFECTTIME = %f,EGO = %d,VIS = %d, TAG = %d, DMGSCALE = %f, TAGSCALE = %d, KNOCKBACK = %f, ZMCLASS = %d, MR = %d, MRX = %f, MRY = %f, MRZ = %f WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.wins,map.interval,map.infecttime,map.ego,map.vis,map.tag,map.dmgscale,map.tagscale,map.knockback,map.zmclass,map.mr,map.mrx,map.mry,map.mrz,map.id,map.name);
 	PrintToServer(query);
 	DbTQuery(DbQueryErrorCallback,query);	
 	Map_Log mapl;
