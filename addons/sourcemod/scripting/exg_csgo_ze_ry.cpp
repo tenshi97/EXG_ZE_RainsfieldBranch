@@ -39,7 +39,7 @@ ConVar g_Cvar_Mp_Warmup_Time;
 
 public Plugin myinfo = {
 	name = " EXG_Zombie_Escape_RY",
-	author = "Rainsfield&WackoD",
+	author = "Rainsfield&WackoD&EXGNullable",
 	description = "EXG ZombieEscape Rainsfield's Branch Plugins",
 	version = "1.0",
 	url = "https://zegod.cn"

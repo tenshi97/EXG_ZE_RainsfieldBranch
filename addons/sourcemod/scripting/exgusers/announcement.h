@@ -1,7 +1,7 @@
 Handle g_Timer_SuperChat_Check;
 void AnnouncementOnPluginStart()
 {
-	RegAdminCmd("sm_sch",SuperChatCommand,ADMFLAG_GENERIC);
+	RegConsoleCmd("sm_sch",SuperChatCommand);
 }
 void AnnouncementOnMapStart()
 {
@@ -60,20 +60,40 @@ int SuperChatCheckQueryCallBack(Handle owner, Handle hndl, char[] error, any dat
 Action SuperChatCommand(int client,int args)
 {
 	char message[512];
-	char client_name[64];
-	int current_time = GetTime();
-	char query[512];
-	int server_port = FindConVar("hostport").IntValue;
-	GetClientName(client,client_name,sizeof(client_name));
 	if (args == 1)
 	{
 		GetCmdArgString(message,sizeof(message));
 		ReplaceString(message, sizeof(message), "\"", "");	
-		Format(query,sizeof(query),"INSERT INTO announcement (NAME,SERVERPORT,MESSAGE,TIMESTAMP) VALUES('%s',%d,'%s',%d)",client_name,server_port,message,current_time);
-		DbTQuery(DbQueryErrorCallback,query);
+		SuperChat(client,message);
 	}	
 	else
 	{
-		PrintToChat(client," \x05[公告系统]全服聊天格式不正确，用法:/sch \"你想说的话\"");
+		PrintToChat(client," \x05[公告系统]\x01全服聊天格式不正确，用法:/sch \"你想说的话\",或用\\你想说的话");
 	}
+}
+void SuperChat(int client,const char[] message)
+{
+	char client_name[64];
+	int current_time = GetTime();
+	char query[512];
+	int server_port = FindConVar("hostport").IntValue;
+	if(!g_pStore)
+	{
+		PrintToChat(client," \x05[公告系统]\x01无法连接到商店系统，暂时关闭全服聊天功能");
+		return;
+	}
+	if(!IsClientVIP(client))
+	{
+		int credits = Store_GetClientCredits(client);
+		if(credits<10)
+		{
+			PrintToChat(client," \x05[公告系统]\x01积分不足,无法使用全服聊天(不会有人没有10积分吧，不会吧)");
+			return;
+		}
+		Store_SetClientCredits(client,credits-10);
+
+	}
+	GetClientName(client,client_name,sizeof(client_name));	
+	Format(query,sizeof(query),"INSERT INTO announcement (NAME,SERVERPORT,MESSAGE,TIMESTAMP) VALUES('%s',%d,'%s',%d)",client_name,server_port,message,current_time);
+	DbTQuery(DbQueryErrorCallback,query);	
 }

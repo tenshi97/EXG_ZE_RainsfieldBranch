@@ -325,8 +325,6 @@ Action TIMELEFT_AUTOVOTEMAP_HNDL(Handle timer)
 	{
 		return Plugin_Handled;
 	}
-	PrintToServer(" [EMC]地图剩余时间已到3分钟，准备换图");
-	//PrintToConsoleAll("[EMC]地图剩余时间已到3分钟，准备换图");
 	g_ChangeMap_Time = MapChangeTime_MapEnd;
 	g_Allow_RTV = false;
 	g_Timer_Timeleft = INVALID_HANDLE;
@@ -365,7 +363,7 @@ void AttemptRTV(int client)
 	RTV_PlayerNeeded = Max(RTV_PlayerNeeded,1);
 	if(g_RTV_PlyVoted[client])
 	{
-		Format(buffer,sizeof(buffer)," \x05[EMC] \x01您已要求发起换图投票(当前\x08 %d票，还需\x09 %d票",g_RTV_VotesNum,RTV_PlayerNeeded);
+		Format(buffer,sizeof(buffer)," \x05[EMC] \x01您已要求发起换图投票(当前\x08 %d票，还需\x09 %d票)",g_RTV_VotesNum,RTV_PlayerNeeded-g_RTV_VotesNum);
 		PrintToChat(client,buffer);
 		return;
 	}
@@ -390,7 +388,7 @@ void AttemptInstantRTV(int client)
 	RTV_PlayerNeeded = Max(RTV_PlayerNeeded,1);	
 	if(g_RTV_PlyVoted[client])
 	{
-		Format(buffer,sizeof(buffer)," \x05[EMC] \x01您已要求立即换图(当前\x08 %d票，还需\x09 %d票)",g_RTV_VotesNum,RTV_PlayerNeeded);
+		Format(buffer,sizeof(buffer)," \x05[EMC] \x01您已要求立即换图(当前\x08 %d票，还需\x09 %d票)",g_RTV_VotesNum,RTV_PlayerNeeded-g_RTV_VotesNum);
 		PrintToChat(client,buffer);
 		return;
 	}

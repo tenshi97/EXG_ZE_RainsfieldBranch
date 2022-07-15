@@ -342,22 +342,22 @@ void MissionOnRoundEnd(int winner)
 					{
 						playermission_list[i].taskdata[14]++;
 					}
-					if((strcmp(map_name,"ze_ffxii_salikawood_v1_6f")==0||strcmp(map_name,"ze_ffxii_feywood_b6_1k")==0)&&playermission_list[i].challenge[1]!=1)
+					if((strcmp(map_name,"ze_ffxii_salikawood_v1_6f",false)==0||strcmp(map_name,"ze_ffxii_feywood_b6_1k",false)==0)&&playermission_list[i].challenge[1]!=1)
 					{
 						PrintToChat(i," \x05[任务系统]\x01恭喜你完成了本周挑战任务的\x07条件1");
 						playermission_list[i].challenge[1]=1;
 					}
-					if(strcmp(map_name,"ze_rabanastre_royal_t5")==0&&playermission_list[i].challenge[2]!=1)
+					if(strcmp(map_name,"ze_rabanastre_royal_t5",false)==0&&playermission_list[i].challenge[2]!=1)
 					{
 						PrintToChat(i," \x05[任务系统]\x01恭喜你完成了本周挑战任务的\x07条件2");
 						playermission_list[i].challenge[2]=1;
 					}
-					if(strcmp(map_name,"ze_ffxii_paramina_rift_v1_4_a8t")==0&&playermission_list[i].challenge[3]!=1)
+					if(strcmp(map_name,"ze_ffxii_paramina_rift_v1_4_a8t",false)==0&&playermission_list[i].challenge[3]!=1)
 					{
 						PrintToChat(i," \x05[任务系统]\x01恭喜你完成了本周挑战任务的\x07条件3");
 						playermission_list[i].challenge[3]=1;
 					}		
-					if((strcmp(map_name,"ze_ffxii_westersand_v7_z9")==0||strcmp(map_name,"ze_ffxii_westersand_v8zeta1k")==0)&&playermission_list[i].challenge[4]!=1)
+					if((strcmp(map_name,"ze_ffxii_westersand_v7_z9",false)==0||strcmp(map_name,"ze_ffxii_westersand_v8zeta1k",false)==0)&&playermission_list[i].challenge[4]!=1)
 					{
 						PrintToChat(i," \x05[任务系统]\x01恭喜你完成了本周挑战任务的\x07条件4");
 						playermission_list[i].challenge[4]=1;
