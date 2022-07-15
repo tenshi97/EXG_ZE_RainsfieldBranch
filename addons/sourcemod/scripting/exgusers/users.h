@@ -20,6 +20,7 @@ enum struct user_log
 	int cpuid;
 	int loaded;//temp
 	int last_login;
+	int regtime;
 }
 user_log g_Users[65];
 char player_title_name[32][64]={"狗管理","服主","MAPPER","MODDER","大爷","糕手"};
@@ -64,7 +65,12 @@ void LoadUserInfo(int client)
 		return;
 	}
 	char query[512];
-	GetClientAuthId(client,AuthId_Steam2,auth_id,sizeof(auth_id),true);
+	if(!GetClientAuthId(client,AuthId_Steam2,auth_id,sizeof(auth_id),true))
+	{
+		PrintToServer("玩家%s[%d]信息载入失败(数据库未连接),等待下回合重载",client_name,client);
+		g_Users[client].loaded=0;
+		return;
+	}
 	Format(query,sizeof(query),"SELECT * FROM exgusers WHERE AUTHID = '%s'",auth_id);
 	PrintToServer(query);
 	DataPack dp = new DataPack();
@@ -90,17 +96,21 @@ int LoadUserInfoCallBack(Handle owner, Handle hndl, char[] error, DataPack dp)
 	if(!SQL_FetchRow(hndl))
 	{
 		PrintToConsoleAll("[调试]未检测到玩家%s[%d][%s]用户数据，注册新玩家",client_name,client,auth_id);
-		Format(query,sizeof(query),"INSERT INTO exgusers (NAME,AUTHID,LAST_LOGIN) VALUES('%s','%s',%d)",client_name,auth_id,current_time);
+		Format(query,sizeof(query),"INSERT INTO exgusers (NAME,AUTHID,LAST_LOGIN,REGTIME) VALUES('%s','%s',%d,%d)",client_name,auth_id,current_time,current_time);
 		PrintToServer(query);
 		new_client=client;
+		g_Users[client].last_login = current_time;
+		g_Users[client].regtime = current_time;
 	}
 	else
 	{
 		new_client=0;
 		g_Users[client].uid = DbFetchInt(hndl,"UID");
-		strcopy(g_Users[client].name,sizeof(client_name),client_name);
+		g_Users[client].regtime = DbFetchInt(hndl,"REGTIME");
 		g_Users[client].last_login = current_time;
-		Format(query,sizeof(query),"UPDATE exgusers SET NAME = '%s', LAST_LOGIN = '%s WHERE AUTHID = '%s'",client_name,current_time,auth_id);
+		strcopy(g_Users[client].name,sizeof(client_name),client_name);
+		Format(query,sizeof(query),"UPDATE exgusers SET NAME = '%s', LAST_LOGIN = %d WHERE AUTHID = '%s'",client_name,current_time,auth_id);
+		PrintToServer(query);
 		g_Users[client].loaded=1;
 	}
 	DbTQuery(LoadUpdateUserInfoCallback,query,new_client);
@@ -127,7 +137,6 @@ void ReloadNewUserInfoCallback(Handle owner, Handle hndl, char[] error, any data
 	if(SQL_FetchRow(hndl))
 	{
 		g_Users[client].uid = DbFetchInt(hndl,"UID");
-		PrintToConsoleAll(" [调试]新用户%s[%d]的UID为%d",client_name,client,g_Users[client].uid);
 		g_Users[client].loaded=1;
 	}
 	else
@@ -146,7 +155,6 @@ Action UserInfoMenuCommand(int client,int args)
 }
 void UserInfoMenu(int client)
 {
-	PrintToChatAll(" [UserInfoMenuTest]");
 	Menu menu = CreateMenu(UserInfoMenuHandler);
 	menu.SetTitle("用户信息\nUID:%d",g_Users[client].uid);
 	menu.AddItem("","test",ITEMDRAW_DISABLED);
