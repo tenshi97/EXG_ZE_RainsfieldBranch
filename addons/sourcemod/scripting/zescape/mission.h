@@ -334,7 +334,7 @@ void MissionOnRoundEnd(int winner)
 					{
 						playermission_list[i].taskdata[6]++;
 					}
-					if(playermission_list[i].taskdata[7]<=10000&&Pmap.tag&label_code[3])
+					if(playermission_list[i].taskdata[7]<=10000&&Pmap.tag&label_code[2])
 					{
 						playermission_list[i].taskdata[7]++;
 					}
@@ -342,26 +342,21 @@ void MissionOnRoundEnd(int winner)
 					{
 						playermission_list[i].taskdata[14]++;
 					}
-					if((strcmp(map_name,"ze_ffxii_salikawood_v1_6f",false)==0||strcmp(map_name,"ze_ffxii_feywood_b6_1k",false)==0)&&playermission_list[i].challenge[1]!=1)
+					if((strcmp(map_name,"ze_lotr_minas_tirith_p5",false)==0)&&playermission_list[i].challenge[1]!=1)
 					{
 						PrintToChat(i," \x05[任务系统]\x01恭喜你完成了本周挑战任务的\x07条件1");
 						playermission_list[i].challenge[1]=1;
 					}
-					if(strcmp(map_name,"ze_rabanastre_royal_t5",false)==0&&playermission_list[i].challenge[2]!=1)
+					if(strcmp(map_name,"ze_tesv_skyrim_v5_6",false)==0&&playermission_list[i].challenge[2]!=1)
 					{
 						PrintToChat(i," \x05[任务系统]\x01恭喜你完成了本周挑战任务的\x07条件2");
 						playermission_list[i].challenge[2]=1;
 					}
-					if(strcmp(map_name,"ze_ffxii_paramina_rift_v1_4_a8t",false)==0&&playermission_list[i].challenge[3]!=1)
+					if(strcmp(map_name,"ze_last_man_standing_v6_t2",false)==0&&playermission_list[i].challenge[3]!=1)
 					{
 						PrintToChat(i," \x05[任务系统]\x01恭喜你完成了本周挑战任务的\x07条件3");
 						playermission_list[i].challenge[3]=1;
-					}		
-					if((strcmp(map_name,"ze_ffxii_westersand_v7_z9",false)==0||strcmp(map_name,"ze_ffxii_westersand_v8zeta1k",false)==0)&&playermission_list[i].challenge[4]!=1)
-					{
-						PrintToChat(i," \x05[任务系统]\x01恭喜你完成了本周挑战任务的\x07条件4");
-						playermission_list[i].challenge[4]=1;
-					}				
+					}					
 				}
 				UpdatePlayerMissionInfo(i);
 			}
@@ -541,11 +536,11 @@ void TEMP_OpHR_TasklistSet()
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 3;
-	task.num[0] = 1;task.num[1] = 3;task.num[2] = 5;
+	task.num[0] = 1;task.num[1] = 2;task.num[2] = 3;
 	task.exp_base = 80;
 	task.period = 1;
 	task.type = HM_PASS;
-	task.tag = 3;
+	task.tag = 2;
 	Format(buffer,sizeof(buffer),"[人类]通关[%s]地图:",label_name[task.tag]);
 	task.difficulty = -1;
 	strcopy(task.name,sizeof(task.name),buffer);
@@ -1223,14 +1218,12 @@ void ChallengeTask(int client)
 	char buffer[256];
 	Menu menu = CreateMenu(ChallengeTaskMenuHandler);
 	menu.SetTitle("挑战任务");
-	menu.AddItem("","本周挑战任务:黄道年代~伊瓦利斯的冒险\n提示:森林、皇都与下水道、雪域峡谷、沙漠与飞空艇",ITEMDRAW_DISABLED);
-	Format(buffer,sizeof(buffer),"条件1:%s",(playermission_list[client].challenge[1]==1)?"通关地图FF12:萨莉卡树林或幻妖森林\n已完成":"???\n未完成");
+	menu.AddItem("","本周挑战任务:英雄之诗~成为英雄拯救世界吧\n",ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"条件1:%s",(playermission_list[client].challenge[1]==1)?"通关地图魔戒:米纳斯提力斯\n已完成":"用剑刃切开烈火，用光明驱散暗影\n未完成");
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-	Format(buffer,sizeof(buffer),"条件2:%s",(playermission_list[client].challenge[2]==1)?"通关地图拉巴纳斯塔\n已完成":"???\n未完成");
+	Format(buffer,sizeof(buffer),"条件2:%s",(playermission_list[client].challenge[2]==1)?"通关地图上古卷轴5：天际\n已完成":"黑龙的咆哮在山谷回响，当那流淌龙血的英雄降临时\n未完成");
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-	Format(buffer,sizeof(buffer),"条件3:%s",(playermission_list[client].challenge[3]==1)?"通关地图FF12:帕拉米娜大峡谷\n已完成":"???\n未完成");
-	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-	Format(buffer,sizeof(buffer),"条件4:%s",(playermission_list[client].challenge[4]==1)?"通关地图FF12:西部沙漠\n已完成":"???\n未完成");
+	Format(buffer,sizeof(buffer),"条件3:%s",(playermission_list[client].challenge[3]==1)?"通关地图一夫当关\n已完成":"成为孤胆英雄，拯救世界于末日之中\n未完成");
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 	menu.AddItem("","提交任务[奖励:400碎片]",(playermission_list[client].challenge[0]==1)?ITEMDRAW_DISABLED:ITEMDRAW_DEFAULT);
 	menu.ExitBackButton = true;
@@ -1253,7 +1246,7 @@ int ChallengeTaskMenuHandler(Menu menu, MenuAction action, int client, int param
 	{
 		if(playermission_list[client].challenge[0]!=1)
 		{
-			if((playermission_list[client].challenge[1]==1)&&(playermission_list[client].challenge[2]==1)&&(playermission_list[client].challenge[3]==1)&&(playermission_list[client].challenge[4]==1))
+			if((playermission_list[client].challenge[1]==1)&&(playermission_list[client].challenge[2]==1)&&(playermission_list[client].challenge[3]==1))
 			{
 				playermission_list[client].challenge[0]=1;
 				playermission_list[client].emoney+=500;

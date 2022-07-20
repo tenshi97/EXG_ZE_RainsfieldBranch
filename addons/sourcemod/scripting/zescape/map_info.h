@@ -53,7 +53,7 @@ void MapInfoOnDbConnected_MapStartPost()
 		if(!Current_Map_Loaded)
 		{
 			//PrintToServer("疲劳计数:%d",g_Map_Interval_Count);
-			if(server_port == 28015)
+			if(server_port == 27015)
 			{
 				if(Pmap.difficulty>=2)
 				{

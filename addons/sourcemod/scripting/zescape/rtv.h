@@ -486,7 +486,7 @@ void CreateNextMapVote()
 			bool playernum_limit = true;
 			if(map.available&&map.exist&&map.download&&map.random)
 			{	
-				if(map.difficulty>=2&&server_port==28015)
+				if(map.difficulty>=2&&server_port==27015)
 				{
 					if(g_Map_Interval_Count>0)
 					{

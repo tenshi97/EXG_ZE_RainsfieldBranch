@@ -164,7 +164,7 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 	menu.SetTitle(buffer);
 	int server_port = FindConVar("hostport").IntValue;
 	bool g_Interval_Allow = true;
-	if(server_port == 28015)
+	if(server_port == 27015)
 	{
 		if(Tmap.difficulty>=2)
 		{
