@@ -371,7 +371,15 @@ void MapAdminConfigMenu(int client,Map_Info map)
 	menu.AddItem(map.name,buffer);
 	Format(buffer,sizeof(buffer),"预订显示:%s",map.vis?"显示":"隐藏");
 	menu.AddItem(map.name,buffer);
-	menu.AddItem(map.name,"标签配置");
+	Format(buffer,sizeof(buffer),"标签配置:");
+	for(int i=0;i<=9;i++)
+	{
+		if(Tmap.tag&label_code[i])
+		{
+			Format(buffer,sizeof(buffer),"%s|%s|",buffer,label_name[i]);
+		}
+	}
+	menu.AddItem(map.name,buffer);
 	Format(buffer,sizeof(buffer),"伤害系数:%f",map.dmgscale);
 	menu.AddItem(map.name,buffer);
 	Format(buffer,sizeof(buffer),"定身系数:%d",map.tagscale);

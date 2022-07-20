@@ -8,12 +8,15 @@ enum struct Nomlist_Log
 	char nominator_steampage[PLATFORM_MAX_PATH];
 	int nom_cost;
 }
+
 const int Nominate_Max_Num = 5;
 bool Nominate_ALLOW;
 ArrayList Nom_Map_List;
 Map_Info g_Nextmap;
 bool g_MapVote_Initiated;
 bool g_MapVote_Proceeding;
+char g_sPlayerSearchFilter[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
+
 void NominateOnPluginStart()
 {
 	RegConsoleCmd("sm_nominate",NominateCommand);
@@ -40,6 +43,7 @@ Action NominateCommand(int client,int args)
 	if (!IsClientInGame(client)) return Plugin_Handled;
 	if (IsFakeClient(client))	return Plugin_Handled;
 	if (!args) {
+		g_sPlayerSearchFilter[client] = "";
 		NominateMapMenu(client);
 		return Plugin_Handled;
 	}
@@ -47,9 +51,9 @@ Action NominateCommand(int client,int args)
 	{
 		PrintToChat(client,"[预定地图:地图数据库尚未载入]");
 	}
-	char arg[PLATFORM_MAX_PATH];
-	GetCmdArg(1,arg,sizeof(arg));
-	NominateMapMenu(client,arg);
+
+	GetCmdArg(1,g_sPlayerSearchFilter[client],sizeof(g_sPlayerSearchFilter[]));
+	NominateMapMenu(client,g_sPlayerSearchFilter[client]);
 	return Plugin_Handled;	
 }
 
@@ -84,11 +88,11 @@ public void NominateOnClientDisconnect(int client)
 }
 void NominateMapMenu(int client,char trie_search[PLATFORM_MAX_PATH]="")
 {
-
 	Menu menu = CreateMenu(NominateMenuHandler);
 	Map_Log map;
 	Map_Info map_detail;
 	menu.SetTitle("预定地图");
+	char szBuffer[PLATFORM_MAX_PATH];
 	for(int i = 0 ; i < Map_List.Length ; i++)
 	{
 		GetArrayArray(Map_List, i, map, sizeof(map));
@@ -100,7 +104,8 @@ void NominateMapMenu(int client,char trie_search[PLATFORM_MAX_PATH]="")
 		if (map_detail.vis == 0)
 			continue;
 		
-		menu.AddItem(map.name,map.name);
+		Format(szBuffer, sizeof(szBuffer), "%s [%s]", map.name, map.name_cn);
+		menu.AddItem(map.name, szBuffer);
 	}
 	if(strlen(trie_search))
 	{
@@ -197,6 +202,8 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 		Format(buffer,sizeof(buffer),"%s[人数上限:35]",buffer);
 	}
 	menu.AddItem(Tmap.name,buffer,ITEMDRAW_DISABLED);
+
+	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }
 int NomMapInfoMenuHandler(Menu menu, MenuAction action, int client, int param)
@@ -234,7 +241,10 @@ int NomMapInfoMenuHandler(Menu menu, MenuAction action, int client, int param)
 			PrintToChatAll(buffer);
 			ForceChangeLevel(map.name,"强制更换");
 		}
-
+	}
+	else if (param == MenuCancel_ExitBack)
+	{
+		NominateMapMenu(client, g_sPlayerSearchFilter[client]);
 	}
 }
 

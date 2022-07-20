@@ -48,23 +48,23 @@ Action JumpCommand(int client,int args)
 
 void JumpServer(int client,char[] dest)
 {
-	char buffer[256];
+	// char buffer[256];
 	if(!IsClientInGame(client))	return;
 	if(IsFakeClient(client))	return;
-	GetClientName(client,buffer,sizeof(buffer));
-	if(strcmp(dest,"1F")==0||strcmp(dest,"1f")==0)
+	// GetClientName(client,buffer,sizeof(buffer));
+	if (strcmp(dest, "1f", false) == 0)
 	{
 		RedirectClient(client,"180.188.21.126:27015");
 	}
-	else if(strcmp(dest,"2F")==0||strcmp(dest,"2f")==0)
+	else if(strcmp(dest, "2f", false) == 0)
 	{
 		RedirectClient(client,"180.188.21.126:27025");
 	}
-	else if(strcmp(dest,"3F")==0||strcmp(dest,"3f")==0)
+	else if(strcmp(dest, "3f", false) == 0)
 	{
 		RedirectClient(client,"180.188.21.126:27035");
 	}
-	else if(strcmp(dest,"4F")==0||strcmp(dest,"4f")==0)
+	else if(strcmp(dest, "4f", false) == 0)
 	{
 		RedirectClient(client,"180.188.21.126:27045");
 	}
