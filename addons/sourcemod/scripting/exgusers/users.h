@@ -23,7 +23,7 @@ enum struct user_log
 	int regtime;
 }
 user_log g_Users[65];
-char player_title_name[32][64]={"狗管理","服主","MAPPER","MODDER","大爷","糕手"};
+char player_title_name[6][64]={"狗管理","服主","MAPPER","MODDER","大爷","糕手"};
 
 void UsersAdmOnPluginStart()
 {
@@ -156,8 +156,11 @@ Action UserInfoMenuCommand(int client,int args)
 void UserInfoMenu(int client)
 {
 	Menu menu = CreateMenu(UserInfoMenuHandler);
+	int legacy_id = GetSteamAccountID(client,true);
+	char buffer[512];
 	menu.SetTitle("用户信息\nUID:%d",g_Users[client].uid);
-	menu.AddItem("","test",ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"旧UID:%d",legacy_id);
+	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 	menu.Display(client,MENU_TIME_FOREVER);
 }
 int UserInfoMenuHandler(Menu menu, MenuAction action, int client, int param)

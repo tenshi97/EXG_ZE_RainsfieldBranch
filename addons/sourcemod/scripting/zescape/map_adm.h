@@ -170,6 +170,7 @@ void MapDataLoadCallback(Handle owner, Handle hndl, char[] error, any data)
 		map.tagscale = DbFetchInt(hndl,"TAGSCALE");
 		map.knockback = DbFetchFloat(hndl,"KNOCKBACK");
 		map.zmclass = DbFetchInt(hndl,"ZMCLASS");
+		map.zmhpscale = DbFetchFloat(hndl,"ZMHPSCALE");
 		map.mr = DbFetchInt(hndl,"MR");
 		map.mrx = DbFetchFloat(hndl,"MRX");
 		map.mry = DbFetchFloat(hndl,"MRY");
@@ -374,7 +375,7 @@ void MapAdminConfigMenu(int client,Map_Info map)
 	Format(buffer,sizeof(buffer),"标签配置:");
 	for(int i=0;i<=9;i++)
 	{
-		if(Tmap.tag&label_code[i])
+		if(map.tag&label_code[i])
 		{
 			Format(buffer,sizeof(buffer),"%s|%s|",buffer,label_name[i]);
 		}
@@ -387,6 +388,8 @@ void MapAdminConfigMenu(int client,Map_Info map)
 	Format(buffer,sizeof(buffer),"击退系数:%f",map.knockback);
 	menu.AddItem(map.name,buffer);
 	Format(buffer,sizeof(buffer),"允许特殊僵尸:%s",map.zmclass?"是":"否");
+	menu.AddItem(map.name,buffer);
+	Format(buffer,sizeof(buffer),"血量系数:%f",map.zmhpscale);
 	menu.AddItem(map.name,buffer);
 	menu.Display(client, MENU_TIME_FOREVER);
 }
@@ -538,12 +541,16 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 			MapCfgUpdate(map);
 			MapAdminConfigMenu(client,map);
 		}
+		if(param == 22)
+		{
+			MapZMHpScaleConfigMenu(client,map);
+		}
 	}	
 }
 void MapCfgUpdate(Map_Info map)
 {
 	char query[2048];
-	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d, WINS = %d, FATIGUE = %d, INFECTTIME = %f,EGO = %d,VIS = %d, TAG = %d, DMGSCALE = %f, TAGSCALE = %d, KNOCKBACK = %f, ZMCLASS = %d, MR = %d, MRX = %f, MRY = %f, MRZ = %f WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.wins,map.interval,map.infecttime,map.ego,map.vis,map.tag,map.dmgscale,map.tagscale,map.knockback,map.zmclass,map.mr,map.mrx,map.mry,map.mrz,map.id,map.name);
+	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d, WINS = %d, FATIGUE = %d, INFECTTIME = %f,EGO = %d,VIS = %d, TAG = %d, DMGSCALE = %f, TAGSCALE = %d, KNOCKBACK = %f, ZMCLASS = %d, ZMHPSCALE = %f, MR = %d, MRX = %f, MRY = %f, MRZ = %f WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.wins,map.interval,map.infecttime,map.ego,map.vis,map.tag,map.dmgscale,map.tagscale,map.knockback,map.zmclass,map.zmhpscale,map.mr,map.mrx,map.mry,map.mrz,map.id,map.name);
 	PrintToServer(query);
 	DbTQuery(DbQueryErrorCallback,query);	
 	Map_Log mapl;
@@ -857,7 +864,7 @@ void MapDmgscaleConfigMenu(int client,Map_Info map)
 {
 	char buffer[256];
 	Menu menu = CreateMenu(MapDmgScaleConfigMenuHandler);
-	Format(buffer,sizeof(buffer),"%s\n伤害系数:%f",map.name,map.dmgscale);
+	Format(buffer,sizeof(buffer),"%s\n伤害系数:%.2f",map.name,map.dmgscale);
 	menu.SetTitle(buffer);
 	menu.AddItem(map.name,"+0.1");
 	menu.AddItem(map.name,"+0.5");
@@ -902,7 +909,7 @@ void MapTagscaleConfigMenu(int client,Map_Info map)
 {
 	char buffer[256];
 	Menu menu = CreateMenu(MapTagscaleConfigMenuHandler);
-	Format(buffer,sizeof(buffer),"%s\n定身系数(数值越高定身越低):%d",map.name,map.tagscale);
+	Format(buffer,sizeof(buffer),"%s\n定身系数(数值越高定身越高):%d",map.name,map.tagscale);
 	menu.SetTitle(buffer);
 	menu.AddItem(map.name,"+1");
 	menu.AddItem(map.name,"+5");
@@ -947,7 +954,7 @@ void MapKnockbackConfigMenu(int client,Map_Info map)
 {
 	char buffer[256];
 	Menu menu = CreateMenu(MapKnockbackConfigMenuHandler);
-	Format(buffer,sizeof(buffer),"%s\n击退系数:%f",map.name,map.knockback);
+	Format(buffer,sizeof(buffer),"%s\n击退系数:%.2f",map.name,map.knockback);
 	menu.SetTitle(buffer);
 	menu.AddItem(map.name,"+0.1");
 	menu.AddItem(map.name,"+0.5");
@@ -977,6 +984,51 @@ int MapKnockbackConfigMenuHandler(Menu menu, MenuAction action, int client, int 
 		if(param==3)	map.knockback = fMax(0.1,map.knockback-0.1);
 		if(param==4)	map.knockback = fMax(0.1,map.knockback-0.5);
 		if(param==5)	map.knockback = fMax(0.1,map.knockback-1.0);
+		MapCfgUpdate(map);
+		MapKnockbackConfigMenu(client,map);
+	}	
+	else if (param == MenuCancel_ExitBack)
+	{
+		menu.GetItem(0,map_name,sizeof(map_name));
+		Maps.GetArray(map_name,map,sizeof(map));
+		MapAdminConfigMenu(client,map);
+	}
+}
+
+void MapZMHpScaleConfigMenu(int client,Map_Info map)
+{
+	char buffer[256];
+	Menu menu = CreateMenu(MapZMHpScaleConfigMenuHandler);
+	Format(buffer,sizeof(buffer),"%s\n血量系数(1.0-母体3W血):%.2f",map.name,map.zmhpscale);
+	menu.SetTitle(buffer);
+	menu.AddItem(map.name,"+0.01");
+	menu.AddItem(map.name,"+0.1");
+	menu.AddItem(map.name,"+0.5");
+	menu.AddItem(map.name,"-0.01");
+	menu.AddItem(map.name,"-0.1");
+	menu.AddItem(map.name,"-0.5");
+	menu.ExitBackButton = true;
+	menu.Display(client,MENU_TIME_FOREVER);
+}
+
+int MapZMHpScaleConfigMenuHandler(Menu menu, MenuAction action, int client, int param)
+{
+	char map_name[PLATFORM_MAX_PATH];
+	Map_Info map;
+	if( action == MenuAction_End )
+	{
+		menu.Close();
+	}
+	else if (action == MenuAction_Select)
+	{
+		menu.GetItem(param,map_name,sizeof(map_name));
+		Maps.GetArray(map_name,map,sizeof(map));
+		if(param==0)	map.zmhpscale = fMin(2.0,map.zmhpscale+0.01);
+		if(param==1)	map.zmhpscale = fMin(2.0,map.zmhpscale+0.1);
+		if(param==2)	map.zmhpscale = fMin(2.0,map.zmhpscale+0.5);
+		if(param==3)	map.zmhpscale = fMax(0.1,map.zmhpscale-0.01);
+		if(param==4)	map.zmhpscale = fMax(0.1,map.zmhpscale-0.1);
+		if(param==5)	map.zmhpscale = fMax(0.1,map.zmhpscale-0.5);
 		MapCfgUpdate(map);
 		MapKnockbackConfigMenu(client,map);
 	}	
