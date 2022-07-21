@@ -1030,7 +1030,7 @@ int MapZMHpScaleConfigMenuHandler(Menu menu, MenuAction action, int client, int 
 		if(param==4)	map.zmhpscale = fMax(0.1,map.zmhpscale-0.1);
 		if(param==5)	map.zmhpscale = fMax(0.1,map.zmhpscale-0.5);
 		MapCfgUpdate(map);
-		MapKnockbackConfigMenu(client,map);
+		MapZMHpScaleConfigMenu(client,map);
 	}	
 	else if (param == MenuCancel_ExitBack)
 	{
