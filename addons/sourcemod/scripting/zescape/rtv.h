@@ -173,6 +173,11 @@ public bool isMapCoolDownOver(Map_Info map)
 	{
 		return true;
 	}
+	int server_port = FindConVar("hostport").IntValue;
+	if (server_port == 27015)
+	{
+		return true;
+	}
 	return false;
 }
 public bool GetCurrentMapNominatorName(char nominator_name[PLATFORM_MAX_PATH],char nominator_steamauth[PLATFORM_MAX_PATH])
@@ -486,7 +491,8 @@ void CreateNextMapVote()
 			bool playernum_limit = true;
 			if(map.available&&map.exist&&map.download&&map.random)
 			{	
-				if(map.difficulty>=2&&server_port==27015)
+				
+				if(map.difficulty>=2&&server_port!=27015)
 				{
 					if(g_Map_Interval_Count>0)
 					{
@@ -494,6 +500,7 @@ void CreateNextMapVote()
 						//PrintToConsoleAll("地图%s由于疲劳机制被剔出了随机队列",map.name);
 					}
 				}
+				
 				if(map.tag&label_code[9])
 				{
 					if(GetClientCount(true)>30)

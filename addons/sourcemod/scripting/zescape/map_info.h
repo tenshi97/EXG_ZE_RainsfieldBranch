@@ -53,7 +53,8 @@ void MapInfoOnDbConnected_MapStartPost()
 		if(!Current_Map_Loaded)
 		{
 			//PrintToServer("疲劳计数:%d",g_Map_Interval_Count);
-			if(server_port == 27015)
+			
+			if(server_port != 27015)
 			{
 				if(Pmap.difficulty>=2)
 				{
@@ -62,6 +63,7 @@ void MapInfoOnDbConnected_MapStartPost()
 				{
 					g_Map_Interval_Count= Max(0,g_Map_Interval_Count-1);				}
 			}
+			
 		}
 		Pmap.temp_cooldown = false;
 		MapCfgUpdate(Pmap);
@@ -224,13 +226,20 @@ void MapInfoOnWarmUpEnd()
 			Pmap_Reload();
 			PrintToChatAll(" \x05[调试]\x01检测当前人数:%d",GetClientCount(true));
 			g_Map_RuntimeUpdate_Checked = true;
-			if(GetClientCount(true)>=20)
+			int server_port = FindConVar("hostport").IntValue;
+			if(GetClientCount(true)>=20 && server_port != 27015)
 			{
+			
 				int Time_MapStart = GetTime();
 				PrintToChatAll(" \x05[地图系统]\x01玩家人数超过20，计入地图CD");
 				Pmap.last_run_time = Time_MapStart;			//Check PlayerNum When MapEnd and if PlayerNum>20,Count Last Run Time
 			}
-			else
+			else if (server_port == 27015)
+			{
+				PrintToChatAll(" \x05[地图系统]\x01 1F 不计算地图CD");				
+			}
+			
+			else 
 			{
 				PrintToChatAll(" \x05[地图系统]\x01玩家人数不足20, 不计入地图CD");				
 			}

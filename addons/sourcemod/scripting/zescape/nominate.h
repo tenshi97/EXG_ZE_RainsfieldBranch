@@ -161,15 +161,22 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 		Format(cooldown_state,sizeof(cooldown_state),"冷却完成");
 		cooldown_over = true;
 	}
+	int server_port = FindConVar("hostport").IntValue;
+	if (server_port == 27015)
+	{
+		Format(cooldown_state,sizeof(cooldown_state),"1F地图无CD");
+		cooldown_over = true;
+	}
 	Format(buffer,sizeof(buffer),"地图预定:%s\n\
 		最后运行时间:%s\n\
 		冷却时间:%d分钟(%s)\n\
 		订价:%d积分[VIP减半]%s\n\
 		地图译名:%s",Tmap.name,ctime,Tmap.cooldown,cooldown_state,Tmap.cost,IsInClockTimePeriod(0,12)?"[优惠时间:生效]":"[优惠时间:未生效]",Tmap.name_cn);
 	menu.SetTitle(buffer);
-	int server_port = FindConVar("hostport").IntValue;
+
 	bool g_Interval_Allow = true;
-	if(server_port == 27015)
+	
+	if(server_port != 27015)
 	{
 		if(Tmap.difficulty>=2)
 		{
@@ -179,6 +186,7 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 			}
 		}
 	}
+	
 	menu.AddItem(Tmap.name,"预定地图",(g_Interval_Allow&&Tmap.available&&(cooldown_over||Tmap.temp_cooldown)&&Tmap.download&&Tmap.exist) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(Tmap.name,"重置冷却",GetAdminFlag(GetUserAdmin(client),Admin_Generic) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(Tmap.name,"强制提名",GetAdminFlag(GetUserAdmin(client),Admin_Generic) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
