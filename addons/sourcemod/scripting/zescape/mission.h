@@ -334,7 +334,7 @@ void MissionOnRoundEnd(int winner)
 					{
 						playermission_list[i].taskdata[6]++;
 					}
-					if(playermission_list[i].taskdata[7]<=10000&&Pmap.tag&label_code[2])
+					if(playermission_list[i].taskdata[7]<=10000&&Pmap.tag&label_code[3])
 					{
 						playermission_list[i].taskdata[7]++;
 					}
@@ -342,17 +342,17 @@ void MissionOnRoundEnd(int winner)
 					{
 						playermission_list[i].taskdata[14]++;
 					}
-					if((strcmp(map_name,"ze_lotr_minas_tirith_p5",false)==0)&&playermission_list[i].challenge[1]!=1)
+					if((strcmp(map_name,"ze_slender_escape_rc2",false)==0)&&playermission_list[i].challenge[1]!=1)
 					{
 						PrintToChat(i," \x05[任务系统]\x01恭喜你完成了本周挑战任务的\x07条件1");
 						playermission_list[i].challenge[1]=1;
 					}
-					if(strcmp(map_name,"ze_tesv_skyrim_v5_6",false)==0&&playermission_list[i].challenge[2]!=1)
+					if(strcmp(map_name,"ze_djinn_go",false)==0&&playermission_list[i].challenge[2]!=1)
 					{
 						PrintToChat(i," \x05[任务系统]\x01恭喜你完成了本周挑战任务的\x07条件2");
 						playermission_list[i].challenge[2]=1;
 					}
-					if(strcmp(map_name,"ze_last_man_standing_v6_t2",false)==0&&playermission_list[i].challenge[3]!=1)
+					if(strcmp(map_name,"ze_shroomforest3_p",false)==0&&playermission_list[i].challenge[3]!=1)
 					{
 						PrintToChat(i," \x05[任务系统]\x01恭喜你完成了本周挑战任务的\x07条件3");
 						playermission_list[i].challenge[3]=1;
@@ -540,7 +540,7 @@ void TEMP_OpHR_TasklistSet()
 	task.exp_base = 80;
 	task.period = 1;
 	task.type = HM_PASS;
-	task.tag = 2;
+	task.tag = 3;
 	Format(buffer,sizeof(buffer),"[人类]通关[%s]地图:",label_name[task.tag]);
 	task.difficulty = -1;
 	strcopy(task.name,sizeof(task.name),buffer);
@@ -616,7 +616,7 @@ Action MissionMenuCommand(int client,int args)
 
 void MissionMenuBuild(int client)
 {
-	if(Current_Mission.id<0)
+	if(Current_Mission.id<=0)
 	{
 		PrintToChat(client," \x05[任务系统]\x01当前没有可用的赛季活动");
 		return;
@@ -721,11 +721,11 @@ int DailyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 	char buffer[256];
 	TASK task;
 	int onlinetime;
-	if(client<=0||client>=65)	return;
 	onlinetime = (MostActive_GetPlayTimeTotal(client) - playermission_list[client].taskdata[4])/60;
 	if (action == MenuAction_End||client<=0||client>=65)
 	{
 		menu.Close();
+		return 0;
 	}
 	else if(action == MenuAction_Select)
 	{
@@ -785,6 +785,7 @@ int DailyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 		DailyTaskMenu(client);
 	}	
 	else if (param == MenuCancel_ExitBack) MissionMenuBuild(client);
+	return 0;
 }
 
 void WeeklyTaskMenu(int client)
@@ -828,7 +829,7 @@ int WeeklyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 {
 	char buffer[256];
 	TASK task;
-	if(client<=0||client>=65)	return;	if (action == MenuAction_End||client<=0||client>=65)
+	if (action == MenuAction_End||client<=0||client>=65)
 	{
 		menu.Close();
 	}
@@ -913,7 +914,6 @@ void AwardMenu(int client)
 	menu.AddItem("uid_wepskin_waterknifered","海豹短刀-浮翠流丹[LV60]", iStyle);
 	menu.AddItem("uid_wepskin_apexbs","小帮手[LV80]", iStyle);
 	menu.AddItem("uid_model_kokuriruru","人物模型-狐九里露露[LV100]", iStyle);
-
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }
@@ -1027,20 +1027,30 @@ void SecretShopMenu(int client)
 	menu.AddItem("uid_wepskin_dualg18","兑换[第一赛季-双持GLOCK]\n期限:120天 价格:300碎片",emoney>=300?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
 	menu.AddItem("uid_model_xinhai","兑换[第一赛季-心海]\n期限:永久 价格:600碎片",emoney>=600?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
 	menu.AddItem("uid_model_lemalin","兑换[第一赛季-恶毒]\n期限：永久 价格:1000碎片",emoney>=1000?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("","恶毒换装补领\n7月29日后领取的恶毒已自带换装");
 	menu.AddItem("","兑换积分:100碎片=500积分",emoney>=100?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("uid_nametag_s2half","兑换50级称号",playermission_list[client].lvl>=50?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("uid_nametag_s2max","兑换100级称号",playermission_list[client].lvl>=100?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }
 
 int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 {
-	if(client<=0||client>=65) return;
+	if(client<=0||client>=65)
+	{
+		menu.Close();
+		return 0;
+	}
 	int credits = Store_GetClientCredits(client);
 	int emoney = playermission_list[client].emoney;
 	int current_time = GetTime();
 	int expdate;
 	int item_id;
 	char item[256];
+	int lemalin_skin1 = Store_GetItemIdbyUniqueId("uid_model_lemalin");
+	int lemalin_skin2 = Store_GetItemIdbyUniqueId("uid_model_lemalin2");
+	int lemalin_skin3 = Store_GetItemIdbyUniqueId("uid_model_lemalin3");
 	if(!playermission_list[client].loaded)
 	{
 		PrintToChat(client," \x05[任务系统]数据未载入，无法购买(请等待下一回合或换图)");
@@ -1172,6 +1182,8 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 					else
 					{
 						Store_GiveItem(client,item_id,0,0,0);
+						Store_GiveItem(client,lemalin_skin2,0,0,0);
+						Store_GiveItem(client,lemalin_skin3,0,0,0);
 						playermission_list[client].emoney-=1000;
 					}
 				}
@@ -1181,10 +1193,39 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 				}
 			}
 		}
-		else if(param==7)
+		else if (param==7)
+		{
+			if(Store_HasClientItem(client,lemalin_skin1)&&(!Store_HasClientItem(client,lemalin_skin2)))
+			{
+				Store_GiveItem(client,lemalin_skin2,0,0,0);
+				Store_GiveItem(client,lemalin_skin3,0,0,0);		
+				PrintToChat(client," \x05[任务系统]\x01获得了\x07[恶毒-毛衣2]\x01和\x07[恶毒-兔子]")		
+			}
+		}
+		else if(param==8)
 		{
 			Store_SetClientCredits(client,credits+500);
 			playermission_list[client].emoney-=100;
+		}
+		else if(param==9||param==10)
+		{
+			menu.GetItem(param,item,sizeof(item));
+			item_id = Store_GetItemIdbyUniqueId(item);
+			if(!Store_HasClientItem(client,item_id))
+			{
+				if(playermission_list[client].lvl<50*param-400)
+				{
+					PrintToChat(client," \x05[任务系统]\x01等级不足无法领取!");
+				}
+				else
+				{
+					Store_GiveItem(client,item_id,0,0,1);
+				}
+			}
+			else
+			{
+				PrintToChat(client," \x05[任务系统]\x01你已经拥有该称号!");
+			}	
 		}
 		SecretShopMenu(client);
 	}		
@@ -1218,21 +1259,20 @@ void ChallengeTask(int client)
 	char buffer[256];
 	Menu menu = CreateMenu(ChallengeTaskMenuHandler);
 	menu.SetTitle("挑战任务");
-	menu.AddItem("","本周挑战任务:英雄之诗~成为英雄拯救世界吧\n",ITEMDRAW_DISABLED);
-	Format(buffer,sizeof(buffer),"条件1:%s",(playermission_list[client].challenge[1]==1)?"通关地图魔戒:米纳斯提力斯\n已完成":"用剑刃切开烈火，用光明驱散暗影\n未完成");
+	menu.AddItem("","本周挑战任务:恶灵退散~妖魔鬼怪快走开\n",ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"条件1:%s",(playermission_list[client].challenge[1]==1)?"通关地图瘦长鬼影\n已完成":"微弱的荧光与炬火，也将驱散那鬼影\n未完成");
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-	Format(buffer,sizeof(buffer),"条件2:%s",(playermission_list[client].challenge[2]==1)?"通关地图上古卷轴5：天际\n已完成":"黑龙的咆哮在山谷回响，当那流淌龙血的英雄降临时\n未完成");
+	Format(buffer,sizeof(buffer),"条件2:%s",(playermission_list[client].challenge[2]==1)?"通关地图神灵：埃及神殿\n已完成":"大漠上回响着鬼怪的哀嚎...\n未完成");
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-	Format(buffer,sizeof(buffer),"条件3:%s",(playermission_list[client].challenge[3]==1)?"通关地图一夫当关\n已完成":"成为孤胆英雄，拯救世界于末日之中\n未完成");
+	Format(buffer,sizeof(buffer),"条件3:%s",(playermission_list[client].challenge[3]==1)?"通关地图蘑菇森林3\n已完成":"穿越时空，摧毁撒旦的阴谋\n未完成");
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-	menu.AddItem("","提交任务[奖励:400碎片]",(playermission_list[client].challenge[0]==1)?ITEMDRAW_DISABLED:ITEMDRAW_DEFAULT);
+	menu.AddItem("","提交任务[奖励:500碎片]",(playermission_list[client].challenge[0]==1)?ITEMDRAW_DISABLED:ITEMDRAW_DEFAULT);
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }	
 
 int ChallengeTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 {
-	if(client<=0||client>=65) return;
 	if(!playermission_list[client].loaded)
 	{
 		PrintToChat(client," \x05[任务系统]数据未载入，无法购买(请等待下一回合或换图)");

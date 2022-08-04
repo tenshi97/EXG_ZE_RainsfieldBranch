@@ -434,6 +434,21 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 		{
 			if(map.available == 1)	map.available =0;
 			else map.available = 1;
+
+			int current_time = GetTime();
+			USER_LOG userinfo_admin;
+			EXGUSERS_GetUserInfo(client,userinfo_admin);
+			ADMIN_LOG admlog_add;
+			admlog_add.uid = userinfo_admin.uid;
+			strcopy(admlog_add.name,sizeof(admlog_add.name),userinfo_admin.name);
+			admlog_add.type=3;
+			admlog_add.value=map.available;
+			admlog_add.valuestr="";
+			admlog_add.target=0;
+			admlog_add.targetstr=map.name;		
+			admlog_add.timestamp = current_time;
+			EXGUSERS_AddAdminLog(admlog_add);
+
 			MapCfgUpdate(map);
 			MapAdminConfigMenu(client,map);
 		}	
@@ -628,9 +643,24 @@ int MapCooldownCfgHandler(Menu menu, MenuAction action, int client, int param)
 			PrintToChat(client,"更改时间参数已发送至控制台");
 			Format(buffer,sizeof(buffer),"sm_mapcd_update \"%s\" %d",map.name,map.cooldown);
 			PrintToConsole(client,buffer);
+			return 0;
 		}
+		int current_time = GetTime();
+		USER_LOG userinfo_admin;
+		EXGUSERS_GetUserInfo(client,userinfo_admin);
+		ADMIN_LOG admlog_add;
+		admlog_add.timestamp = current_time;
+		admlog_add.uid = userinfo_admin.uid;
+		strcopy(admlog_add.name,sizeof(admlog_add.name),userinfo_admin.name);
+		admlog_add.type=1;
+		admlog_add.value=map.cooldown;
+		admlog_add.valuestr="";
+		admlog_add.target=0;
+		admlog_add.targetstr=map.name;		
+		EXGUSERS_AddAdminLog(admlog_add);
 		MapCfgUpdate(map);
 		MapCooldownMenu(client,map);
+		return 0;
 	}
 }
 
@@ -650,6 +680,19 @@ Action MapCooldownCommand(int client,int args)
 		return Plugin_Handled;
 	}
 	map.cooldown = n_cooldown;
+	int current_time = GetTime();
+	USER_LOG userinfo_admin;
+	EXGUSERS_GetUserInfo(client,userinfo_admin);
+	ADMIN_LOG admlog_add;
+	admlog_add.timestamp = current_time;
+	admlog_add.uid = userinfo_admin.uid;
+	strcopy(admlog_add.name,sizeof(admlog_add.name),userinfo_admin.name);
+	admlog_add.type=1;
+	admlog_add.value=map.cooldown;
+	admlog_add.valuestr="";
+	admlog_add.target=0;
+	admlog_add.targetstr=map.name;
+	EXGUSERS_AddAdminLog(admlog_add);
 	MapCfgUpdate(map);
 	return Plugin_Handled;
 }
@@ -702,8 +745,22 @@ int MapCostCfgHandler(Menu menu, MenuAction action, int client, int param)
 			Format(buffer,sizeof(buffer),"sm_mapcost_update \"%s\" %d",map.name,map.cost);
 			PrintToConsole(client,buffer);
 		}
+		int current_time = GetTime();
+		USER_LOG userinfo_admin;
+		EXGUSERS_GetUserInfo(client,userinfo_admin);
+		ADMIN_LOG admlog_add;
+		admlog_add.timestamp = current_time;
+		admlog_add.uid = userinfo_admin.uid;
+		strcopy(admlog_add.name,sizeof(admlog_add.name),userinfo_admin.name);
+		admlog_add.type=2;
+		admlog_add.value=map.cost;
+		admlog_add.valuestr="";
+		admlog_add.target=0;
+		admlog_add.targetstr=map.name;		
+		EXGUSERS_AddAdminLog(admlog_add);
 		MapCfgUpdate(map);
 		MapCostMenu(client,map);
+		return 0;
 	}	
 }
 
@@ -723,6 +780,19 @@ Action MapCostCommand(int client,int args)
 		return Plugin_Handled;
 	}
 	map.cost = n_cost;
+	int current_time = GetTime();
+	USER_LOG userinfo_admin;
+	EXGUSERS_GetUserInfo(client,userinfo_admin);
+	ADMIN_LOG admlog_add;
+	admlog_add.timestamp = current_time;
+	admlog_add.uid = userinfo_admin.uid;
+	strcopy(admlog_add.name,sizeof(admlog_add.name),userinfo_admin.name);
+	admlog_add.type=2;
+	admlog_add.value=map.cost;
+	admlog_add.valuestr="";
+	admlog_add.target=0;
+	admlog_add.targetstr=map.name;		
+	EXGUSERS_AddAdminLog(admlog_add);
 	MapCfgUpdate(map);
 	return Plugin_Handled;
 }

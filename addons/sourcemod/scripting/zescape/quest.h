@@ -117,8 +117,7 @@ void DailyQuestMenu(int client)
 
 int DailyQuestMenuHandler(Menu menu, MenuAction action, int client, int param)
 {
-	if(client<=0||client>=65)	return;
-	if (action == MenuAction_End)
+	if (action == MenuAction_End||client<=0||client>=65)
 	{
 		menu.Close();
 	}

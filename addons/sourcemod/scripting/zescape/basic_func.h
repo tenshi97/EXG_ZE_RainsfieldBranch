@@ -1,4 +1,6 @@
 const int g_const_midnight_timestamp=1654185600;
+const int SQL_Inject_Str_Num = 14;
+char SQL_Inject_List[SQL_Inject_Str_Num][64]={"\'","=",",",";","%","insert","select","update","create","exec","delete","declare","master","truncate"};
 bool IsValidHuman(int client)
 {
 	if(IsClientInGame(client))
@@ -55,10 +57,11 @@ float fMin(float a,float b)
 }
 Action SetClientTeam(int client,int team)
 {
-	if(!IsClientInGame(client))	return;
+	if(!IsClientInGame(client))	return Plugin_Handled;
 	if (team == 1) FakeClientCommand(client, "jointeam spectator");
 	if (team == 2) FakeClientCommand(client, "jointeam red");
 	if (team == 3) FakeClientCommand(client, "jointeam blue");
+	return Plugin_Handled;
 }
 bool DiffTimeTransform1(char buffer[PLATFORM_MAX_PATH],int timestamp1,int timestamp2,int total)
 {
@@ -117,5 +120,13 @@ bool IsInClockTimePeriod(int start_point,int end_point)
 	{
 		if(current_time_reduced>=sp_t&&current_time_reduced<=ep_t)	return false;
 		else return true;
+	}
+}
+
+void CheckSQLInjectString(char[] text,int maxlen)
+{
+	for(int i=0;i<SQL_Inject_Str_Num;i++)
+	{
+		ReplaceString(text,maxlen,SQL_Inject_List[i]," ",false);
 	}
 }
