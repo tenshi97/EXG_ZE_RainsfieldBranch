@@ -184,21 +184,3 @@ public void OnClientPostAdminCheck(int client)
 	MissionOnClientConnected(client);
 	QuestOnPlayerConnected(client);
 }
-/*
-	int id;
-	char name[PLATFORM_MAX_PATH];
-	char name_cn[PLATFORM_MAX_PATH];
-	int cooldown;
-	int last_run_time;
-	int available;
-	int cost;
-	int heat;
-	int difficulty;
-	int tag;
-	int round;
-	int wins;
-	int translated;
-	int download;
-	int exist;
-*/
-//

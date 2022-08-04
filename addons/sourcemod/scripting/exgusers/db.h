@@ -10,6 +10,7 @@ void Db_Connect_Callback(Handle owner, Handle hndl, const char[] error, any data
 	Db_Connection = hndl;
 	UsersAdmOnPluginStart();
 	AnnouncementOnMapStart();
+	ServerOnDbConnected();
 }
 bool isDbConnected()
 {
@@ -19,15 +20,6 @@ bool isDbConnected()
 void DbTQuery(SQLTCallback callback, const char[] query, any data = 0, DBPriority prio = DBPrio_Normal) {
 	SQL_TQuery(Db_Connection, callback, query, data, prio);
 }
-void DbOnDbConnected_Post()
-{
-	
-}
-void DbOnDbConnected_MapStartPost()
-{
-
-}
-
 void Db_Close()
 {	
 	if (Db_Connection != INVALID_HANDLE) Db_Connection.Close();

@@ -1,28 +1,4 @@
-enum struct user_log
-{
-	int uid;
-	char steamauth[64];
-	char name[64];
-	int mute;
-	int eban;
-	int nomban;
-	int zhban;
-	int cban;
-	int mute_expiretime;
-	int eban_expiretime;
-	int nomban_expiretime;
-	int zhban_expiretime;
-	int cban_expiretime;
-	int credits;
-	int credits_gain;
-	int stitle;
-	int title_group;
-	int cpuid;
-	int loaded;//temp
-	int last_login;
-	int regtime;
-}
-user_log g_Users[65];
+USER_LOG g_Users[65];
 char player_title_name[6][64]={"狗管理","服主","MAPPER","MODDER","大爷","糕手"};
 
 void UsersAdmOnPluginStart()
@@ -91,8 +67,10 @@ int LoadUserInfoCallBack(Handle owner, Handle hndl, char[] error, DataPack dp)
 	dp.ReadString(auth_id,sizeof(auth_id));
 	dp.ReadString(client_name,sizeof(client_name));
 	delete dp;
+	CheckSQLInjectString(client_name,sizeof(client_name));
 	int current_time = GetTime();
 	PrintToConsoleAll("[调试]载入反馈 %d %s %s",client,auth_id,client_name);
+
 	if(!SQL_FetchRow(hndl))
 	{
 		PrintToConsoleAll("[调试]未检测到玩家%s[%d][%s]用户数据，注册新玩家",client_name,client,auth_id);
@@ -169,4 +147,12 @@ int UserInfoMenuHandler(Menu menu, MenuAction action, int client, int param)
 	{
 		menu.Close();
 	}
+}
+
+public int Native_EXGUSERS_GetUserInfo(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	char buffer[256];
+	SetNativeArray(2,view_as<int>(g_Users[client]),sizeof(USER_LOG));
+	return 0;
 }

@@ -15,11 +15,13 @@ bool g_pStore = false;
 #include <mostactive>
 #pragma semicolon 1
 #pragma newdecls required
-#include "exgusers/basic_func.h"
+#include "zescape/basic_func.h"
 #include "exgusers/users.h"
 #include "exgusers/db.h"
 #include "exgusers/announcement.h"
 #include "exgusers/say.h"
+#include "exgusers/adminlog.h"
+#include "exgusers/server.h"
 public Plugin myinfo = {
 	name = " EXG_CSGO_Users",
 	author = "Rainsfield&WackoD&ExgNullable",
@@ -49,8 +51,21 @@ public void OnPluginStart()
 	DbOnPluginStart();
 	AnnouncementOnPluginStart();
 	UsersAdmOnPluginStart();
+	AdminLogOnPluginStart();
+	ServerOnPluginStart();
 }
-
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
+{
+	CreateNative("EXGUSERS_AddAdminLog",Native_EXGUSERS_AddAdminLog);
+	CreateNative("EXGUSERS_GetUserInfo",Native_EXGUSERS_GetUserInfo);
+	CreateNative("EXGUSERS_GetServerByPort",Native_EXGUSERS_GetServerByPort);
+	RegPluginLibrary("exgusers");
+	MarkNativeAsOptional("Store_GetClientCredits");
+	MarkNativeAsOptional("Store_SetClientCredits");
+	MarkNativeAsOptional("Store_GetItemIdbyUniqueId");
+	MarkNativeAsOptional("Store_GiveItem");
+	MarkNativeAsOptional("Store_HasClientItem");
+}
 public void OnMapStart()
 {
 	if(!isDbConnected())	return;	
