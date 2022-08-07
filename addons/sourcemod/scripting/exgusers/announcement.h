@@ -32,8 +32,10 @@ int SuperChatCheckQueryCallBack(Handle owner, Handle hndl, char[] error, any dat
 	}
 	int broadcastag;
 	int server_port = FindConVar("hostport").IntValue;
-	int server_order = (server_port-28005)/10;
-	int server_tag = 1<<(server_order-1);
+	SERVER_LOG server_log,sender_server;
+ 	GetServerByPort(server_port,server_log);
+ 	char buffer[256];
+ 	int server_tag = 1<<(server_log.sid);
 	while(SQL_FetchRow(hndl))
 	{
 		broadcastag = DbFetchInt(hndl,"BROADCASTAG");
@@ -42,15 +44,15 @@ int SuperChatCheckQueryCallBack(Handle owner, Handle hndl, char[] error, any dat
 			broadcastag = broadcastag|server_tag;
 			char message[512];
 			char sender_name[64];
-			char buffer[256];
 			char query[512];
-			int sender_server;
+			int sender_server_port;
 			int mid;
 			mid = DbFetchInt(hndl,"MID");
 			DbFetchString(hndl,"NAME",sender_name,sizeof(sender_name));
 			DbFetchString(hndl,"MESSAGE",message,sizeof(message));
-			sender_server = (DbFetchInt(hndl,"SERVERPORT")-28005)/10;
-			Format(buffer,sizeof(buffer)," \x05[全服聊天][僵尸逃跑#%d]\x07%s:\x04%s",sender_server,sender_name,message);
+			sender_server_port = DbFetchInt(hndl,"SERVERPORT");
+			GetServerByPort(sender_server_port,sender_server);
+			Format(buffer,sizeof(buffer)," \x05[全服聊天][%s]\x07%s:\x04%s",sender_server.name,sender_name,message);
 			PrintToChatAll(buffer);
 			Format(query,sizeof(query),"UPDATE announcement SET BROADCASTAG = %d WHERE MID = %d",broadcastag,mid);
 			DbTQuery(DbQueryErrorCallback,query);
@@ -79,7 +81,10 @@ void SuperChat(int client,const char[] message)
 	int server_port = FindConVar("hostport").IntValue;
 	if(!g_pStore)
 	{
-		PrintToChat(client," \x05[公告系统]\x01无法连接到商店系统，暂时关闭全服聊天功能");
+		GetClientName(client,client_name,sizeof(client_name));	
+		CheckSQLInjectString(client_name,sizeof(client_name));
+		Format(query,sizeof(query),"INSERT INTO announcement (NAME,SERVERPORT,MESSAGE,TIMESTAMP) VALUES('%s',%d,'%s',%d)",client_name,server_port,message,current_time);
+		DbTQuery(DbQueryErrorCallback,query);	
 		return;
 	}
 	if(!IsClientVIP(client))
@@ -94,6 +99,7 @@ void SuperChat(int client,const char[] message)
 
 	}
 	GetClientName(client,client_name,sizeof(client_name));	
+	CheckSQLInjectString(client_name,sizeof(client_name));
 	Format(query,sizeof(query),"INSERT INTO announcement (NAME,SERVERPORT,MESSAGE,TIMESTAMP) VALUES('%s',%d,'%s',%d)",client_name,server_port,message,current_time);
 	DbTQuery(DbQueryErrorCallback,query);	
 }
