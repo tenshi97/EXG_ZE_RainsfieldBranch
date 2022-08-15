@@ -54,15 +54,14 @@ void MapInfoOnDbConnected_MapStartPost()
 		{
 			//PrintToServer("疲劳计数:%d",g_Map_Interval_Count);
 			
-			if(server_port != 27015)
-			{
+		
 				if(Pmap.difficulty>=2)
 				{
 					g_Map_Interval_Count = Min(2,g_Map_Interval_Count+Pmap.interval);				}
 				else
 				{
 					g_Map_Interval_Count= Max(0,g_Map_Interval_Count-1);				}
-			}
+			
 			
 		}
 		Pmap.temp_cooldown = false;

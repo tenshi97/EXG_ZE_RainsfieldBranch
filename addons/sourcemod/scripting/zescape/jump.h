@@ -54,26 +54,26 @@ void JumpServer(int client,char[] dest)
 	// GetClientName(client,buffer,sizeof(buffer));
 	if (strcmp(dest, "1f", false) == 0)
 	{
-		RedirectClient(client,"45.125.45.192:27015");
+		RedirectClient(client,"zegod.cn:27015");
 	}
 	else if(strcmp(dest, "2f", false) == 0)
 	{
-		RedirectClient(client,"45.125.45.192:27025");
+		RedirectClient(client,"zegod.cn:27025");
 	}
 	else if(strcmp(dest, "3f", false) == 0)
 	{
-		RedirectClient(client,"45.125.45.192:27035");
+		RedirectClient(client,"zegod.cn:27035");
 	}
 	else if(strcmp(dest, "4f", false) == 0)
 	{
-		RedirectClient(client,"45.125.45.192:27045");
+		RedirectClient(client,"zegod.cn:27045");
 	}
 	else if(strcmp(dest,"xs1f",false) == 0 )
 	{
-		RedirectClient(client,"103.85.86.204:25065");
+		RedirectClient(client,"xs.zegod.cn:25065");
 	}
 	else if(strcmp(dest,"xs2f",false) == 0 )
 	{
-		RedirectClient(client,"103.85.86.204:25075");
+		RedirectClient(client,"xs.zegod.cn:25075");
 	}
 }
