@@ -43,7 +43,48 @@ enum struct Map_Info
     float mry;
     float mrz;
 }
-
+enum struct ADMIN_LOG
+{
+    int uid;
+    char name[64];
+    int timestamp;
+    int type;
+    int value;
+    char valuestr[256];
+    int target;
+    char targetstr[256];
+}
+enum struct USER_LOG
+{
+    int uid;
+    char steamauth[64];
+    char name[64];
+    int mute;
+    int eban;
+    int nomban;
+    int zhban;
+    int cban;
+    int mute_expiretime;
+    int eban_expiretime;
+    int nomban_expiretime;
+    int zhban_expiretime;
+    int cban_expiretime;
+    int credits;
+    int credits_gain;
+    int stitle;
+    int title_group;
+    int cpuid;
+    int loaded;//temp
+    int last_login;
+    int regtime;
+}
+enum struct SERVER_LOG
+{
+    int sid;
+    int port;
+    char name[64];
+    int mode;
+}
 /**
  * Return Current Map's Property of Banning Human Skills
  * @return	True if Current Map Banned Human Skills
@@ -75,7 +116,10 @@ native int RY_Mission_GiveClientExp(int client,int exp);
 
 native int RY_Map_GetMapInfo(char[] map_name,any output[sizeof(Map_Info)]);
 native void RY_Map_GetCurrentMapInfo(any output[sizeof(Map_Info)]);
-
+native void RY_Map_GetCurrentMapNominator(char[] nominator_auth);
+native void EXGUSERS_AddAdminLog(any admlog[sizeof(ADMIN_LOG)]);
+native void EXGUSERS_GetUserInfo(int client,any userinfo[sizeof(USER_LOG)]);
+native void EXGUSERS_GetServerByPort(int port,any server[sizeof(SERVER_LOG)]);
 forward void RY_Map_OnMapConfigLoaded();
 
 forward RY_Daily_TimerCheck_Update(int start_time,int new_time,int days_delta);

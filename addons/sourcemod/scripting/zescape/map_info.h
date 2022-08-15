@@ -136,7 +136,10 @@ public int Native_RY_Map_GetCurrentMapInfo(Handle plugin, int numParams)
 	Maps.GetArray(Pmap.name,Map_Return,sizeof(Map_Return));
 	SetNativeArray(1, view_as<int>(Map_Return), sizeof(Map_Info)); 
 }
-
+public int Native_RY_Map_GetCurrentMapNominator(Handle plugin,int numParams)
+{
+	SetNativeString(1,g_current_nominator_steamauth,sizeof(g_current_nominator_steamauth));
+}
 Action ActionMapInfoMenu(int client,int args)
 {
 	if (!IsClientInGame(client)) return Plugin_Handled;
@@ -227,18 +230,13 @@ void MapInfoOnWarmUpEnd()
 			PrintToChatAll(" \x05[调试]\x01检测当前人数:%d",GetClientCount(true));
 			g_Map_RuntimeUpdate_Checked = true;
 			int server_port = FindConVar("hostport").IntValue;
-			if(GetClientCount(true)>=20 && server_port != 27015)
+			if(GetClientCount(true)>=20)
 			{
 			
 				int Time_MapStart = GetTime();
 				PrintToChatAll(" \x05[地图系统]\x01玩家人数超过20，计入地图CD");
 				Pmap.last_run_time = Time_MapStart;			//Check PlayerNum When MapEnd and if PlayerNum>20,Count Last Run Time
 			}
-			else if (server_port == 27015)
-			{
-				PrintToChatAll(" \x05[地图系统]\x01 1F 不计算地图CD");				
-			}
-			
 			else 
 			{
 				PrintToChatAll(" \x05[地图系统]\x01玩家人数不足20, 不计入地图CD");				

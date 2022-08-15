@@ -18,9 +18,8 @@ def get_timestamp_spec(clock,days=0):
     time_Array = time.strptime(specified_time,"%Y-%m-%d %H:%M:%S")
     return time.mktime(time_Array)
 
-
 # 按间距中的绿色按钮以运行脚本。
 if __name__ == '__main__':
     print_hi('PyCharm')
-print(str(get_timestamp_spec(0,-1)))
+print(str(get_timestamp_spec(8,28)))
 # 访问 https://www.jetbrains.com/help/pycharm/ 获取 PyCharm 帮助

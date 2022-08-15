@@ -60,7 +60,7 @@ public Action ButtonOnPressed(const char[] output, int caller, int activator, fl
 	
 	int hammerid = GetEntProp(caller, Prop_Data, "m_iHammerID");
 
-	//PrintToChatAll(" \x04[触发检测] \x09%s(%s) \x01触发了 \x06按钮%s(%d)", activator_name, activator_auth, button_name, hammerid);
+	PrintToChatAll(" \x04[触发检测] \x09%s(%s) \x01触发了 \x06按钮%s(%d)", activator_name, activator_auth, button_name, hammerid);
 	PrintToConsoleAll("[触发检测] %s(%s) 触发了 按钮(Button)%s(%d)", activator_name, activator_auth, button_name, hammerid);
 
 	return Plugin_Continue;
@@ -131,7 +131,7 @@ public Action TriggerOnStartTouch(int entity, int toucher)
 		
 		int hammerid = GetEntProp(entity, Prop_Data, "m_iHammerID");
 
-		//PrintToChatAll(" \x04[触发检测] \x09%s(%s) \x01触发了 \x06机关%s(%d)", activator_name, activator_auth, button_name, hammerid);
+		PrintToChatAll(" \x04[触发检测] \x09%s(%s) \x01触发了 \x06机关%s(%d)", activator_name, activator_auth, button_name, hammerid);
 		PrintToConsoleAll("[触发检测] %s(%s) 触发了 机关(Trigger)%s(%d)", activator_name, activator_auth, button_name, hammerid);
 	}
 

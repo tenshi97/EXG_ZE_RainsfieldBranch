@@ -10,6 +10,9 @@ int g_WarningTime_BeforeVote;
 int g_VoteTime;
 int g_Extend_Times;
 bool g_Instant_RTV;
+bool g_Extend_Vote;
+int g_Extend_Vote_Yes;
+int g_Extend_Vote_No;
 Handle g_WTimer_BeforeVote;
 Handle g_WTimer_BeforeMapChange;
 Handle g_Timer_Timeleft;
@@ -64,6 +67,7 @@ void RTVOnPluginStart()
 	RegConsoleCmd("sm_rtv",RTVCommand);
 	RegConsoleCmd("sm_ht",RTVCommand);
 	RegConsoleCmd("sm_mct",MapChangeTimeCommand);
+	RegConsoleCmd("sm_ext",ExtendCommand);
 	RegAdminCmd("sm_forcertv",ForceRTVCommand,ADMFLAG_GENERIC);
 	g_Cvar_RTV_PlayerNeededRatio = CreateConVar("emc_rtv_needed","0.5","Percentage of RTV Votes needed to start(def:0.45)",0, true, 0.05, true, 1.0);
 	g_Cvar_RTV_MaxRounds = CreateConVar("emc_max_rounds","50","Percentage of RTV Votes needed to start(def:0.45)",0, true, 0.05, true, 1.0);
@@ -163,6 +167,7 @@ void RTVOnMapStart()
 	g_Timer_MapVote_CenterText = INVALID_HANDLE;
 	ResetRTV();
 	g_RTV_Rounds = 0;
+	g_Extend_Vote = true;
 }
 public bool isMapCoolDownOver(Map_Info map)
 {
@@ -736,6 +741,13 @@ public void MapVoteHandler(Menu menu, int num_votes, int num_clients, const int[
 		Call_StartForward(g_RTV_Forward_NoChangeSelect);
 		Call_Finish();
 		ClearNomMapList();
+		int timeleft_check;
+		GetMapTimeLeft(timeleft_check);
+		if(timeleft_check<180)
+		{
+			PrintToChatAll(" \x05[EMC]地图剩余时间不足，补偿4分钟");
+			ExtendMapTimeLimit(240);
+		}
 	}
 	else
 	{
@@ -814,4 +826,129 @@ Action Instant_ChangeMap_Hndl(Handle timer)
 	GetNextMap(nextmap,sizeof(nextmap));
 	g_WTimer_BeforeMapChange  = INVALID_HANDLE;
 	ForceChangeLevel(nextmap,"[EMC]Instant Change Map");
+}
+
+Action ExtendCommand(int client,int args)
+{
+	if(!IsClientVIP(client))
+	{
+		PrintToChat(client," \x05[EMC]\x01您不是VIP，无法使用延长功能!");
+		return Plugin_Handled;
+	}
+	if(!g_Extend_Vote)
+	{
+		PrintToChat(client," \x05[EMC]\x01已经发起过延长投票!");
+		return Plugin_Handled;
+	}
+	ExtendMapVote(client);
+	return Plugin_Handled;
+}
+void ExtendMapVote(int client)
+{
+	char buffer[256];
+	if(g_MapVote_Proceeding||g_MapVote_Initiated||g_ChangeMap_Time == MapChangeTime_Instant)
+	{
+		PrintToChat(client," \x05[EMC]\x01当前正在进行地图投票或即将换图，无法使用延长功能");
+		return;
+	}
+	g_Extend_Vote_Yes = 0;
+	g_Extend_Vote_No = 0;
+	if(g_Nextmap_Selected)
+	{
+		if(g_ChangeMap_Time == MapChangeTime_RoundEnd)
+		{
+			g_Extend_Vote = false;
+			g_Allow_RTV = false;
+			g_ChangeMap_Time = MapChangeTime_MapEnd;
+			ExtendMapTimeLimit(60);
+			Menu menu = CreateMenu(ExtendMapVoteHandler, MenuAction_End | MenuAction_Display | MenuAction_DisplayItem);
+			SetMenuPagination(menu, MENU_NO_PAGINATION);
+			char client_name[64];
+			GetClientName(client,client_name,sizeof(client_name));
+			Format(buffer,sizeof(buffer)," \x05[EMC]\x01玩家\x09%s\x01发起了延长地图投票",client_name);
+			PrintToChatAll(buffer);
+			menu.SetTitle("地图延长投票");
+			menu.AddItem("","若同意票数超过总人数2/3",ITEMDRAW_DISABLED);
+			menu.AddItem("","地图将延长15分钟",ITEMDRAW_DISABLED);
+			menu.AddItem("","同意");
+			menu.AddItem("","反对");
+			SetVoteResultCallback(menu,ExtendResultHandler1);
+			VoteMenuToAll(menu,15);			
+		}
+		else
+		{
+			if(g_ChangeMap_Time == MapChangeTime_MapEnd)
+			{
+				g_Extend_Vote = false;
+				g_Allow_RTV = false;
+				ExtendMapTimeLimit(60);
+				Menu menu = CreateMenu(ExtendMapVoteHandler, MenuAction_End | MenuAction_Display | MenuAction_DisplayItem);
+				SetMenuPagination(menu, MENU_NO_PAGINATION);
+				char client_name[64];
+				GetClientName(client,client_name,sizeof(client_name));
+				Format(buffer,sizeof(buffer)," \x05[EMC]\x01玩家\x09%s\x01发起了延长地图投票",client_name);
+				PrintToChatAll(buffer);
+				menu.SetTitle("地图延长投票");
+				menu.AddItem("","若同意票数超过总人数2/3",ITEMDRAW_DISABLED);
+				menu.AddItem("","地图将延长15分钟",ITEMDRAW_DISABLED);
+				menu.AddItem("Yes","同意");
+				menu.AddItem("No","反对");
+				SetVoteResultCallback(menu,ExtendResultHandler2);
+				VoteMenuToAll(menu,15);			
+			}
+		}
+	}
+}
+
+int ExtendMapVoteHandler(Menu menu, MenuAction action, int param1, int param2) 
+{
+	if(action == MenuAction_Select)
+	{
+		char voter_name[64];
+		GetClientName(param1,voter_name,sizeof(voter_name));
+		if(param2==2)
+		{
+			g_Extend_Vote_Yes++;
+			PrintToConsoleAll("[EMC]延长投票:%s选择了同意",voter_name);
+		}
+		if(param2==3)
+		{
+			g_Extend_Vote_No++;
+			PrintToConsoleAll("[EMC]延长投票:%s选择了反对",voter_name);
+		}                                                                                                                                      
+	}
+}
+
+public void ExtendResultHandler1(Menu menu, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info)
+{
+	int total_client = GetClientCount(true);
+	g_Allow_RTV = true;
+	if(g_Extend_Vote_Yes*3>=total_client*2)
+	{
+		PrintToChatAll(" \x05[EMC]\x01投票延长成功!地图延长15分钟");
+		ExtendMapTimeLimit(900);
+		g_ChangeMap_Time = MapChangeTime_MapEnd;
+	}
+	else
+	{
+		PrintToChatAll(" \x05[EMC]\x01投票延长失败!地图将在回合结束后更换");
+		g_ChangeMap_Time = MapChangeTime_RoundEnd;		
+	}
+}
+
+public void ExtendResultHandler2(Menu menu, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info)
+{
+	int total_client = GetClientCount(true);
+	g_Allow_RTV = true;
+	if(g_Extend_Vote_Yes*3>=total_client*2)
+	{
+		PrintToChatAll(" \x05[EMC]\x01投票延长成功!地图延长15分钟");
+		ExtendMapTimeLimit(900);
+		g_ChangeMap_Time = MapChangeTime_MapEnd;
+	}
+	else
+	{
+		PrintToChatAll(" \x05[EMC]\x01投票延长失败!地图将在剩余时间结束后更换");
+		g_ChangeMap_Time = MapChangeTime_MapEnd;		
+	}
 }
