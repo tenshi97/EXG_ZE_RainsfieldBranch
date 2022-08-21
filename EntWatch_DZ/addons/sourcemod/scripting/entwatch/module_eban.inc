@@ -21,7 +21,7 @@ int g_iDBStatus = 0; // 0 - Def., 1 - Reconnect, 2 - Unknown Driver, 3 - Create 
 
 stock void EWM_Eban_OnPluginStart()
 {
-	g_hCvar_Default_BanTime		= CreateConVar("entwatch_bantime", "0", "Default ban time (0-43200)", _, true, 0.0, true, 43200.0);
+	g_hCvar_Default_BanTime		= CreateConVar("entwatch_bantime", "0", "Default ban time (0-4320000)", _, true, 0.0, true, 4320000.0);
 	g_hCvar_Default_BanReason	= CreateConVar("entwatch_banreason", "Item misuse", "Default ban reason.", _);
 	g_hCvar_Keep_Expired_Bans	= CreateConVar("entwatch_keep_expired_ban", "1", "Enable/Disable keep expired bans.", _, true, 0.0, true, 1.0);
 	g_hCvar_Use_Reason_Menu		= CreateConVar("entwatch_use_reason_menu", "0", "Enable/Disable menu if the admin has not indicated a reason", _, true, 0.0, true, 1.0);
@@ -222,7 +222,7 @@ public void EWM_Eban_BanClient(int iClient, int iAdmin, int iDuration, const cha
 		}else
 		{
 			//Wesker EDIT -- Restrict longer bans with command override
-			if(iAdmin != 0 && iBanDuration >= 720)
+			if(iAdmin != 0 && iBanDuration >= 72000)
 			{
 				//Check if admin has permission
 				if (!CheckCommandAccess(iAdmin, "sm_eban_long", ADMFLAG_ROOT))
@@ -297,7 +297,7 @@ public void EWM_Eban_UnBanClient(int iClient, int iAdmin, const char[] sReason)
 				CPrintToChat(iAdmin, "%s%t %s%t", g_SchemeConfig.Color_Tag, "EW_Tag", g_SchemeConfig.Color_Warning, "Not have permission rEBan");
 				return;
 			}
-		}else if(iBanDuration >= 720)
+		}else if(iBanDuration >= 72000)
 		{
 			//Check if admin has permission
 			if (!CheckCommandAccess(iAdmin, "sm_eban_long", ADMFLAG_ROOT))
@@ -791,4 +791,5 @@ public int EWM_Eban_Menu_EBanReason_Handler(Menu hMenu, MenuAction hAction, int 
 				CPrintToChat(iClient, "%s%t %s%t", g_SchemeConfig.Color_Tag, "EW_Tag", g_SchemeConfig.Color_Warning, "Player is not valid anymore");
 		}
 	}
+	return 0;
 }

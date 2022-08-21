@@ -18,7 +18,7 @@ stock void EWM_OfflineEban_OnPluginStart()
 	
 	HookConVarChange(g_hCvar_OfflineClearRecords, Cvar_OfflineEBAN_Changed);
 	
-	RegAdminCmd("sm_eoban", EWM_OfflineEban_Command_Restrict, ADMFLAG_RCON);
+	RegAdminCmd("sm_eoban", EWM_OfflineEban_Command_Restrict, ADMFLAG_GENERIC);
 	
 	//Timer Checker
 	CreateTimer(60.0, EWM_OfflineEban_Timer_Checker, _, TIMER_REPEAT);
@@ -367,6 +367,7 @@ public int EWM_OfflineEban_PlayerList_Handler(Menu hMenu, MenuAction hAction, in
 			}
 		}
 	}
+	return 0;
 }
 
 public int EWM_OfflineEban_Player_Handler(Menu hMenu, MenuAction hAction, int iClient, int iParam2)
@@ -382,6 +383,7 @@ public int EWM_OfflineEban_Player_Handler(Menu hMenu, MenuAction hAction, int iC
 			if(StringToInt(sOption) == 777) EWM_OfflineEban_Duration(iClient);
 		}
 	}
+	return 0;
 }
 
 public int EWM_OfflineEban_Duration_Handler(Menu hMenu, MenuAction hAction, int iClient, int iParam2)
@@ -416,6 +418,7 @@ public int EWM_OfflineEban_Duration_Handler(Menu hMenu, MenuAction hAction, int 
 			if(bAccessDuration) EWM_OfflineEban_Reason(iClient, iDuration);
 		}
 	}
+	return 0;
 }
 
 public int EWM_OfflineEban_Reason_Handler(Menu hMenu, MenuAction hAction, int iClient, int iParam2)
@@ -434,6 +437,7 @@ public int EWM_OfflineEban_Reason_Handler(Menu hMenu, MenuAction hAction, int iC
 			EWM_OfflineEban_BanClient(g_aMenuBuffer[iClient], iClient, iDuration, sReason);
 		}
 	}
+	return 0;
 }
 
 //-------------------------------------------------------

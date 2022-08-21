@@ -1,6 +1,6 @@
 #define EW_MODULE_CLANTAG
 
-#define MAXSIZECLANTAG 16
+#define MAXSIZECLANTAG 32
 
 char g_sClanTag[MAXPLAYERS+1][MAXSIZECLANTAG];
 
@@ -13,7 +13,7 @@ stock void EWM_Clantag_OnPluginStart()
 }
 
 //Get Client ClanTag on Connect
-public Action Event_PlayerConnectFull(Event hEvent, const char[] sName, bool bDontBroadcast)
+public void Event_PlayerConnectFull(Event hEvent, const char[] sName, bool bDontBroadcast)
 {
 	int iClient = GetClientOfUserId(GetEventInt(hEvent, "userid"));
 	
@@ -21,9 +21,14 @@ public Action Event_PlayerConnectFull(Event hEvent, const char[] sName, bool bDo
 }
 
 //Get Client ClanTag on Change
-public void OnClientSettingsChanged(int iClient)
+public void OnClientCommandKeyValues_Post(int iClient, KeyValues kv)
 {
-	if(IsValidClient(iClient)) CS_GetClientClanTag(iClient, g_sClanTag[iClient], MAXSIZECLANTAG);
+	if(IsValidClient(iClient))
+	{
+		char sCommmand[32];
+		if (kv.GetSectionName(sCommmand, sizeof(sCommmand)) && strcmp(sCommmand, "ClanTagChanged", false) == 0)
+			kv.GetString("tag", g_sClanTag[iClient], MAXSIZECLANTAG);
+	}
 }
 
 //Clear stored ClanTag
@@ -63,12 +68,18 @@ public Action EWM_Clantag_Timer_UpdateClantag(Handle timer, int client)
 			g_ItemList.GetArray(i, ItemTest, sizeof(ItemTest));
 			if(ItemTest.Hud && ItemTest.OwnerID != INVALID_ENT_REFERENCE && IsValidEdict(ItemTest.WeaponID))
 			{
-				ItemTest.UpdateTime();
+				UpdateTime();
 				char sClanName[MAXSIZECLANTAG];
 				
-				if(ItemTest.CheckDelay() > 0)
+				if(ItemTest.CheckDelay() > 0.0)
 				{
 					FormatEx(sClanName, MAXSIZECLANTAG, "%s[-%d]:", ItemTest.ShortName, ItemTest.RoundDelay());
+				}else if(ItemTest.LockButton)
+				{
+					FormatEx(sClanName, MAXSIZECLANTAG, "%s[L]:", ItemTest.ShortName);
+				}else if(ItemTest.CheckWaitTime() > 0)
+				{
+					FormatEx(sClanName, MAXSIZECLANTAG, "%s[%d]:", ItemTest.ShortName, ItemTest.RoundWaitTime());
 				}else
 				{
 					switch(ItemTest.Mode)
