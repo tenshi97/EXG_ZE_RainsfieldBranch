@@ -1,18 +1,24 @@
 USER_LOG g_Users[65];
 char player_title_name[6][64]={"狗管理","服主","MAPPER","MODDER","大爷","糕手"};
 
+GlobalForward g_fwOnUserLoaded;
+
 void UsersAdmOnPluginStart()
 {
 //	RegAdminCmd("sm_uadmin",UserAdminMenu,ADMFLAG_GENERIC);
 //	RegAdminCmd("sm_ua",UserAdminMenu,ADMFLAG_GENERIC);
 	RegConsoleCmd("sm_user",UserInfoMenuCommand);
 	RegConsoleCmd("sm_i",UserInfoMenuCommand);
-
+	
+	// forward void EXGUSERS_OnUserLoaded(int client);
+	g_fwOnUserLoaded = new GlobalForward("EXGUSERS_OnUserLoaded", ET_Ignore, Param_Cell);
 }
+
 void UsersOnClientInServer(int client)
 {
 	LoadUserInfo(client);
 }
+
 void UserInfoOnRoundStart(int client)
 {
 	for(int i=1;i<=64;i++)
@@ -29,36 +35,42 @@ void UsersOnClientDisconnect(int client)
 	g_Users[client].uid=0;
 	g_Users[client].loaded=0;
 }
+
 void LoadUserInfo(int client)
 {
-	char auth_id[64];
 	char client_name[64];
 	GetClientName(client,client_name,sizeof(client_name));
-	if(!isDbConnected())
+	if (!isDbConnected())
 	{
 		PrintToServer("玩家%s[%d]信息载入失败(数据库未连接),等待下回合重载",client_name,client);
 		g_Users[client].loaded=0;
 		return;
 	}
-	if(!IsClientInGame(client))
+
+	if (!IsClientInGame(client))
 	{
 		PrintToServer("玩家%s[%d]信息载入失败(玩家未连接),等待下回合重载",client_name,client);
 		g_Users[client].loaded=0;
 		return;
 	}
-	char query[512];
-	if(!GetClientAuthId(client,AuthId_Steam2,auth_id,sizeof(auth_id),true))
+
+	char auth_id[64];
+	if (!GetClientAuthId(client, AuthId_Steam2, auth_id, sizeof(auth_id), true))
 	{
 		PrintToServer("玩家%s[%d]信息载入失败(STEAMAUTH未连接),等待下回合重载",client_name,client);
 		g_Users[client].loaded=0;
 		return;
 	}
+
+	char query[512];
 	Format(query,sizeof(query),"SELECT * FROM exgusers WHERE AUTHID = '%s'",auth_id);
 	PrintToServer(query);
+
 	DataPack dp = new DataPack();
 	dp.WriteCell(client);
 	dp.WriteString(auth_id);
 	dp.WriteString(client_name);
+
 	DbTQuery(LoadUserInfoCallBack,query,dp);
 }
 
@@ -73,6 +85,7 @@ int LoadUserInfoCallBack(Handle owner, Handle hndl, char[] error, DataPack dp)
 	dp.ReadString(auth_id,sizeof(auth_id));
 	dp.ReadString(client_name,sizeof(client_name));
 	delete dp;
+
 	CheckSQLInjectString(client_name,sizeof(client_name));
 	int current_time = GetTime();
 	PrintToConsoleAll("[调试]载入反馈 %d %s %s",client,auth_id,client_name);
@@ -97,10 +110,13 @@ int LoadUserInfoCallBack(Handle owner, Handle hndl, char[] error, DataPack dp)
 		PrintToServer(query);
 		g_Users[client].loaded=1;
 		MonitorOnClientConnect(client);
+		Call_OnUserLoaded(client);
+		return;
 	}
-	DbTQuery(LoadUpdateUserInfoCallback,query,new_client);
 
+	DbTQuery(LoadUpdateUserInfoCallback, query, new_client);
 }
+
 void LoadUpdateUserInfoCallback(Handle owner, Handle hndl, char[] error, any data)
 {
 	int client = data;
@@ -124,21 +140,26 @@ void ReloadNewUserInfoCallback(Handle owner, Handle hndl, char[] error, any data
 		g_Users[client].uid = DbFetchInt(hndl,"UID");
 		g_Users[client].loaded=1;
 		MonitorOnClientConnect(client);
+
+		Call_OnUserLoaded(client);
 	}
 	else
 	{
 		g_Users[client].loaded = 0;
 	}
 }
+
 /*void UserAdminMenu(int client)
 {
 	Menu menu = CreateMenu(UserAdminMenuHandler);
 }*/
+
 Action UserInfoMenuCommand(int client,int args)
 {
 	UserInfoMenu(client);
 	return Plugin_Handled;
 }
+
 void UserInfoMenu(int client)
 {
 	Menu menu = CreateMenu(UserInfoMenuHandler);
@@ -149,6 +170,7 @@ void UserInfoMenu(int client)
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 	menu.Display(client,MENU_TIME_FOREVER);
 }
+
 int UserInfoMenuHandler(Menu menu, MenuAction action, int client, int param)
 {
 	if (action == MenuAction_End||client<=0||client>=65)
@@ -163,4 +185,11 @@ public int Native_EXGUSERS_GetUserInfo(Handle plugin, int numParams)
 	char buffer[256];
 	SetNativeArray(2,g_Users[client],sizeof(USER_LOG));
 	return 0;
+}
+
+void Call_OnUserLoaded(int client)
+{
+	Call_StartForward(g_fwOnUserLoaded);
+	Call_PushCell(client);
+	Call_Finish();
 }

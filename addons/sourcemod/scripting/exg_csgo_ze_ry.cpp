@@ -184,6 +184,10 @@ public void OnClientDisconnect(int client)
 public void OnClientPostAdminCheck(int client)
 {
 	VoiceChatOnClientConnected(client);
-	MissionOnClientConnected(client);
 	QuestOnPlayerConnected(client);
+}
+
+public void EXGUSERS_OnUserLoaded(int client)
+{
+	MissionOnClientConnected(client);
 }

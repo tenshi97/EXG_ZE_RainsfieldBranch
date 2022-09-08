@@ -287,6 +287,7 @@ void DbClearPlayerMissionInfoCallback(Handle owner, Handle hndl, char[] error, a
 {
 	ReloadAllPlayerMissionInfo();
 }
+
 void UpdatePlayerMissionInfo(int client,int force=0)
 {
 	if((!force)&&(playermission_list[client].loaded==0||playermission_list[client].uid==0))
@@ -295,6 +296,7 @@ void UpdatePlayerMissionInfo(int client,int force=0)
 		LoadPlayerMissionInfo(client);
 		return;
 	}
+
 	char query[2048];
 	int uid = playermission_list[client].uid;
 	int lvl = playermission_list[client].lvl;
@@ -334,13 +336,13 @@ void UpdatePlayerMissionInfo(int client,int force=0)
 	}
 }
 
-
 void MissionOnClientConnected(int client)
 {
 	playermission_list[client].loaded=0;
 	playermission_list[client].uid = 0;
 	LoadPlayerMissionInfo(client);
 }
+
 void MissionOnClientDisconnect(int client)
 {
 	if(playermission_list[client].loaded)
@@ -391,6 +393,7 @@ void MissionOnRoundEnd(int winner)
 		}
 	}
 }
+
 void MissionHumanDmgCount(int attacker,int victim,int dmg)
 {
 	if(GetClientCount(true)<30)	return;
@@ -411,6 +414,7 @@ void MissionHumanDmgCount(int attacker,int victim,int dmg)
 		playermission_list[victim].taskdata[11]+=dmg;
 	}
 }
+
 void MissionHumanKillZombie(int attacker)
 {
 	if(GetClientCount(true)<30)	return;
@@ -423,6 +427,7 @@ void MissionHumanKillZombie(int attacker)
 		playermission_list[attacker].taskdata[10]++;
 	}
 }
+
 void MissionZombieInfectHuman(int attacker)
 {
 	if(GetClientCount(true)<30)	return;
@@ -435,6 +440,7 @@ void MissionZombieInfectHuman(int attacker)
 		playermission_list[attacker].taskdata[9]++;
 	}
 }
+
 void MissionHumanNadeCount(int client)
 {
 	if(GetClientCount(true)<30)	return;
@@ -461,14 +467,13 @@ void MissionOnMapEnd()
 	}	
 }
 
-
-
 void CheckValidMission()
 {
 	char query[512];
 	Format(query,sizeof(query),"SELECT * FROM ZEMISSION");
 	DbTQuery(CheckValidMissionCallBack,query);
 }
+
 void CheckValidMissionCallBack(Handle owner, Handle hndl, char[] error, any data)
 {
 	int current_time = GetTime();

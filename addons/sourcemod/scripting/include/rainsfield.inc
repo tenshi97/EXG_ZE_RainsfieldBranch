@@ -142,15 +142,12 @@ native int RY_Mission_GetClientMissionLevel(int client);
 
 native int RY_Mission_GiveClientExp(int client,int exp);
 
-native int RY_Map_GetMapInfo(char[] map_name,any output[sizeof(Map_Info)]);
+native int RY_Map_GetMapInfo(char[] map_name, any output[sizeof(Map_Info)]);
 native void RY_Map_GetCurrentMapInfo(any output[sizeof(Map_Info)]);
 native void RY_Map_GetCurrentMapNominator(char[] nominator_auth);
-native void EXGUSERS_AddAdminLog(any admlog[sizeof(ADMIN_LOG)]);
-native int EXGUSERS_GetUserInfo(int client,any userinfo[sizeof(USER_LOG)]);
-native void EXGUSERS_GetServerByPort(int port,any server[sizeof(SERVER_LOG)]);
 forward void RY_Map_OnMapConfigLoaded();
 
-forward RY_Daily_TimerCheck_Update(int start_time,int new_time,int days_delta);
+forward void RY_Daily_TimerCheck_Update(int start_time, int new_time, int days_delta);
 
 forward void EMC_Forward_RTV_StartMapVote();
 forward void EMC_Forward_NextmapSelected(char[] nextmap_name);
@@ -158,3 +155,12 @@ forward void EMC_Forward_RTV_Extended();
 forward void EMC_Forward_RTV_Nochange();
 
 forward void EMC_Forward_MapConfigLoaded();
+
+///////////////////////
+//     EXG Users     //
+///////////////////////
+native void EXGUSERS_AddAdminLog(any admlog[sizeof(ADMIN_LOG)]);
+native int EXGUSERS_GetUserInfo(int client, any userinfo[sizeof(USER_LOG)]);
+native void EXGUSERS_GetServerByPort(int port, any server[sizeof(SERVER_LOG)]);
+
+forward void EXGUSERS_OnUserLoaded(int client);
