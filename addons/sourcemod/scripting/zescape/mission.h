@@ -984,11 +984,13 @@ int AwardMenuHandle(Menu menu, MenuAction action, int client, int param)
 		if(playermission_list[client].sp&(1<<(param)))
 		{
 			PrintToChat(client," \x05[任务系统]\x01已经领取过该奖励！");
+			AwardMenu(client);
 			return 0;
 		}
 		if(playermission_list[client].lvl<25*(param+1))
 		{
 			PrintToChat(client," \x05[任务系统]\x01领取所需等级不足!需要赛季等级\x09%d\x01级，而你只有\x09%d\x01级",25*(param+1),playermission_list[client].lvl);
+			AwardMenu(client);
 			return 0;
 		}
 		item_id = Store_GetItemIdbyUniqueId(item);
