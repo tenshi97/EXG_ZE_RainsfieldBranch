@@ -13,6 +13,7 @@ bool g_Instant_RTV;
 bool g_Extend_Vote;
 int g_Extend_Vote_Yes;
 int g_Extend_Vote_No;
+int g_Extend_Vote_All;
 Handle g_WTimer_BeforeVote;
 Handle g_WTimer_BeforeMapChange;
 Handle g_Timer_Timeleft;
@@ -285,7 +286,7 @@ public void RTVOnClientDisconnect(int client)
 			g_RTV_VotesNum--;
 		}
 	}
-	if(GetClientCount(true) == 0)	return;
+	if(GetClientCount(true) <=5 )	return;
 	if(!g_Allow_RTV)	return;
 	int d_RTV_PlayerNeeded;
 	d_RTV_PlayerNeeded=Max(1,RoundToFloor(GetClientCount(true)*GetConVarFloat(g_Cvar_RTV_PlayerNeededRatio)));
@@ -327,15 +328,14 @@ public void OnMapTimeLeftChanged()
 }
 Action TIMELEFT_AUTOVOTEMAP_HNDL(Handle timer)
 {
-	if(g_Nextmap_Selected||g_MapVote_Initiated||g_MapVote_Proceeding)
+	if(!g_Nextmap_Selected&&!g_MapVote_Initiated&&!g_MapVote_Proceeding)
 	{
-		return Plugin_Handled;
+		g_ChangeMap_Time = MapChangeTime_MapEnd;
+		g_Allow_RTV = false;
+		StartMapVote(MapChangeTime_MapEnd);
 	}
-	g_ChangeMap_Time = MapChangeTime_MapEnd;
-	g_Allow_RTV = false;
 	g_Timer_Timeleft = INVALID_HANDLE;
-	StartMapVote(MapChangeTime_MapEnd);
-	return Plugin_Handled;
+	return Plugin_Stop;
 }
 Action RTVCommand(int client,int args)
 {
@@ -849,6 +849,7 @@ void ExtendMapVote(int client)
 	}
 	g_Extend_Vote_Yes = 0;
 	g_Extend_Vote_No = 0;
+	g_Extend_Vote_All = 0;
 	if(g_Nextmap_Selected)
 	{
 		if(g_ChangeMap_Time == MapChangeTime_RoundEnd)
@@ -905,11 +906,13 @@ int ExtendMapVoteHandler(Menu menu, MenuAction action, int param1, int param2)
 		if(param2==2)
 		{
 			g_Extend_Vote_Yes++;
+			g_Extend_Vote_All++;
 			PrintToConsoleAll("[EMC]延长投票:%s选择了同意",voter_name);
 		}
 		if(param2==3)
 		{
 			g_Extend_Vote_No++;
+			g_Extend_Vote_All++;
 			PrintToConsoleAll("[EMC]延长投票:%s选择了反对",voter_name);
 		}                                                                                                                                      
 	}
@@ -917,9 +920,9 @@ int ExtendMapVoteHandler(Menu menu, MenuAction action, int param1, int param2)
 
 public void ExtendResultHandler1(Menu menu, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info)
 {
-	int total_client = GetClientCount(true);
 	g_Allow_RTV = true;
-	if(g_Extend_Vote_Yes*3>=total_client*2)
+	PrintToChatAll(" \x05[EMC]\x01延长投票结果:\x07%d\x01/\x09%d\x01,通过率:\x07%.4f%",g_Extend_Vote_Yes,g_Extend_Vote_All,100.0*float(g_Extend_Vote_Yes)/float(g_Extend_Vote_All));
+	if(g_Extend_Vote_Yes*3>=g_Extend_Vote_All*2)
 	{
 		PrintToChatAll(" \x05[EMC]\x01投票延长成功!地图延长15分钟");
 		ExtendMapTimeLimit(900);
@@ -934,9 +937,9 @@ public void ExtendResultHandler1(Menu menu, int num_votes, int num_clients, cons
 
 public void ExtendResultHandler2(Menu menu, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info)
 {
-	int total_client = GetClientCount(true);
 	g_Allow_RTV = true;
-	if(g_Extend_Vote_Yes*3>=total_client*2)
+	PrintToChatAll(" \x05[EMC]\x01延长投票结果:\x07%d\x01/\x09%d\x01,通过率:\x07%.4f%",g_Extend_Vote_Yes,g_Extend_Vote_All,float(g_Extend_Vote_Yes)/float(g_Extend_Vote_All));
+	if(g_Extend_Vote_Yes*3>=g_Extend_Vote_All*2)
 	{
 		PrintToChatAll(" \x05[EMC]\x01投票延长成功!地图延长15分钟");
 		ExtendMapTimeLimit(900);

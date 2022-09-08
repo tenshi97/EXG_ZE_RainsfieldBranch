@@ -71,6 +71,7 @@ int QuestMenuHandler(Menu menu, MenuAction action, int client, int param)
 	if (action == MenuAction_End)
 	{
 		menu.Close();
+		return 0;
 	}
 	else if (action == MenuAction_Select)
 	{
@@ -86,6 +87,7 @@ int QuestMenuHandler(Menu menu, MenuAction action, int client, int param)
 		{
 			MissionMenuBuild(client);
 		}
+		return 0;
 	}
 }
 void DailyQuestMenu(int client)
@@ -120,6 +122,7 @@ int DailyQuestMenuHandler(Menu menu, MenuAction action, int client, int param)
 	if (action == MenuAction_End||client<=0||client>=65)
 	{
 		menu.Close();
+		return 0;
 	}
 	else if(action == MenuAction_Select)
 	{
@@ -148,6 +151,7 @@ int DailyQuestMenuHandler(Menu menu, MenuAction action, int client, int param)
 		}
 		UpdatePlayerQuestInfo(client);
 		DailyQuestMenu(client);
+		return 0;
 	}
 }
 
@@ -248,6 +252,16 @@ void ClearAllPlayerQuestInfo()
 {
 	char query[512];
 	PrintToChatAll(" \x05[任务系统]\x01清理日常任务数据...");
+	for(int i=1;i<=64;i++)
+	{
+		if(playerquest_list[i].loaded == 0 )	continue;
+		playerquest_list[i].loaded = 0;
+		for(int j=0;j<=5;j++)
+		{
+			playerquest_list[i].taskdata[j]=0;
+			playerquest_list[i].taskcomplete[j]=0;
+		}
+	}
 	Format(query,sizeof(query),"UPDATE zequest SET DINFECT = 0, DKILL = 0, DDMGTAKE = 0, DDMGMAKE = 0, DPASS = 0, DNADE = 0, DT1C = 0, DT2C = 0, DT3C = 0, DT4C = 0, DT5C = 0, DT6C = 0");
 	DbTQuery(DbClearPlayerQuestInfoCallback,query);
 }

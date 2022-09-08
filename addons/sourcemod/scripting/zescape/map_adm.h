@@ -612,6 +612,7 @@ void MapCooldownMenu(int client,Map_Info map)
 	menu.AddItem(map.name,"+1天",map.cooldown<20160?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(map.name,"+7天",map.cooldown<20160?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(map.name,"自定义");
+	menu.ExitBackButton = true;
 	menu.Display(client, MENU_TIME_FOREVER);
 
 }
@@ -660,6 +661,13 @@ int MapCooldownCfgHandler(Menu menu, MenuAction action, int client, int param)
 		EXGUSERS_AddAdminLog(admlog_add);
 		MapCfgUpdate(map);
 		MapCooldownMenu(client,map);
+		return 0;
+	}
+	else if (param == MenuCancel_ExitBack)
+	{
+		menu.GetItem(0,map_name,sizeof(map_name));
+		Maps.GetArray(map_name,map,sizeof(map));
+		MapAdminConfigMenu(client,map);
 		return 0;
 	}
 }
@@ -714,6 +722,7 @@ void MapCostMenu(int client,Map_Info map)
 	menu.AddItem(map.name,"+1000积分",map.cost<15000?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(map.name,"+5000积分",map.cost<15000?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(map.name,"自定义");
+	menu.ExitBackButton = true;
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
@@ -762,6 +771,13 @@ int MapCostCfgHandler(Menu menu, MenuAction action, int client, int param)
 		MapCostMenu(client,map);
 		return 0;
 	}	
+	else if (param == MenuCancel_ExitBack)
+	{
+		menu.GetItem(0,map_name,sizeof(map_name));
+		Maps.GetArray(map_name,map,sizeof(map));
+		MapAdminConfigMenu(client,map);
+		return 0;
+	}
 }
 
 Action MapCostCommand(int client,int args)
@@ -811,6 +827,7 @@ void MapTimeLimitMenu(int client,Map_Info map)
 	menu.AddItem(map.name,"-10分钟",map.timelimit>10?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(map.name,"-30分钟",map.timelimit>10?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(map.name,"-60分钟",map.timelimit>10?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	menu.ExitBackButton = true;
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
@@ -836,6 +853,13 @@ int MapTimeLimitMenuHandler(Menu menu, MenuAction action, int client, int param)
 		MapCfgUpdate(map);
 		MapTimeLimitMenu(client,map);
 	}
+	else if (param == MenuCancel_ExitBack)
+	{
+		menu.GetItem(0,map_name,sizeof(map_name));
+		Maps.GetArray(map_name,map,sizeof(map));
+		MapAdminConfigMenu(client,map);
+		return 0;
+	}
 }
 
 void MapInfectTimeMenu(int client,Map_Info map)
@@ -856,6 +880,7 @@ void MapInfectTimeMenu(int client,Map_Info map)
 	menu.AddItem(map.name,"-10秒",map.infecttime>1?ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(map.name,"无限(跑图设置)");
 	menu.AddItem(map.name,"默认(CFG设置)");
+	menu.ExitBackButton = true;
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
@@ -885,6 +910,13 @@ int MapInfectTimeHandler(Menu menu, MenuAction action, int client, int param)
 		MapCfgUpdate(map);
 		MapInfectTimeMenu(client,map);
 	}
+	else if (param == MenuCancel_ExitBack)
+	{
+		menu.GetItem(0,map_name,sizeof(map_name));
+		Maps.GetArray(map_name,map,sizeof(map));
+		MapAdminConfigMenu(client,map);
+		return 0;
+	}
 }
 
 void MapTagConfigMenu(int client,Map_Info map)
@@ -903,6 +935,7 @@ void MapTagConfigMenu(int client,Map_Info map)
 			menu.AddItem(map.name,label_name[i]);
 		}
 	}
+	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }
 int MapTagConfigMenuHandler(Menu menu, MenuAction action, int client, int param)
@@ -927,6 +960,13 @@ int MapTagConfigMenuHandler(Menu menu, MenuAction action, int client, int param)
 		}
 		MapCfgUpdate(map);
 		MapTagConfigMenu(client,map);
+	}
+	else if (param == MenuCancel_ExitBack)
+	{
+		menu.GetItem(0,map_name,sizeof(map_name));
+		Maps.GetArray(map_name,map,sizeof(map));
+		MapAdminConfigMenu(client,map);
+		return 0;
 	}
 }
 

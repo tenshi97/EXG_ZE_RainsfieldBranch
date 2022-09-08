@@ -34,6 +34,7 @@ bool g_pStore = false;
 #include "zescape/mission.h"
 #include "zescape/quest.h"
 #include "zescape/hd.h"
+//#include "zescape/entwatchedit.h"
 Handle g_Warmup_Timer;
 ConVar g_Cvar_Mp_Warmup_Time;
 
@@ -119,6 +120,7 @@ public void OnMapStart()
 	if(!isDbConnected())	return;			//未连接，return，通过Db连接函数的函数执行Post，已连接则通直接Post使得换图后重载各插件数据
 	PrintToServer("DbOnDbConnected_MapStartPost");
 	DbOnDbConnected_MapStartPost();	
+	//EWEditOnMapStart();
 }
 public void OnEntityCreated(int entity, const char[] classname)
 {

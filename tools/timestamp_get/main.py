@@ -21,5 +21,5 @@ def get_timestamp_spec(clock,days=0):
 # 按间距中的绿色按钮以运行脚本。
 if __name__ == '__main__':
     print_hi('PyCharm')
-print(str(get_timestamp_spec(8,28)))
+print(str(get_timestamp_spec(4,120)))
 # 访问 https://www.jetbrains.com/help/pycharm/ 获取 PyCharm 帮助

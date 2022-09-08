@@ -4,15 +4,16 @@ bool g_pStore = false;
 #include <sdktools>
 #include <sdkhooks>
 //#include <json>
-#include <outputinfo>
+//#include <outputinfo>
 #include <zombiereloaded>
 #include <store>
 #include <timers>
 #include <nextmap>
-#include <server_redirect>
 #include <rainsfield>
+#include <server_redirect>
 #include <leader>
 #include <mostactive>
+#include <outputinfo>
 #pragma semicolon 1
 #pragma newdecls required
 #include "zescape/basic_func.h"
@@ -22,6 +23,7 @@ bool g_pStore = false;
 #include "exgusers/say.h"
 #include "exgusers/adminlog.h"
 #include "exgusers/server.h"
+#include "exgusers/monitor.h"
 public Plugin myinfo = {
 	name = " EXG_CSGO_Users",
 	author = "Rainsfield&WackoD&ExgNullable",
@@ -53,6 +55,7 @@ public void OnPluginStart()
 	UsersAdmOnPluginStart();
 	AdminLogOnPluginStart();
 	ServerOnPluginStart();
+	MonitorOnPluginStart();
 }
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
@@ -75,4 +78,9 @@ public void OnMapStart()
 public void OnClientPostAdminCheck(int client)
 {
 	UsersOnClientInServer(client);
+}
+public void OnClientDisconnect(int client)
+{
+	MonitorOnClientDisconnect(client);
+	UsersOnClientDisconnect(client);
 }

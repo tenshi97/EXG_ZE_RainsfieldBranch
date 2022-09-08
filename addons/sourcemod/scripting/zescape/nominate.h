@@ -136,13 +136,18 @@ void NominateMapMenu(int client,char trie_search[PLATFORM_MAX_PATH]="")
 int NominateMenuHandler(Menu menu, MenuAction action, int client, int param) 
 {
 	Map_Info Tmap;
-	if (action == MenuAction_End) menu.Close();
+	if (action == MenuAction_End)
+	{
+		menu.Close();
+		return 0;
+	}
 	else if (action == MenuAction_Select)
 	{                             
 		char buffer[PLATFORM_MAX_PATH];                                            
 		menu.GetItem(param,buffer,sizeof(buffer));
 		Maps.GetArray(buffer,Tmap,sizeof(Tmap));
 		NomMapInfoMenu(client,Tmap);
+		return 0;
 	}	
 }
 void NomMapInfoMenu(int client,Map_Info Tmap)
@@ -172,7 +177,8 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 
 	bool g_Interval_Allow = true;
 	
-
+	if(server_port != 27015)
+	{
 		if(Tmap.difficulty>=2)
 		{
 			if(g_Map_Interval_Count>0)
@@ -180,8 +186,7 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 				g_Interval_Allow = false;
 			}
 		}
-	
-	
+	}
 	menu.AddItem(Tmap.name,"预定地图",(g_Interval_Allow&&Tmap.available&&(cooldown_over||Tmap.temp_cooldown)&&Tmap.download&&Tmap.exist) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(Tmap.name,"重置冷却",GetAdminFlag(GetUserAdmin(client),Admin_Generic) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(Tmap.name,"强制提名",GetAdminFlag(GetUserAdmin(client),Admin_Generic) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
@@ -216,6 +221,7 @@ int NomMapInfoMenuHandler(Menu menu, MenuAction action, int client, int param)
 	if (action == MenuAction_End||client<=0||client>=65)
 	{
 		menu.Close();
+		return 0;
 	}
 	else if(action == MenuAction_Select)
 	{
@@ -249,6 +255,7 @@ int NomMapInfoMenuHandler(Menu menu, MenuAction action, int client, int param)
 	{
 		NominateMapMenu(client, g_sPlayerSearchFilter[client]);
 	}
+	return 0;
 }
 
 

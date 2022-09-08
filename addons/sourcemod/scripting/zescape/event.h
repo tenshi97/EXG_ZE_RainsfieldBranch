@@ -20,6 +20,21 @@ void EventOnPluginStart() {
 	//HookEvent("round_poststart", OnRoundPostStart, EventHookMode_Post);
 	HookEvent("round_freeze_end", OnRoundFreezeEnd, EventHookMode_Post);
 	HookEvent("round_end", OnRoundEnd, EventHookMode_Post);
+	HookEntityOutput("func_physbox","OnHealthChanged",Hitbox_OnHealthChanged);
+	HookEntityOutput("func_physbox_multiplayer","OnHealthChanged",Hitbox_OnHealthChanged);
+	HookEntityOutput("func_breakable","OnHealthChanged",Hitbox_OnHealthChanged);
+}
+void Hitbox_OnHealthChanged(const char[] output, int caller, int activator, float delay)
+{
+	if(!IsValidEntity(activator))	return;
+	if(activator<=0||activator>64)	return;
+	if(!IsClientInGame(activator))	return;
+	if(IsFakeClient(activator))		return;
+	if(!IsPlayerAlive(activator))	return;
+	if(ZR_IsClientHuman(activator))
+	{
+		MissionOnHit(activator);
+	}
 }
 void OnRoundPreStart(Event event, const char[] name, bool dontBroadcast) 
 {

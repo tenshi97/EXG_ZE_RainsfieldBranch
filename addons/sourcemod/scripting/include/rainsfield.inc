@@ -2,7 +2,35 @@
     #endinput
 #endif
 #define _rainsfield_included_
-
+enum struct ItemWeapon_Log
+{
+    char name[64];
+    int hammerid;
+    char classname[64];
+}
+enum struct WeaponPurchase_Log
+{
+    char name[64];
+    int price;
+    int restrict;
+    int maxpurchase;
+}
+enum struct Ent_Log
+{
+    char name[256];
+    char shortname[64];
+    int color;
+    char class[64];
+    int hasfilter;
+    char filtername[64];
+    int chat;
+    int hud;
+    int hammerid;
+    int mode;
+    int cooldown;
+    int maxamount;
+    int maxuses;
+}
 enum struct Map_Info
 {
     int id;
@@ -118,7 +146,7 @@ native int RY_Map_GetMapInfo(char[] map_name,any output[sizeof(Map_Info)]);
 native void RY_Map_GetCurrentMapInfo(any output[sizeof(Map_Info)]);
 native void RY_Map_GetCurrentMapNominator(char[] nominator_auth);
 native void EXGUSERS_AddAdminLog(any admlog[sizeof(ADMIN_LOG)]);
-native void EXGUSERS_GetUserInfo(int client,any userinfo[sizeof(USER_LOG)]);
+native int EXGUSERS_GetUserInfo(int client,any userinfo[sizeof(USER_LOG)]);
 native void EXGUSERS_GetServerByPort(int port,any server[sizeof(SERVER_LOG)]);
 forward void RY_Map_OnMapConfigLoaded();
 

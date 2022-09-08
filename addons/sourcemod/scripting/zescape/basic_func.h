@@ -93,13 +93,13 @@ int IsClientVIP(int client)
 	return 0;
 }
 void KillTimerSafe(Handle& timer) {
-	if (!timer) return;
+	if (!timer||timer==INVALID_HANDLE) return;
 	KillTimer(timer);
 	timer = INVALID_HANDLE;
 }
 
 void CloseHandleSafe(Handle& hndl) {
-	if (!hndl) return;
+	if (!hndl&&hndl==INVALID_HANDLE) return;
 	hndl.Close();
 	hndl = null;
 }

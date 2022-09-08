@@ -23,6 +23,12 @@ void UserInfoOnRoundStart(int client)
 		}
 	}
 }
+
+void UsersOnClientDisconnect(int client)
+{
+	g_Users[client].uid=0;
+	g_Users[client].loaded=0;
+}
 void LoadUserInfo(int client)
 {
 	char auth_id[64];
@@ -36,14 +42,14 @@ void LoadUserInfo(int client)
 	}
 	if(!IsClientInGame(client))
 	{
-		PrintToServer("玩家%s[%d]信息载入失败(数据库未连接),等待下回合重载",client_name,client);
+		PrintToServer("玩家%s[%d]信息载入失败(玩家未连接),等待下回合重载",client_name,client);
 		g_Users[client].loaded=0;
 		return;
 	}
 	char query[512];
 	if(!GetClientAuthId(client,AuthId_Steam2,auth_id,sizeof(auth_id),true))
 	{
-		PrintToServer("玩家%s[%d]信息载入失败(数据库未连接),等待下回合重载",client_name,client);
+		PrintToServer("玩家%s[%d]信息载入失败(STEAMAUTH未连接),等待下回合重载",client_name,client);
 		g_Users[client].loaded=0;
 		return;
 	}
@@ -90,6 +96,7 @@ int LoadUserInfoCallBack(Handle owner, Handle hndl, char[] error, DataPack dp)
 		Format(query,sizeof(query),"UPDATE exgusers SET NAME = '%s', LAST_LOGIN = %d WHERE AUTHID = '%s'",client_name,current_time,auth_id);
 		PrintToServer(query);
 		g_Users[client].loaded=1;
+		MonitorOnClientConnect(client);
 	}
 	DbTQuery(LoadUpdateUserInfoCallback,query,new_client);
 
@@ -116,6 +123,7 @@ void ReloadNewUserInfoCallback(Handle owner, Handle hndl, char[] error, any data
 	{
 		g_Users[client].uid = DbFetchInt(hndl,"UID");
 		g_Users[client].loaded=1;
+		MonitorOnClientConnect(client);
 	}
 	else
 	{
@@ -153,6 +161,6 @@ public int Native_EXGUSERS_GetUserInfo(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
 	char buffer[256];
-	SetNativeArray(2,view_as<int>(g_Users[client]),sizeof(USER_LOG));
+	SetNativeArray(2,g_Users[client],sizeof(USER_LOG));
 	return 0;
 }

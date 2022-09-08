@@ -24,7 +24,7 @@ void TriggerOutputOnMapStart()
 	}	
 }
 */
-
+int g_antispam_hammerid=0;
 public Action ButtonOnPressed(const char[] output, int caller, int activator, float delay)
 {
 	if (GetEntPropEnt(caller, Prop_Data, "m_hMoveParent") != -1 ||
@@ -76,7 +76,7 @@ void TriggerOnEntityCreated(int entity, const char[] classname)
 {
 	if (IsValidEntity(entity))
 	{
-		if (strcmp(classname, "trigger_once", false) == 0 || strcmp(classname, "trigger_multiple", false) != 0)
+		if (strcmp(classname, "trigger_once", false) == 0)
 		{
 			SDKHook(entity, SDKHook_SpawnPost, TriggerOnTriggerSpawnPost);
 		}
@@ -130,9 +130,12 @@ public Action TriggerOnStartTouch(int entity, int toucher)
 		}
 		
 		int hammerid = GetEntProp(entity, Prop_Data, "m_iHammerID");
-
-		PrintToChatAll(" \x04[触发检测] \x09%s(%s) \x01触发了 \x06机关%s(%d)", activator_name, activator_auth, button_name, hammerid);
-		PrintToConsoleAll("[触发检测] %s(%s) 触发了 机关(Trigger)%s(%d)", activator_name, activator_auth, button_name, hammerid);
+		if(hammerid != g_antispam_hammerid)
+		{
+			g_antispam_hammerid = hammerid;
+			PrintToChatAll(" \x04[触发检测] \x09%s(%s) \x01触发了 \x06机关%s(%d)", activator_name, activator_auth, button_name, hammerid);
+			PrintToConsoleAll("[触发检测] %s(%s) 触发了 机关(Trigger)%s(%d)", activator_name, activator_auth, button_name, hammerid);
+		}
 	}
 
 	return Plugin_Continue;
