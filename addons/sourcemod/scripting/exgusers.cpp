@@ -48,7 +48,6 @@ public void OnLibraryRemoved(const char[] name)
 		g_pStore = (GetFeatureStatus(FeatureType_Native, "Store_GetClientCredits") == FeatureStatus_Available);
 	}
 }
-
 public void OnPluginStart()
 {
 	DbOnPluginStart();
@@ -58,15 +57,12 @@ public void OnPluginStart()
 	ServerOnPluginStart();
 	MonitorOnPluginStart();
 }
-
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
-	RegPluginLibrary("exgusers");
-
 	CreateNative("EXGUSERS_AddAdminLog",Native_EXGUSERS_AddAdminLog);
 	CreateNative("EXGUSERS_GetUserInfo",Native_EXGUSERS_GetUserInfo);
 	CreateNative("EXGUSERS_GetServerByPort",Native_EXGUSERS_GetServerByPort);
-	
+	RegPluginLibrary("exgusers");
 	MarkNativeAsOptional("Store_GetClientCredits");
 	MarkNativeAsOptional("Store_SetClientCredits");
 	MarkNativeAsOptional("Store_GetItemIdbyUniqueId");
@@ -75,9 +71,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 }
 public void OnMapStart()
 {
-	if(!isDbConnected())
-		return;
-
+	if(!isDbConnected())	return;	
 	AnnouncementOnMapStart();
 }
 
@@ -85,7 +79,6 @@ public void OnClientPostAdminCheck(int client)
 {
 	UsersOnClientInServer(client);
 }
-
 public void OnClientDisconnect(int client)
 {
 	MonitorOnClientDisconnect(client);

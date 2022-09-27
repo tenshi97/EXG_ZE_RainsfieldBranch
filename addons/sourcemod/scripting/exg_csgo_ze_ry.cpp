@@ -14,6 +14,7 @@ bool g_pStore = false;
 #include <leader>
 #include <mostactive>
 #include <sourcecomms>
+#include <weddings>
 #pragma semicolon 1
 #pragma newdecls required
 #include "zescape/basic_func.h"
@@ -184,10 +185,10 @@ public void OnClientDisconnect(int client)
 public void OnClientPostAdminCheck(int client)
 {
 	VoiceChatOnClientConnected(client);
-	QuestOnPlayerConnected(client);
 }
 
 public void EXGUSERS_OnUserLoaded(int client)
 {
 	MissionOnClientConnected(client);
+	QuestOnPlayerConnected(client);
 }

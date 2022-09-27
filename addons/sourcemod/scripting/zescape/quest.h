@@ -9,12 +9,11 @@ enum struct QUEST
 }
 enum struct PlayerQuestInfo
 {
-	char name[64];
-	char authid[64];
 	int taskdata[16];
 	int taskcomplete[16];
 	int loaded;
 	int timestamp;
+	int uid;
 }
 ArrayList QuestList;
 PlayerQuestInfo playerquest_list[65];
@@ -170,12 +169,11 @@ void QuestOnPlayerDisconnected(int client)
 		UpdatePlayerQuestInfo(client);
 	}
 	playerquest_list[client].loaded = 0;
+	playerquest_list[client].uid = 0;
 }
 
 void LoadPlayerQuestInfo(int client)
 {
-	char client_authid[64];
-	char client_name[64];
 	char query[512];
 	if(client<=0||client>=65)	return;
 	if(!IsClientInGame(client)||!isDbConnected())
@@ -184,9 +182,16 @@ void LoadPlayerQuestInfo(int client)
 		PrintToConsoleAll(" [任务系统]玩家%d的数据载入出错，等待重载",client);
 		return;
 	}
-	GetClientName(client,client_name,sizeof(client_name));
-	GetClientAuthId(client,AuthId_Steam3,client_authid,sizeof(client_authid),true);
-	Format(query,sizeof(query),"SELECT * FROM zequest WHERE AUTHID = '%s'",client_authid);
+	USER_LOG user;
+	EXGUSERS_GetUserInfo(client,user);
+	if(user.loaded==0||user.uid==0)
+	{
+		playermission_list[client].loaded=0;
+		PrintToChat(client,"\x05[任务系统]\x01加载玩家%d的[用户数据]时出错，用户系统未载入（请等待下一回合，\x07或输入!msr再试\x01)",client);
+		return;
+	}
+	playerquest_list[client].uid = user.uid;
+	Format(query,sizeof(query),"SELECT * FROM zequest WHERE UID = %d",playerquest_list[client].uid);
 	DbTQuery(LoadPlayerQuestInfoCallBack,query,client);
 }
 void LoadPlayerQuestInfoCallBack(Handle owner, Handle hndl, char[] error, any data)
@@ -194,22 +199,15 @@ void LoadPlayerQuestInfoCallBack(Handle owner, Handle hndl, char[] error, any da
 
 	char query[512];
 	int client = data;
-	char client_authid[64];
-	char client_name[64];
 	if(!IsClientInGame(client))	return;
-	GetClientName(client,client_name,sizeof(client_name));
-	GetClientAuthId(client,AuthId_Steam3,client_authid,sizeof(client_authid),true);
 	int current_time = GetTime();
-	playerquest_list[client].authid = client_authid;
 	if(!SQL_FetchRow(hndl))
 	{
-		PrintToConsoleAll(" [任务系统]未检测到玩家%s[client:%d]数据，注册新玩家，当前活动时间戳:%d",client_name,client,g_daily_timestamp);
-		Format(query,sizeof(query),"INSERT INTO zequest (AUTHID,NAME,TIMESTAMP) VALUES('%s','%s',%d)",client_authid,client_name,current_time);
+		Format(query,sizeof(query),"INSERT INTO zequest (UID,TIMESTAMP) VALUES(%d,%d)",playerquest_list[client].uid,current_time);
 	}
 	else
 	{
 		playerquest_list[client].timestamp = DbFetchInt(hndl,"TIMESTAMP");
-		PrintToConsoleAll(" [任务系统]载入玩家%s[client:%d]数据,当前活动时间戳:%d，玩家上次登录时间戳:%d",client_name,client,g_daily_timestamp,playerquest_list[client].timestamp);
 		playerquest_list[client].taskdata[0]=DbFetchInt(hndl,"DINFECT");
 		playerquest_list[client].taskdata[1]=DbFetchInt(hndl,"DKILL");
 		playerquest_list[client].taskdata[2]=DbFetchInt(hndl,"DDMGTAKE");
@@ -222,7 +220,7 @@ void LoadPlayerQuestInfoCallBack(Handle owner, Handle hndl, char[] error, any da
 		playerquest_list[client].taskcomplete[3]=DbFetchInt(hndl,"DT4C");
 		playerquest_list[client].taskcomplete[4]=DbFetchInt(hndl,"DT5C");
 		playerquest_list[client].taskcomplete[5]=DbFetchInt(hndl,"DT6C");
-		Format(query,sizeof(query),"UPDATE zequest SET NAME = '%s', TIMESTAMP = %d WHERE AUTHID = '%s'",client_name,current_time,client_authid);	
+		Format(query,sizeof(query),"UPDATE zequest SET TIMESTAMP = %d WHERE UID = %d",current_time,playerquest_list[client].uid);	
 		if(playerquest_list[client].timestamp<g_daily_timestamp)
 		{
 			ClearPlayerDailyQuestInfo(client);
@@ -283,17 +281,13 @@ void UpdatePlayerQuestInfo(int client)
 	int taskdata[16];
 	int taskcomplete[16];
 	int current_time = GetTime();
-	char client_name[64];
-	char client_authid[64];
 	char query[1024];
-	GetClientName(client,client_name,sizeof(client_name));
-	GetClientAuthId(client,AuthId_Steam3,client_authid,sizeof(client_authid),true);	
 	for(int i=0;i<=5;i++)
 	{
 		taskdata[i]=playerquest_list[client].taskdata[i];
 		taskcomplete[i]=playerquest_list[client].taskcomplete[i];
 	}
-	Format(query,sizeof(query),"UPDATE zequest SET NAME = '%s', TIMESTAMP = %d, DINFECT = %d, DKILL = %d, DDMGTAKE = %d, DDMGMAKE = %d, DPASS = %d, DNADE = %d, DT1C = %d, DT2C = %d, DT3C = %d, DT4C = %d, DT5C = %d, DT6C = %d WHERE AUTHID = '%s'",client_name,current_time,taskdata[0],taskdata[1],taskdata[2],taskdata[3],taskdata[4],taskdata[5],taskcomplete[0],taskcomplete[1],taskcomplete[2],taskcomplete[3],taskcomplete[4],taskcomplete[5],client_authid);
+	Format(query,sizeof(query),"UPDATE zequest SET TIMESTAMP = %d, DINFECT = %d, DKILL = %d, DDMGTAKE = %d, DDMGMAKE = %d, DPASS = %d, DNADE = %d, DT1C = %d, DT2C = %d, DT3C = %d, DT4C = %d, DT5C = %d, DT6C = %d WHERE UID = %d",current_time,taskdata[0],taskdata[1],taskdata[2],taskdata[3],taskdata[4],taskdata[5],taskcomplete[0],taskcomplete[1],taskcomplete[2],taskcomplete[3],taskcomplete[4],taskcomplete[5],playerquest_list[client].uid);
 	DbTQuery(DbQueryErrorCallback,query);
 }
 

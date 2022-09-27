@@ -65,7 +65,7 @@ void EWEditOnMapStart()
 	if(FileExists(ew_path_override))
 	{
 		g_KV_Override = true;
-		PrintToServer(" [Rainsfield]Override EntWatch Detected");
+		//PrintToServer(" [Rainsfield]Override EntWatch Detected");
 		strcopy(g_ew_path,sizeof(g_ew_path),ew_path_override);
 		BuildCurrentMapEntList();
 		return;
@@ -239,6 +239,7 @@ void EntSetMenu(int client,int itemnum)
 	menu.AddItem("",buffer);
 	menu.AddItem("","重载");
 	menu.AddItem("","保存所有(适用于BUG情况)");
+	menu.AddItem("","删除该神器hud");
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 
@@ -338,6 +339,10 @@ int EntSetMenuHandler(Menu menu, MenuAction action, int client, int param)
 			case 13:
 			{
 				ModifyAll();
+			}
+			case 14:
+			{
+				DeleteKv(item_num);
 			}
 		}
 		return 0;
@@ -608,7 +613,7 @@ bool EntAdmIsClientModifying(int client,const char[] sArgs)
 
 void EWEditOnEntityCreated(int entity, const char[] classname)
 {
-    if(StrContains(classname, "weapon_") != -1)
+    if(StrContains(classname, "weapon_") == 0)
     {
     	SDKHook(entity, SDKHook_SpawnPost, EWEditOnWeaponSpawned);
     }
@@ -626,7 +631,7 @@ void EWEditOnWeaponSpawned(int iWeapon)
 	weapon_log.hammerid = GetEntProp(iWeapon, Prop_Data, "m_iHammerID")
 	GetEntPropString(iWeapon,Prop_Data,"m_iName",weapon_log.name,sizeof(weapon_log.name));
 	GetEdictClassname(iWeapon,weapon_log.classname,sizeof(weapon_log.classname));
-	PrintToConsoleAll(" [Rainsfield Debug] New Item Weapon[%d:%s %s] Spawned Detected",weapon_log.hammerid,weapon_log.name,weapon_log.classname);
+	//PrintToConsoleAll(" [Rainsfield Debug] New Item Weapon[%d:%s %s] Spawned Detected",weapon_log.hammerid,weapon_log.name,weapon_log.classname);
 	SplitString(weapon_log.name,"&",weapon_log.name,sizeof(weapon_log.name));
 	for(int i=0;i<g_Ent_List.Length;i++)
 	{
@@ -766,4 +771,29 @@ void InsertKV(const char[] new_subkey,Ent_Log ent_temp)
 	kv_new.Rewind();
 	kv_new.ExportToFile(g_ew_path);
 	delete kv_new;
+}
+
+void DeleteKv(int item_num)
+{
+	KeyValues kv_delete = new KeyValues("entities");
+	kv_delete.ImportFromFile(g_ew_path);
+	if(!kv_delete.GotoFirstSubKey())	
+	{
+		delete kv_delete;
+		return;
+	}
+	Ent_Log ent_temp;
+	GetArrayArray(g_Ent_List,item_num,ent_temp,sizeof(ent_temp));
+	while(kv_delete.GetNum("hammerid")!=ent_temp.hammerid)
+	{
+		if(!kv_delete.GotoNextKey())
+		{
+			delete kv_delete;
+			return;
+		}
+	}
+	kv_delete.DeleteThis();
+	kv_delete.Rewind();
+	kv_delete.ExportToFile(g_ew_path);
+	delete kv_delete;
 }

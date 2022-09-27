@@ -723,6 +723,7 @@ public void MapVoteHandler(Menu menu, int num_votes, int num_clients, const int[
 		Call_StartForward(g_RTV_Forward_ExtendSelect);
 		Call_Finish();
 		ClearNomMapList();
+		delete menu;
 	}
 	else if(strcmp(result,"NoChange")==0)
 	{
@@ -744,6 +745,7 @@ public void MapVoteHandler(Menu menu, int num_votes, int num_clients, const int[
 			PrintToChatAll(" \x05[EMC]地图剩余时间不足，补偿4分钟");
 			ExtendMapTimeLimit(240);
 		}
+		delete menu;
 	}
 	else
 	{
@@ -777,6 +779,7 @@ public void MapVoteHandler(Menu menu, int num_votes, int num_clients, const int[
 		 		}
 		 	}
 		}
+		delete menu;
 		Nom_Map_List.Clear();	
 		ChangeMap();
 	}
@@ -899,6 +902,10 @@ void ExtendMapVote(int client)
 
 int ExtendMapVoteHandler(Menu menu, MenuAction action, int param1, int param2) 
 {
+	if(action == MenuAction_End)
+	{
+		delete menu;
+	}
 	if(action == MenuAction_Select)
 	{
 		char voter_name[64];
@@ -933,6 +940,7 @@ public void ExtendResultHandler1(Menu menu, int num_votes, int num_clients, cons
 		PrintToChatAll(" \x05[EMC]\x01投票延长失败!地图将在回合结束后更换");
 		g_ChangeMap_Time = MapChangeTime_RoundEnd;		
 	}
+	delete menu;
 }
 
 public void ExtendResultHandler2(Menu menu, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info)

@@ -46,9 +46,8 @@ enum struct Map_Log
 {
 	int id;
 	char name[PLATFORM_MAX_PATH];
-	char name_cn[PLATFORM_MAX_PATH];
+	char name_cn[PLATFORM_MAX_PATH]
 }
-
 int Map_Id_Max;
 StringMap Maps;
 ArrayList Map_List;
@@ -90,7 +89,6 @@ void MapAdmOnPluginStart()
 	{
 		g_MapConfigLoaded = CreateGlobalForward("EMC_Forward_MapConfigLoaded",ET_Ignore);
 	}
-
 }
 void MapAdmOnDbConnected_MapStartPost()
 {

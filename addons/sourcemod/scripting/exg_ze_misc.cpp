@@ -18,6 +18,7 @@ bool g_pStore = false;
 #pragma newdecls required
 #include "zescape/entwatchedit.h"
 #include "zescape/weaponedit.h"
+#include "zescape/zelevel.h"
 
 public Plugin myinfo = {
 	name = " EXG_Zombie_Escape_MISC",
@@ -58,18 +59,22 @@ public void OnLibraryRemoved(const char[] name)
 
 public void OnPluginStart()	
 {
+	HookEvent("round_end", OnRoundEnd, EventHookMode_Post);
 	EWEditOnPluginStart();
 	WeaponEditOnPluginStart();
+	LevelOnPluginStart();
 }
 
 public void OnMapStart() 
 {
 	EWEditOnMapStart();
 	WeaponEditOnMapStart();
+	LevelOnMapStart();
 }
 public void OnEntityCreated(int entity, const char[] classname)
 {
 	EWEditOnEntityCreated(entity, classname);	
+	LevelOnEntityCreated(entity,classname);
 }
 
 
@@ -82,7 +87,10 @@ public void OnMapEnd()
 {
 
 }
-
+public void OnRoundEnd(Event event, const char[] name, bool dontBroadcast) 
+{
+	LevelOnRoundEnd();
+}
 
 public void OnClientDisconnect(int client)
 {

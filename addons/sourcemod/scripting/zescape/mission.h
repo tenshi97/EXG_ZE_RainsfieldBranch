@@ -104,7 +104,7 @@ void MissionTimeCheck()
 		UpdateMissionTimeStamp();
 	}
 }
-void UpdateMissionTimeStamp()
+void UpdateMissionTimeStamp() 
 {
 	char query[512];
 	Format(query,sizeof(query),"UPDATE ZEMISSION SET DAILY = %d, WEEKLY =%d WHERE ID = %d",Current_Mission.daily_timestamp,Current_Mission.weekly_timestamp,Current_Mission.id);
@@ -356,12 +356,13 @@ void MissionOnHit(int client)
 {
 	if(GetClientCount(true)<=30)	return;
 	playermission_list[client].taskdata[4]++;
-	UpdatePlayerMissionInfo(client);
 }
 void MissionOnRoundEnd(int winner)
 {
 	int player_num = GetClientCount(true);
 	char map_name[64];
+	int player_pass = 0;
+	bool admin_online = false;
 	GetCurrentMap(map_name,sizeof(map_name));
 	for(int i=1;i<=64;i++)
 	{
@@ -387,6 +388,66 @@ void MissionOnRoundEnd(int winner)
 					{
 						playermission_list[i].taskdata[14]++;
 					}				
+				}
+				if(IsPlayerAlive(i))
+				{
+					if(ZR_IsClientHuman(i))
+					{
+						player_pass++;
+					}
+				}
+				if(IsPlayerAlive(i))
+				{
+					if(ZR_IsClientHuman(i))
+					{
+						if(playermission_list[i].challenge[4]!=1&&Pmap.difficulty>=2)
+						{
+							for(int j=1;j<=64;j++)
+							{
+								if(IsClientInGame(j))
+								{
+									if(!IsFakeClient(j))
+									{
+										if(GetUserFlagBits(j) && ADMFLAG_GENERIC)
+										{
+											admin_online = true;
+											break;
+										}
+									}
+								}
+							}
+							playermission_list[i].challenge[4]=1;
+							PrintToChat(i," \x05[任务系统]\x01恭喜你完成了当前挑战任务的\x07条件4\x01并获得\x07 100 \x01碎片");
+							playermission_list[i].emoney+=100;						
+						}
+						if(StrContains(map_name,"minecraft_adv",false)!=-1)
+						{
+							if(player_num>=30&&playermission_list[i].challenge[1]!=1)
+							{
+								playermission_list[i].challenge[1]=1;
+								PrintToChat(i," \x05[任务系统]\x01恭喜你完成了当前挑战任务的\x07条件1\x01并获得\x07 200 \x01碎片");
+								playermission_list[i].emoney+=200;
+							}
+						}
+						if(StrContains(map_name,"mist",false)!=-1)
+						{
+							if(player_num>=30&&playermission_list[i].challenge[2]!=1)
+							{
+								playermission_list[i].challenge[2]=1;
+								PrintToChat(i," \x05[任务系统]\x01恭喜你完成了当前挑战任务的\x07条件2\x01并获得\x07 200 \x01碎片");
+								playermission_list[i].emoney+=200;
+							}
+						}
+						if(StrContains(map_name,"tesv",false)!=-1)
+						{
+							if(player_num>=30&&playermission_list[i].challenge[3]!=1)
+							{
+								playermission_list[i].challenge[3]=1;
+								PrintToChat(i," \x05[任务系统]\x01恭喜你完成了当前挑战任务的\x07条件3\x01并获得\x07 200 \x01碎片");
+								playermission_list[i].emoney+=200;
+							}
+						}
+					}
 				}
 				UpdatePlayerMissionInfo(i);
 			}
@@ -658,6 +719,8 @@ Action MissionMenuCommand(int client,int args)
 	if(!playermission_list[client].loaded)
 	{
 		PrintToChat(client," \x05[任务系统]\x01任务数据载入出错,等待下一回合或输入!msr");
+		PrintToChat(client," \x05[任务系统]\x01尝试自动重载");
+		LoadPlayerMissionInfo(client);
 		return Plugin_Handled;
 	}
 	MissionMenuBuild(client);
@@ -674,6 +737,8 @@ void MissionMenuBuild(int client)
 	if(!playermission_list[client].loaded)
 	{
 		PrintToChat(client," \x05[任务系统]\x01任务数据载入出错,等待下一回合或输入!msr");
+		PrintToChat(client," \x05[任务系统]\x01尝试自动重载");
+		LoadPlayerMissionInfo(client);
 		return;
 	}
 	Menu menu = CreateMenu(MissionMenuHandler);
@@ -1095,6 +1160,8 @@ void SecretShopMenu(int client)
 	menu.SetTitle("神秘商店\n您当前积分为:%d\n您当前持有的碎片为:%d",credits,playermission_list[client].emoney);
 	menu.AddItem("","购买1大行动等级(3000积分)",credits>=3000?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
 	menu.AddItem("","购买10大行动等级(25000积分)",credits>=25000?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("","兑换积分(100碎片->300积分)",emoney>=100?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("uid_model_kokuriruru","兑换人物模型-狐九里露露[永久](2500碎片)",emoney>=2500?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }
@@ -1123,30 +1190,54 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 	}
 	else if(action == MenuAction_Select)
 	{
-		if(param == 0)
+		menu.GetItem(param,item,sizeof(item));
+		switch(param)
 		{
-			if(credits>=3000&&playermission_list[client].lvl<Current_Mission.max_level)
+			case 0:
 			{
-				GrantExp(client,Current_Mission.level_exp);	
-				Store_SetClientCredits(client,credits-3000);
-				PrintToChat(client," \x05[任务系统]消费积分购买了1大行动等级");
+				if(credits>=3000&&playermission_list[client].lvl<Current_Mission.max_level)
+				{
+					GrantExp(client,Current_Mission.level_exp);	
+					Store_SetClientCredits(client,credits-3000);
+					PrintToChat(client," \x05[任务系统]消费积分购买了1大行动等级");
+				}
+				else
+				{
+					PrintToChat(client," \x05[任务系统]你的积分不足或你已满级!");
+				}
 			}
-			else
+			case 1:
 			{
-				PrintToChat(client," \x05[任务系统]你的积分不足或你已满级!");
+				if(credits>=25000&&playermission_list[client].lvl<Current_Mission.max_level)
+				{
+					GrantExp(client,10*(Current_Mission.level_exp));	
+					Store_SetClientCredits(client,credits-25000);
+					PrintToChat(client," \x05[任务系统]消费积分购买了10大行动等级");
+				}
+				else
+				{
+					PrintToChat(client," \x05[任务系统]你的积分不足或你已满级!");
+				}
 			}
-		}
-		else if(param == 1)
-		{
-			if(credits>=25000&&playermission_list[client].lvl<Current_Mission.max_level)
+			case 2:
 			{
-				GrantExp(client,10*(Current_Mission.level_exp));	
-				Store_SetClientCredits(client,credits-25000);
-				PrintToChat(client," \x05[任务系统]消费积分购买了10大行动等级");
+				Store_SetClientCredits(client,credits+300);
+				playermission_list[client].emoney-=100;				
 			}
-			else
+			case 3:
 			{
-				PrintToChat(client," \x05[任务系统]你的积分不足或你已满级!");
+				item_id = Store_GetItemIdbyUniqueId(item);
+				if(!Store_HasClientItem(client,item_id))
+				{
+					Store_GiveItem(client,item_id,0,0,0);	
+					PrintToChat(client," \x05[任务系统]\x01兑换成功")	;
+					playermission_list[client].emoney -= 2500;
+					UpdatePlayerMissionInfo(client);
+				}				
+				else
+				{
+					PrintToChat(client," \x05[任务系统]\x01您已经拥有该道具，请勿重复兑换")	;					
+				}
 			}
 		}
 		SecretShopMenu(client);
@@ -1180,16 +1271,26 @@ public int Native_RY_GiveClientMissionExp(Handle plugin, int numParams)
 }
 void ChallengeTask(int client)
 {
-	/*char buffer[256];
+	char buffer[256];
+	if(playermission_list[client].loaded==0)
+	{
+		return;
+	}
 	Menu menu = CreateMenu(ChallengeTaskMenuHandler);
-	menu.SetTitle("挑战任务");
+	menu.SetTitle("挑战任务:龙之研究~击败那些奇奇怪怪的龙吧");
+	menu.AddItem("",playermission_list[client].challenge[1]?"条件1:通关地图 我的世界大冒险\n[已完成]":"嘴臭的龙[200碎片]\n[未完成]",ITEMDRAW_DISABLED);
+	menu.AddItem("",playermission_list[client].challenge[2]?"条件2:通关地图 雾龙传说(mist)\n[已完成]":"看不清的龙[200碎片]\n[未完成]",ITEMDRAW_DISABLED);
+	menu.AddItem("",playermission_list[client].challenge[3]?"条件3:通关地图 上古卷轴\n[已完成]":"吞噬世界的龙[200碎片]\n[未完成]",ITEMDRAW_DISABLED);
+	menu.AddItem("",playermission_list[client].challenge[4]?"[奖励任务/不计入挑战条件]:与管理员通关一张[困难]以上地图[100碎片]\n[已完成]":"[奖励任务/不计入挑战条件]如果你是龙，也好。\n[未完成]",ITEMDRAW_DISABLED);
+	menu.AddItem("","提交任务[300碎片奖励]");
 	menu.ExitBackButton = true;
-	menu.Display(client,MENU_TIME_FOREVER);*/
+	menu.Display(client,MENU_TIME_FOREVER);
 	return;
 }	
 
-/*int ChallengeTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
+int ChallengeTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 {
+
 	if(!playermission_list[client].loaded)
 	{
 		PrintToChat(client," \x05[任务系统]数据未载入，无法购买(请等待下一回合或换图)");
@@ -1206,8 +1307,9 @@ void ChallengeTask(int client)
 			if((playermission_list[client].challenge[1]==1)&&(playermission_list[client].challenge[2]==1)&&(playermission_list[client].challenge[3]==1))
 			{
 				playermission_list[client].challenge[0]=1;
-				playermission_list[client].emoney+=500;
-				PrintToChat(client," \x05[任务系统]\x01完成挑战任务，获得500碎片!");
+				playermission_list[client].emoney+=300;
+				PrintToChat(client," \x05[任务系统]\x01完成挑战任务，获得300碎片!");
+				UpdatePlayerMissionInfo(client);
 			}
 			else
 			{
@@ -1220,4 +1322,5 @@ void ChallengeTask(int client)
 		}
 	}	
 	else if (param == MenuCancel_ExitBack) MissionMenuBuild(client);
-}*/
+	return 0;
+}

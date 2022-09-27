@@ -16,6 +16,8 @@ void UsersAdmOnPluginStart()
 
 void UsersOnClientInServer(int client)
 {
+	g_Users[client].uid=0;
+	g_Users[client].loaded=0;
 	LoadUserInfo(client);
 }
 

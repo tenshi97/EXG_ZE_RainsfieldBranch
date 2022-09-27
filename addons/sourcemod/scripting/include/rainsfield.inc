@@ -113,6 +113,19 @@ enum struct SERVER_LOG
     char name[64];
     int mode;
 }
+enum struct LEVEL_LOG
+{
+    int id;
+    char name[64];
+    int entity_id;
+    char entity_name[64];
+    char entity_class[64];
+    char output_name[256];
+    char output_arg[256];
+    int diff;
+    int extra;
+    int precon;
+}
 /**
  * Return Current Map's Property of Banning Human Skills
  * @return	True if Current Map Banned Human Skills

@@ -1,6 +1,7 @@
 char g_wp_path[256];
 KeyValues kv_wp;
 ArrayList g_WP_List;
+ArrayList g_WP_Default_List;
 enum struct Weapon_AdmEditing
 {
 	int hook_say;
@@ -76,6 +77,13 @@ Action WeaponAdminCommand(int client,int args)
 	WeaponMenu(client);
 	return Plugin_Handled;
 }
+Action WeaponAdminPlusCommand(int client,int args)
+{
+	if(client<=0||client>64)	return Plugin_Handled;
+	if(!IsClientInGame(client))	return Plugin_Handled;
+	WeaponPlusMenu(client);
+	return Plugin_Handled;
+}
 void WeaponMenu(int client)
 {
 	WeaponPurchase_Log weapon_temp;
@@ -88,7 +96,10 @@ void WeaponMenu(int client)
 	}
 	menu.Display(client,MENU_TIME_FOREVER);
 }
+void WeaponPlusMenu(int client)
+{
 
+}
 int WeaponMenuHandler(Menu menu, MenuAction action, int client, int param) 
 {
 	if (action == MenuAction_End) menu.Close();
