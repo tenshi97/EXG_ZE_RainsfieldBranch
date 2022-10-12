@@ -56,6 +56,7 @@ void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 	PrintToServer("[RoundStart]");
 	RTVOnRoundStart();
 	MapInfoOnRoundStart();
+	MissionOnRoundStart();
 }
 void OnRoundEnd(Event event, const char[] name, bool dontBroadcast) 
 {

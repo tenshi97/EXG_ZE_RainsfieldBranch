@@ -14,6 +14,7 @@ bool g_pStore = false;
 #include <leader>
 #include <mostactive>
 #include <sourcecomms>
+#include <smlib2>
 #pragma semicolon 1
 #pragma newdecls required
 #include "zescape/entwatchedit.h"
@@ -35,6 +36,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	MarkNativeAsOptional("Store_GetItemIdbyUniqueId");
 	MarkNativeAsOptional("Store_GiveItem");
 	MarkNativeAsOptional("Store_HasClientItem");
+
+	CreateNative("EXGZE_GetLevelDiffName",Native_GetLevelDiffName);
+	CreateNative("EXGZE_GetCurrentLevel",Native_GetCurrentLevel);
 
 	RegPluginLibrary("exg_ze_misc");
 }

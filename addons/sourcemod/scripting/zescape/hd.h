@@ -93,6 +93,7 @@ int SendCrateHandler(Menu menu, MenuAction action, int client, int param)
 						if(!Store_HasClientItem(i,item_id))
 						{
 							Store_GiveItem(i,item_id,0,0,0);
+							PrintCenterText(i,"你获得了一个特殊箱子，请及时打开");
 						}
 					}
 				}
@@ -112,6 +113,7 @@ int SendCrateHandler(Menu menu, MenuAction action, int client, int param)
 							if(!Store_HasClientItem(i,item_id))
 							{
 								Store_GiveItem(i,item_id,0,0,0);
+								PrintCenterText(i,"你获得了一个特殊箱子，请及时打开");
 							}
 						}
 					}
@@ -159,6 +161,7 @@ int SendCrateToPlayerMenuHandler(Menu menu, MenuAction action, int client, int p
 			GetClientName(client,client_name,sizeof(client_name));
 			GetClientName(target,target_name,sizeof(target_name));
 			Format(buffer,sizeof(buffer),"\x05[活动系统]\x01管理员\x07%s\x01给\x07%s\x01赠送了一个\x09活动箱子\x01,这其中必有什么交易",client_name,target_name);
+			PrintToChatAll(buffer);
 			Store_GiveItem(target,item_id,0,0,0);
 		}			
 	}	

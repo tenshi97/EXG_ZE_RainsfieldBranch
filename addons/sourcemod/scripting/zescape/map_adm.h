@@ -85,6 +85,7 @@ void MapAdmOnPluginStart()
 	RegAdminCmd("sm_mapcd_update",MapCooldownCommand,ADMFLAG_GENERIC);
 	RegAdminCmd("sm_mapcost_update",MapCostCommand,ADMFLAG_GENERIC);
 	RegAdminCmd("sm_resetma",MapAdminResetCommand,ADMFLAG_GENERIC);
+	RegConsoleCmd("sm_mla",MapLabelCommand);
 	if(g_MapConfigLoaded == null)
 	{
 		g_MapConfigLoaded = CreateGlobalForward("EMC_Forward_MapConfigLoaded",ET_Ignore);
@@ -96,6 +97,63 @@ void MapAdmOnDbConnected_MapStartPost()
 	Map_List.Clear();
 	MapDataReload();
 }
+
+Action MapLabelCommand(int client,int args)
+{
+	if(client<=0||client>=65)	return Plugin_Handled;
+	if(!IsClientInGame(client))	return Plugin_Handled;
+	if(IsFakeClient(client))	return Plugin_Handled;
+	MapLabelMenuBuild(client);
+	return Plugin_Handled;
+}
+void MapLabelMenuBuild(int client)
+{
+	if(client<=0||client>=65)	return;
+	if(!IsClientInGame(client))	return;
+	if(IsFakeClient(client))	return;
+	Menu menu = CreateMenu(MapLabelMenuHandler);
+	menu.SetTitle("活动地图组");
+	Map_Log map;
+	Map_Info mapt;
+	for(int i = 0 ; i < Map_List.Length ; i++)
+	{
+		GetArrayArray(Map_List,i,map,sizeof(map));
+		Maps.GetArray(map.name,mapt,sizeof(mapt));
+		if(mapt.tag&(1<<10))
+		{
+			menu.AddItem(mapt.name,mapt.name,GetAdminFlag(GetUserAdmin(client),Admin_Generic) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+		}
+	}
+	if(menu.ItemCount==0)
+	{
+		delete menu;
+	}
+	else
+	{
+		menu.Display(client, MENU_TIME_FOREVER);
+	}
+	return;
+}
+
+int MapLabelMenuHandler(Menu menu, MenuAction action, int client, int param) 
+{
+	Map_Info map;
+	char map_name[PLATFORM_MAX_PATH];
+	if (action == MenuAction_End)
+	{
+		menu.Close();
+	}
+	else if (action == MenuAction_Select)
+	{            
+		menu.GetItem(param,map_name,sizeof(map_name));
+		Maps.GetArray(map_name,map,sizeof(map));		
+		map.tag-=(1<<10);
+		MapCfgUpdate(map);
+		PrintToChat(client," \x05[地图管理]\x01移除了地图\x07 %s \x01的\x07[%s]\x01标签",map.name,label_name[10]);
+		MapLabelMenuBuild(client);
+	}
+}
+
 Action MapDataReloadCommand(int client,int args)
 {
 	if(isDbConnected())

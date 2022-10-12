@@ -192,3 +192,7 @@ public void EXGUSERS_OnUserLoaded(int client)
 	MissionOnClientConnected(client);
 	QuestOnPlayerConnected(client);
 }
+public void EXGZE_OnLevelSet(any level[sizeof(LEVEL_LOG)])
+{
+	MissionOnLevelSet(level);
+}

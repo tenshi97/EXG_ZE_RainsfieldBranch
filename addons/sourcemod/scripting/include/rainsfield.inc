@@ -125,6 +125,8 @@ enum struct LEVEL_LOG
     int diff;
     int extra;
     int precon;
+    int credits;
+    int bounty;
 }
 /**
  * Return Current Map's Property of Banning Human Skills
@@ -177,3 +179,11 @@ native int EXGUSERS_GetUserInfo(int client, any userinfo[sizeof(USER_LOG)]);
 native void EXGUSERS_GetServerByPort(int port, any server[sizeof(SERVER_LOG)]);
 
 forward void EXGUSERS_OnUserLoaded(int client);
+
+
+/////////////////////
+//   EXG ZE MISC   //
+/////////////////////
+forward void EXGZE_OnLevelSet(any level[sizeof(LEVEL_LOG)]);
+native void EXGZE_GetLevelDiffName(int diff,char[] diffname);
+native void EXGZE_GetCurrentLevel(any level[sizeof(LEVEL_LOG)]);
