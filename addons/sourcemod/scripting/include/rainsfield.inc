@@ -70,6 +70,8 @@ enum struct Map_Info
     float mrx;
     float mry;
     float mrz;
+    int plupper;
+    int pllower;
 }
 enum struct ADMIN_LOG
 {
@@ -87,21 +89,8 @@ enum struct USER_LOG
     int uid;
     char steamauth[64];
     char name[64];
-    int mute;
-    int eban;
     int nomban;
-    int zhban;
-    int cban;
-    int mute_expiretime;
-    int eban_expiretime;
     int nomban_expiretime;
-    int zhban_expiretime;
-    int cban_expiretime;
-    int credits;
-    int credits_gain;
-    int stitle;
-    int title_group;
-    int cpuid;
     int loaded;//temp
     int last_login;
     int regtime;
@@ -111,7 +100,10 @@ enum struct SERVER_LOG
     int sid;
     int port;
     char name[64];
+    char shortname[64];
     int mode;
+    int ze_fatigue;
+    char ip[64];
 }
 enum struct LEVEL_LOG
 {
@@ -187,3 +179,4 @@ forward void EXGUSERS_OnUserLoaded(int client);
 forward void EXGZE_OnLevelSet(any level[sizeof(LEVEL_LOG)]);
 native void EXGZE_GetLevelDiffName(int diff,char[] diffname);
 native void EXGZE_GetCurrentLevel(any level[sizeof(LEVEL_LOG)]);
+native void EXGZE_ToggleSprite(int leader);

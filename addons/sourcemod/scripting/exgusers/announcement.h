@@ -17,7 +17,6 @@ Action g_Timer_SuperChat_Check_Hndl(Handle timer)
 	current_time-=60;
 	if(!isDbConnected())	return Plugin_Handled;
 	Format(query,sizeof(query),"SELECT * FROM announcement WHERE TIMESTAMP >= %d",current_time);
-	PrintToServer(query);
 	DbTQuery(SuperChatCheckQueryCallBack,query);
 	return Plugin_Handled;
 }
@@ -65,9 +64,9 @@ Action SuperChatCommand(int client,int args)
 	if (args == 1)
 	{
 		GetCmdArgString(message,sizeof(message));
-		ReplaceString(message, sizeof(message), "\"", "");	
+		ReplaceString(message, sizeof(message), "\"", "");
 		SuperChat(client,message);
-	}	
+	}
 	else
 	{
 		PrintToChat(client," \x05[公告系统]\x01全服聊天格式不正确，用法:/sch \"你想说的话\",或用\\你想说的话");
@@ -81,10 +80,10 @@ void SuperChat(int client,const char[] message)
 	int server_port = FindConVar("hostport").IntValue;
 	if(!g_pStore)
 	{
-		GetClientName(client,client_name,sizeof(client_name));	
+		GetClientName(client,client_name,sizeof(client_name));
 		CheckSQLInjectString(client_name,sizeof(client_name));
 		Format(query,sizeof(query),"INSERT INTO announcement (NAME,SERVERPORT,MESSAGE,TIMESTAMP) VALUES('%s',%d,'%s',%d)",client_name,server_port,message,current_time);
-		DbTQuery(DbQueryErrorCallback,query);	
+		DbTQuery(DbQueryErrorCallback,query);
 		return;
 	}
 	if(!IsClientVIP(client))
@@ -98,8 +97,8 @@ void SuperChat(int client,const char[] message)
 		Store_SetClientCredits(client,credits-10);
 
 	}
-	GetClientName(client,client_name,sizeof(client_name));	
+	GetClientName(client,client_name,sizeof(client_name));
 	CheckSQLInjectString(client_name,sizeof(client_name));
 	Format(query,sizeof(query),"INSERT INTO announcement (NAME,SERVERPORT,MESSAGE,TIMESTAMP) VALUES('%s',%d,'%s',%d)",client_name,server_port,message,current_time);
-	DbTQuery(DbQueryErrorCallback,query);	
+	DbTQuery(DbQueryErrorCallback,query);
 }

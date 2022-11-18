@@ -10,15 +10,13 @@ void TimeOnPluginStart()
 	}
 	if(g_DailyTimer_Check == null)
 	{
-		PrintToServer("[Time]Test");
 		g_DailyTimer_Check = CreateTimer(60.0,DailyTimerCheckerHndl,_,TIMER_REPEAT);
 	}
 }
 Action DailyTimerCheckerHndl(Handle timer)
 {
 	char query[512];
-	PrintToConsoleAll(" \x05[调试]时钟检测-开始");
-	if(!isDbConnected())	return;	
+	if(!isDbConnected())	return;
 	Format(query,sizeof(query),"SELECT * FROM ZETIMER");
 	DbTQuery(DailyTimerCheckCallBack,query);
 }
@@ -72,4 +70,4 @@ void TimerRecord_Update(char[] record_name,int timestamp,int repeat=1,int period
 	char query[512];
 	Format(query,sizeof(query),"UPDATE zetimer SET TIMESTAMP = %d, REPEATS = %d, PERIOD = %d, BEGINTIME = %d, ENDTIME = %d WHERE NAME = '%s' ",timestamp,repeat,period,begin,finish,record_name);
 	DbTQuery(DbQueryErrorCallback,query);
-}  	
+}

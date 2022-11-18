@@ -54,7 +54,7 @@ Action NominateCommand(int client,int args)
 
 	GetCmdArg(1,g_sPlayerSearchFilter[client],sizeof(g_sPlayerSearchFilter[]));
 	NominateMapMenu(client,g_sPlayerSearchFilter[client]);
-	return Plugin_Handled;	
+	return Plugin_Handled;
 }
 
 Action NomListCommand(int client,int args)
@@ -67,7 +67,7 @@ Action NomListCommand(int client,int args)
 		return Plugin_Handled;
 	}
 	BuildNomlistMenu(client);
-	return Plugin_Handled;	
+	return Plugin_Handled;
 }
 
 public void NominateOnClientDisconnect(int client)
@@ -103,7 +103,7 @@ void NominateMapMenu(int client,char trie_search[PLATFORM_MAX_PATH]="")
 		Maps.GetArray(map.name, map_detail, sizeof(map_detail));
 		if (map_detail.vis == 0)
 			continue;
-		
+
 		Format(szBuffer, sizeof(szBuffer), "%s [%s]", map.name, map.name_cn);
 		menu.AddItem(map.name, szBuffer);
 	}
@@ -124,16 +124,16 @@ void NominateMapMenu(int client,char trie_search[PLATFORM_MAX_PATH]="")
 		}
 		else if(menu.ItemCount > 1)
 		{
-			menu.Display(client, MENU_TIME_FOREVER);			
+			menu.Display(client, MENU_TIME_FOREVER);
 		}
 	}
 	else
 	{
 		menu.Display(client, MENU_TIME_FOREVER);
-	}	
+	}
 }
 
-int NominateMenuHandler(Menu menu, MenuAction action, int client, int param) 
+int NominateMenuHandler(Menu menu, MenuAction action, int client, int param)
 {
 	Map_Info Tmap;
 	if (action == MenuAction_End)
@@ -142,13 +142,13 @@ int NominateMenuHandler(Menu menu, MenuAction action, int client, int param)
 		return 0;
 	}
 	else if (action == MenuAction_Select)
-	{                             
-		char buffer[PLATFORM_MAX_PATH];                                            
+	{
+		char buffer[PLATFORM_MAX_PATH];
 		menu.GetItem(param,buffer,sizeof(buffer));
 		Maps.GetArray(buffer,Tmap,sizeof(Tmap));
 		NomMapInfoMenu(client,Tmap);
 		return 0;
-	}	
+	}
 }
 void NomMapInfoMenu(int client,Map_Info Tmap)
 {
@@ -167,7 +167,7 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 		cooldown_over = true;
 	}
 	int server_port = FindConVar("hostport").IntValue;
-	
+
 	Format(buffer,sizeof(buffer),"地图预定:%s\n\
 		最后运行时间:%s\n\
 		冷却时间:%d分钟(%s)\n\
@@ -176,8 +176,9 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 	menu.SetTitle(buffer);
 
 	bool g_Interval_Allow = true;
-	
-	if(server_port != 27015)
+	SERVER_LOG current_server;
+	EXGUSERS_GetServerByPort(server_port,current_server);
+	if(current_server.ze_fatigue)
 	{
 		if(Tmap.difficulty>=2)
 		{
@@ -187,7 +188,10 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 			}
 		}
 	}
-	menu.AddItem(Tmap.name,"预定地图",(g_Interval_Allow&&Tmap.available&&(cooldown_over||Tmap.temp_cooldown)&&Tmap.download&&Tmap.exist) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	USER_LOG nominator_userlog;
+	EXGUSERS_GetUserInfo(client,nominator_userlog);
+	Format(buffer,sizeof(buffer),"预定地图%s",nominator_userlog.nomban?"[订图封禁]":"");
+	menu.AddItem(Tmap.name,buffer,(g_Interval_Allow&&Tmap.available&&(cooldown_over||Tmap.temp_cooldown)&&Tmap.download&&Tmap.exist&&(!nominator_userlog.nomban)) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(Tmap.name,"重置冷却",GetAdminFlag(GetUserAdmin(client),Admin_Generic) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(Tmap.name,"强制提名",GetAdminFlag(GetUserAdmin(client),Admin_Generic) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(Tmap.name,"强制更换",GetAdminFlag(GetUserAdmin(client),Admin_Generic) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
@@ -202,7 +206,7 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 		}
 	}
 	menu.AddItem(Tmap.name,buffer,ITEMDRAW_DISABLED);
-	Format(buffer,sizeof(buffer),"疲劳状态:%d(+%d)\n仅对1F困难图生效",g_Map_Interval_Count,Tmap.interval);
+	Format(buffer,sizeof(buffer),"疲劳状态:%d(+%d)\n%s",g_Map_Interval_Count,Tmap.interval,current_server.ze_fatigue?"已启用":"未启用");
 	menu.AddItem(Tmap.name,buffer,ITEMDRAW_DISABLED);
 	Format(buffer,sizeof(buffer),"预定设置:[开放预定:%s][下载站:%s添加]\n[文件存在:%s]",Tmap.available?"是":"否",Tmap.download?"已":"未",Tmap.exist?"是":"否");
 	if(Tmap.tag&label_code[9])
@@ -229,7 +233,7 @@ int NomMapInfoMenuHandler(Menu menu, MenuAction action, int client, int param)
 		menu.GetItem(param,map.name,sizeof(map.name));
 		Maps.GetArray(map.name,map,sizeof(map));
 		char buffer[256];
-		if(param == 0)	
+		if(param == 0)
 		{
 			NominateMap(client,map,0);
 		}
@@ -275,10 +279,21 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 		credits = Store_GetClientCredits(client);
 	if(map.tag&label_code[9]&&forcenom==0)
 	{
-		if(GetClientCount(true)>35)
+		if(map.plupper!=0)
 		{
-			PrintToChat(client," \x05[地图系统]\x01人数超过\x09 35 \x01人，无法订阅该地图");
-			return;
+			if(GetClientCount(true)>map.plupper)
+			{
+				PrintToChat(client," \x05[地图系统]\x01人数超过\x09 人数上限[%d人] \x01，无法订阅该地图");
+				return;
+			}
+		}
+		if(map.pllower!=0)
+		{
+			if(GetClientCount(true)<map.pllower)
+			{
+				PrintToChat(client," \x05[地图系统]\x01人数未达到\x09 人数下限[%d人] \x01，无法订阅该地图");
+				return;
+			}
 		}
 	}
 	if(!Nominate_ALLOW||Nom_Map_List.Length>=Nominate_Max_Num)
@@ -295,7 +310,7 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 	if(!g_pStore || credits>=map.cost || forcenom)
 	{
 		if(nom_index!=-1)
-		{	
+		{
 			GetArrayArray(Nom_Map_List,nom_index,nom_log,sizeof(nom_log));
 			credits_temp = nom_log.nom_cost;
 			CancelNom(nom_index,client);
@@ -305,9 +320,7 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 		{
 			if (GetUserFlagBits(client) && ADMFLAG_RESERVATION)
 			{
-				PrintToServer("vip");
 				nommap.nom_cost = RoundFloat(map.cost * 0.5);
-				PrintToServer("%i",map.cost);
 			}
 			else
 			{
@@ -374,7 +387,7 @@ int is_Nominator(int client)
 			return i;
 		}
 	}
-	return -1;	
+	return -1;
 }
 
 //待实现：断线取消订阅
@@ -427,7 +440,7 @@ int NomlistMenuHandler(Menu menu, MenuAction action, int client, int param)
 	else if (param == MenuCancel_ExitBack) BuildNomlistMenu(client);
 }
 
-void CancelNom(int index,int opt)	
+void CancelNom(int index,int opt)
 {
 	Nomlist_Log nom_log;
 	char buffer[256];
@@ -441,7 +454,7 @@ void CancelNom(int index,int opt)
 	{
 		Format(buffer,sizeof(buffer)," \x05[EMC]\x09%s\x01取消了自己预定的\x09%s\x01,费用\x09%d\x01积分已归还",nom_log.nominator_name,nom_log.name,nom_log.nom_cost);
 		PrintToChatAll(buffer);
-		
+
 		if (g_pStore)
 		{
 			nominator_credits = Store_GetClientCredits(opt);
@@ -467,7 +480,7 @@ void CancelNom(int index,int opt)
 				if (g_pStore)
 				{
 					nominator_credits = Store_GetClientCredits(nominator_index);
-					Store_SetClientCredits(nominator_index,nominator_credits+nom_log.nom_cost);	
+					Store_SetClientCredits(nominator_index,nominator_credits+nom_log.nom_cost);
 					PrintToChatAll("[EMC]费用已归还本人");
 				}
 			}

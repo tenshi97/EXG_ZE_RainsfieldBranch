@@ -1,7 +1,7 @@
 //Maps:Global Map StringMap in map_adm.h
 Map_Info Pmap;
 bool Current_Map_Loaded = false;
-
+bool Current_Map_Fatigue = false;
 ConVar Cvar_MP_TIMELIMIT;
 ConVar Cvar_InfectSpawnTimeMax;
 ConVar Cvar_InfectSpawnTimeMin;
@@ -38,6 +38,7 @@ void MapInfoOnMapStart()
 	g_Map_Round = 0;
 	g_Map_RuntimeUpdate_Checked = false;
 	Current_Map_Loaded = false;
+	Current_Map_Fatigue = false;
 	g_current_nominated = GetCurrentMapNominatorName(g_current_nominator_name,g_current_nominator_steamauth);
 }
 
@@ -45,24 +46,37 @@ void MapInfoOnDbConnected_MapStartPost()
 {
 	char map_name[64];
 	if(Current_Map_Loaded)	return;
+	Current_Map_Fatigue = false;
 	GetCurrentMap(map_name,sizeof(map_name));
 	int server_port = FindConVar("hostport").IntValue;
+	SERVER_LOG current_server;
+	EXGUSERS_GetServerByPort(server_port,current_server);
 	if(Maps.GetArray(map_name,Pmap,sizeof(Pmap)))
 	{
 		PrintToServer("[当前地图信息读取完毕]");
-		if(!Current_Map_Loaded)
+
+		if(!Current_Map_Loaded&&current_server.sid!=0)
 		{
-			//PrintToServer("疲劳计数:%d",g_Map_Interval_Count);
-			
-		
+			Current_Map_Fatigue = true;
+			if(current_server.ze_fatigue)
+			{
+
+			//PrintToServer("疲劳计数:%d",g_Map_Interval_Count)
 				if(Pmap.difficulty>=2)
 				{
-					g_Map_Interval_Count = Min(2,g_Map_Interval_Count+Pmap.interval);				}
+					g_Map_Interval_Count = Min(2,g_Map_Interval_Count+Pmap.interval);				
+				}
 				else
 				{
-					g_Map_Interval_Count= Max(0,g_Map_Interval_Count-1);				}
-			
-			
+					g_Map_Interval_Count= Max(0,g_Map_Interval_Count-1);				
+				}
+				PrintToChatAll(" \x05[地图系统]\x01服务器启用神图疲劳");
+			}
+			else
+			{
+				PrintToChatAll(" \x05[地图系统]\x01服务器无神图疲劳，已清零");
+				g_Map_Interval_Count = 0;
+			}
 		}
 		Pmap.temp_cooldown = false;
 		MapCfgUpdate(Pmap);
@@ -188,6 +202,34 @@ int MapInfoMenuHandler(Menu menu, MenuAction action, int client, int param) {
 }
 void MapInfoOnRoundStart()
 {
+	if(!Current_Map_Fatigue)
+	{
+		int server_port = FindConVar("hostport").IntValue;
+		SERVER_LOG current_server;
+		EXGUSERS_GetServerByPort(server_port,current_server);		
+		if(current_server.sid!=0)
+		{
+			Current_Map_Fatigue = true;
+			if(current_server.ze_fatigue)
+			{
+
+				if(Pmap.difficulty>=2)
+				{
+					g_Map_Interval_Count = Min(2,g_Map_Interval_Count+Pmap.interval);				
+				}
+				else
+				{
+					g_Map_Interval_Count= Max(0,g_Map_Interval_Count-1);				
+				}
+				PrintToChatAll(" \x05[地图系统]\x01服务器启用神图疲劳");
+			}
+			else
+			{
+				PrintToChatAll(" \x05[地图系统]\x01服务器无神图疲劳，已清零");
+				g_Map_Interval_Count = 0;
+			}			
+		}
+	}
 	Cvar_DamageScale_1.SetFloat(Pmap.dmgscale,true,false);
 	Cvar_DamageScale_2.SetFloat(Pmap.dmgscale,true,false);
 }
@@ -217,21 +259,23 @@ void MapInfoOnRoundEnd(int winner)
 		Cvar_InfectSpawnTimeMax = FindConVar("zr_infect_spawntime_max");		
 	}
 	MapCfgUpdate(Pmap);
+	CheckMapCoolDown();
 	return;
 }
 void MapInfoOnWarmUpEnd()
 {
-	if(!g_Map_RuntimeUpdate_Checked)
+	CheckMapCoolDown();
+}
+
+void CheckMapCoolDown()
+{
+	if(g_Map_RuntimeUpdate_Checked)	return;
+	if(Current_Map_Loaded)
 	{
-		if(Current_Map_Loaded)
-		{
 			Pmap_Reload();
-			PrintToChatAll(" \x05[调试]\x01检测当前人数:%d",GetClientCount(true));
-			g_Map_RuntimeUpdate_Checked = true;
-			int server_port = FindConVar("hostport").IntValue;
 			if(GetClientCount(true)>=20)
 			{
-			
+				g_Map_RuntimeUpdate_Checked = true;
 				int Time_MapStart = GetTime();
 				PrintToChatAll(" \x05[地图系统]\x01玩家人数超过20，计入地图CD");
 				Pmap.last_run_time = Time_MapStart;			//Check PlayerNum When MapEnd and if PlayerNum>20,Count Last Run Time
@@ -240,7 +284,6 @@ void MapInfoOnWarmUpEnd()
 			{
 				PrintToChatAll(" \x05[地图系统]\x01玩家人数不足20, 不计入地图CD");				
 			}
-			MapCfgUpdate(Pmap);
-		}
+			MapCfgUpdate(Pmap);		
 	}
 }

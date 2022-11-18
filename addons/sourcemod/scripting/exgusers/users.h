@@ -9,11 +9,23 @@ void UsersAdmOnPluginStart()
 //	RegAdminCmd("sm_ua",UserAdminMenu,ADMFLAG_GENERIC);
 	RegConsoleCmd("sm_user",UserInfoMenuCommand);
 	RegConsoleCmd("sm_i",UserInfoMenuCommand);
-	
 	// forward void EXGUSERS_OnUserLoaded(int client);
+	UsersReloadAll();
 	g_fwOnUserLoaded = new GlobalForward("EXGUSERS_OnUserLoaded", ET_Ignore, Param_Cell);
 }
-
+void UsersReloadAll()
+{
+	for(int i=1;i<=64;i++)
+	{
+		if(IsClientInGame(i))
+		{
+			if(!IsFakeClient(i))
+			{
+				LoadUserInfo(i);
+			}
+		}
+	}
+}
 void UsersOnClientInServer(int client)
 {
 	g_Users[client].uid=0;
@@ -165,11 +177,10 @@ Action UserInfoMenuCommand(int client,int args)
 void UserInfoMenu(int client)
 {
 	Menu menu = CreateMenu(UserInfoMenuHandler);
-	int legacy_id = GetSteamAccountID(client,true);
 	char buffer[512];
 	menu.SetTitle("用户信息\nUID:%d",g_Users[client].uid);
-	Format(buffer,sizeof(buffer),"旧UID:%d",legacy_id);
-	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+	menu.AddItem("","帐号状态");
+	menu.AddItem("","偏好设置",ITEMDRAW_DISABLED);
 	menu.Display(client,MENU_TIME_FOREVER);
 }
 
@@ -177,10 +188,59 @@ int UserInfoMenuHandler(Menu menu, MenuAction action, int client, int param)
 {
 	if (action == MenuAction_End||client<=0||client>=65)
 	{
-		menu.Close();
+		delete menu;
+	}
+	else if (action == MenuAction_Select)
+	{
+		switch(param)
+		{
+			case 0:
+			{
+				UserStatusMenu(client);
+			}
+			/*case 1:
+			{
+				UserPreference_Menu(client);
+			}*/
+		}
 	}
 }
-
+/*void UserPreference_Menu(int client)
+{
+	Menu menu = CreateMenu(UserPreferenceMenuHandler);
+	menu.SetTitle("偏好设置");
+	char buffer[256];
+	menu.AddItem("",buffer);
+	menu.Display(client,MENU_TIME_FOREVER);
+}
+int UserPreferenceMenuHandler(Menu menu, MenuAction action, int client, int param)
+{
+	if (action == MenuAction_End||client<=0||client>=65)
+	{
+		delete menu;
+	}
+}*/
+void UserStatusMenu(int client)
+{
+	Menu menu = CreateMenu(UserStatusMenuHandler);
+	menu.SetTitle("账号状态");
+	char buffer[512],ctime[512];
+	FormatTime(ctime,64,NULL_STRING,g_Users[client].nomban_expiretime);
+	if(g_Users[client].nomban_expiretime>TIME_PERMANENT)
+	{
+		Format(ctime,sizeof(ctime),"永久");
+	}
+	Format(buffer,sizeof(buffer),"提名封禁:%s%s%s", g_Users[client].nomban?"封禁":"正常", g_Users[client].nomban?"\n":"", g_Users[client].nomban?ctime:"");
+	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+	menu.Display(client,MENU_TIME_FOREVER);
+}
+int UserStatusMenuHandler(Menu menu, MenuAction action, int client, int param)
+{
+	if (action == MenuAction_End||client<=0||client>=65)
+	{
+		delete menu;
+	}
+}
 public int Native_EXGUSERS_GetUserInfo(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
@@ -194,4 +254,11 @@ void Call_OnUserLoaded(int client)
 	Call_StartForward(g_fwOnUserLoaded);
 	Call_PushCell(client);
 	Call_Finish();
+	NomBanOnUserLoadCheck(client);
+}
+
+void UpdateUserInfo(int client)
+{
+	char query[512];
+
 }
