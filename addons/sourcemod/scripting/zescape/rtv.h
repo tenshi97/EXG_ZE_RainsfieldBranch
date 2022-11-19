@@ -1,6 +1,6 @@
 ConVar g_Cvar_RTV_MaxRounds;
 ConVar g_Cvar_RTV_PlayerNeededRatio;
-
+bool current_map_logged =false;
 int g_RTV_VotesNum;
 int g_RTV_Rounds;
 bool g_RTV_PlyVoted[65];
@@ -29,7 +29,7 @@ enum struct Maps_VoteInfo
 	char name_cn[PLATFORM_MAX_PATH];
 	bool nominated;
 	char nominator_name[PLATFORM_MAX_PATH];
-	int nominator_steamid;
+	int nominator_uid;
 	char nominator_steamauth[PLATFORM_MAX_PATH];
 	char nominator_steampage[PLATFORM_MAX_PATH];
 	int difficulty;
@@ -88,6 +88,7 @@ void RTVOnPluginStart()
 	{
 		g_RTV_Forward_NextMapSelected = CreateGlobalForward("EMC_Forward_NextmapSelected",ET_Ignore,Param_String);
 	}
+	current_map_logged = false;
 }
 
 void MapVoteLogClear()
@@ -169,6 +170,7 @@ void RTVOnMapStart()
 	ResetRTV();
 	g_RTV_Rounds = 0;
 	g_Extend_Vote = true;
+	current_map_logged = false;
 }
 public bool isMapCoolDownOver(Map_Info map)
 {
@@ -230,7 +232,7 @@ void ResetRTV()
 	g_Nextmap_Result.name = "";
 	g_Nextmap_Result.nominated = false;
 	g_Nextmap_Result.nominator_name = "";
-	g_Nextmap_Result.nominator_steamid = 0;
+	g_Nextmap_Result.nominator_uid = 0;
 	g_Nextmap_Result.difficulty = 0;
 	g_Extend_Times = 0;
 }
@@ -247,8 +249,20 @@ void RTVOnRoundStart()
 		PrintToChatAll(buffer);
 		PrintToChatAll(buffer);
 		PrintToChatAll(buffer);
-		Format(buffer,sizeof(buffer),"[EMC]%s%s(STEAMID:%d)",g_LastRound_MapVoteSave.nominated?"预定者":"当前地图为野生",g_LastRound_MapVoteSave.nominated?g_LastRound_MapVoteSave.nominator_name:"",g_LastRound_MapVoteSave.nominator_steamid);
+		Format(buffer,sizeof(buffer),"[EMC]%s%s(UID:%d)",g_LastRound_MapVoteSave.nominated?"预定者":"当前地图为野生",g_LastRound_MapVoteSave.nominated?g_LastRound_MapVoteSave.nominator_name:"",g_LastRound_MapVoteSave.nominator_uid);
 		PrintToServer(buffer);
+	}
+	char query[512];
+	int server_port = FindConVar("hostport").IntValue;
+	if(!current_map_logged)
+	{
+		SERVER_LOG current_server;
+		EXGUSERS_GetServerByPort(server_port,current_server);
+		if(isDbConnected())
+		{
+			Format(query,sizeof(query),"INSERT INTO sourcemod.exgze_maphistory (SVNAME,NOM,NOMNAME,NOMUID,TIMESTAMP,MAPNAME) VALUES('%s',%d,'%s',%d,%d,'%s')",current_server.name,g_LastRound_MapVoteSave.nominated,g_LastRound_MapVoteSave.nominator_name,g_LastRound_MapVoteSave.nominator_uid,GetTime(),map_name);
+			DbTQuery(DbQueryErrorCallback,query);
+		}
 	}
 }
 void RTVOnRoundEnd()
@@ -475,7 +489,7 @@ void CreateNextMapVote()
 		mapv.name = map.name;
 		mapv.nominated = true;
 		mapv.nominator_name = nomlog.nominator_name;
-		mapv.nominator_steamid = nomlog.nominator_steamid;
+		mapv.nominator_uid = nomlog.nominator_uid;
 		strcopy(mapv.nominator_steamauth,sizeof(mapv.nominator_steamauth),nomlog.nominator_steamauth);
 		mapv.name_cn = map.name_cn;
 		mapv.difficulty = map.difficulty;
@@ -639,7 +653,7 @@ int NextMapVoteHandler(Menu menu, MenuAction action, int param1, int param2)
 			 			if(!IsClientInGame(j) || IsFakeClient(j))
 							continue;
 
-			 			if(GetSteamAccountID(j,true)==mapv.nominator_steamid)
+			 			if(EXGUSERS_GetUserUID(j)==mapv.nominator_uid)
 			 			{
 							if (g_pStore)
 							{
@@ -686,7 +700,7 @@ void ClearNomMapList()
 		for(int j = 1; j <=64 ;j++)
 		{
 		 	if(!IsClientInGame(j)||IsFakeClient(j))	continue;
-		 	if(GetSteamAccountID(j,true)==mapv.nominator_steamid)
+		 	if(EXGUSERS_GetUserUID(j)==mapv.nominator_uid)
 		 	{
 				if (g_pStore)
 				{
@@ -772,7 +786,7 @@ public void MapVoteHandler(Menu menu, int num_votes, int num_clients, const int[
 		 		for(int j = 1; j <= 64 ; j++)
 		 		{
 		 			if(!IsClientInGame(j)||IsFakeClient(j))	continue;
-		 			if(GetSteamAccountID(j,true)==mapv.nominator_steamid)
+		 			if(EXGUSERS_GetUserUID(j)==mapv.nominator_uid)
 		 			{
 						if (g_pStore)
 						{

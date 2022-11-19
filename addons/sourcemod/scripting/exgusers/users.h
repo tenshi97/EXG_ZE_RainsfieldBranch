@@ -248,6 +248,12 @@ public int Native_EXGUSERS_GetUserInfo(Handle plugin, int numParams)
 	SetNativeArray(2,g_Users[client],sizeof(USER_LOG));
 	return 0;
 }
+public int Native_EXGUSERS_GetUserUID(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	if(g_Users[client].loaded == 0 )	return -1;
+	return g_Users[client].uid;
+}
 
 void Call_OnUserLoaded(int client)
 {

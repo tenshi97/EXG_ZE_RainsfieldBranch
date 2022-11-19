@@ -7,9 +7,11 @@ void ServerOnPluginStart()
 	RegAdminCmd("sm_sa",ServerAdminCommand,ADMFLAG_GENERIC);
 	RegAdminCmd("sm_serveradmin",ServerAdminCommand,ADMFLAG_GENERIC);
 	RegAdminCmd("sm_jump",JumpCommand,ADMFLAG_GENERIC);
+	ServerList = CreateArray(sizeof(SERVER_LOG));
 }
 void ServerOnDbConnected()
 {
+	delete ServerList;
 	char query[256];
 	Format(query,sizeof(query),"SELECT * FROM exgusers_servers");
 	ServerList = CreateArray(sizeof(SERVER_LOG));

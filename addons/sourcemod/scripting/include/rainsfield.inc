@@ -148,7 +148,7 @@ native bool RY_MapProperty_NoBhopLimit();
 native int RY_Mission_GetClientMissionLevel(int client);
 
 native int RY_Mission_GiveClientExp(int client,int exp);
-
+native int RY_ZE_ZBUYCOUNT(int client,int price);
 native int RY_Map_GetMapInfo(char[] map_name, any output[sizeof(Map_Info)]);
 native void RY_Map_GetCurrentMapInfo(any output[sizeof(Map_Info)]);
 native void RY_Map_GetCurrentMapNominator(char[] nominator_auth);
@@ -168,8 +168,8 @@ forward void EMC_Forward_MapConfigLoaded();
 ///////////////////////
 native void EXGUSERS_AddAdminLog(any admlog[sizeof(ADMIN_LOG)]);
 native int EXGUSERS_GetUserInfo(int client, any userinfo[sizeof(USER_LOG)]);
+native int EXGUSERS_GetUserUID(int client);
 native void EXGUSERS_GetServerByPort(int port, any server[sizeof(SERVER_LOG)]);
-
 forward void EXGUSERS_OnUserLoaded(int client);
 
 

@@ -54,6 +54,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CreateNative("RY_Map_GetMapInfo",Native_RY_Map_GetMapInfo);
 	CreateNative("RY_Map_GetCurrentMapInfo",Native_RY_Map_GetCurrentMapInfo);
 	CreateNative("RY_Map_GetCurrentMapNominator",Native_RY_Map_GetCurrentMapNominator);
+	CreateNative("RY_ZE_ZBUYCOUNT",Native_RY_ZE_ZBUYCOUNT);
 //	CreateNative("RY_Map_GetMapDataByMapName",Native_Map_GetMapDataByMapName);
 //	CreateNative("RY_MapProperty_GetMapPushBackFactor");
 

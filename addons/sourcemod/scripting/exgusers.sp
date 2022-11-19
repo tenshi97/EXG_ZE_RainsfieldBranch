@@ -67,6 +67,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CreateNative("EXGUSERS_AddAdminLog",Native_EXGUSERS_AddAdminLog);
 	CreateNative("EXGUSERS_GetUserInfo",Native_EXGUSERS_GetUserInfo);
 	CreateNative("EXGUSERS_GetServerByPort",Native_EXGUSERS_GetServerByPort);
+	CreateNative("EXGUSERS_GetUserUID",Native_EXGUSERS_GetUserUID);
 	RegPluginLibrary("exgusers");
 	MarkNativeAsOptional("Store_GetClientCredits");
 	MarkNativeAsOptional("Store_SetClientCredits");

@@ -53,9 +53,11 @@ enum struct PlayerMissionRoundBuffer
 {
 	int bosshits;
 	int zminfect;
+	int zmtake;
 	int motherzm;
 	int hmdmg;
 	int hmkill;
+	int pay;
 }
 PlayerMissionRoundBuffer playermission_rounddata[65];
 PlayerMissionRoundBuffer nullrounddata;
@@ -80,6 +82,8 @@ void MissionOnPluginStart()
 	nullrounddata.motherzm = 0;
 	nullrounddata.hmdmg = 0;
 	nullrounddata.hmkill = 0;
+	nullrounddata.pay = 0;
+	nullrounddata.zmtake = 0;
 	RegConsoleCmd("sm_mission",MissionMenuCommand);
 	RegConsoleCmd("sm_ms",MissionMenuCommand);
 	RegConsoleCmd("sm_dxd",MissionMenuCommand);	//Just For Fun!
@@ -443,7 +447,7 @@ void MissionOnRoundEnd(int winner)
 					{
 						playermission_list[i].taskdata[14]++;
 					}
-					if(playermission_rounddata[i].motherzm == 1)
+					if(playermission_rounddata[i].pay >= 100000)
 					{
 						if(playermission_list[i].challenge[1]!=1)
 						{
@@ -454,9 +458,9 @@ void MissionOnRoundEnd(int winner)
 						}
 					}
 				}
-				if(StrContains(map_name,"mako_reactor_v5_3",false)!=-1)
+				if(StrContains(map_name,"santa",false)!=-1)
 				{
-					if(playermission_list[i].challenge[3]!=1&&Mission_Current_Level.id==3)
+					if(playermission_list[i].challenge[3]!=1&&(Mission_Current_Level.id==3||Mission_Current_Level.id==4))
 					{
 						PrintToChat(i," \x05[任务系统]\x01您在悬赏任务关卡内单局对BOSS攻击了\x07%d\x01次",playermission_rounddata[i].bosshits);
 						if(playermission_rounddata[i].bosshits>=500)
@@ -468,7 +472,7 @@ void MissionOnRoundEnd(int winner)
 						}
 					}
 				}
-				if(playermission_list[i].challenge[2]!=1&&playermission_rounddata[i].hmkill>=3)
+				if(playermission_list[i].challenge[2]!=1&&playermission_rounddata[i].zmtake>=100000)
 				{
 					playermission_list[i].challenge[2]=1;
 					PrintToChat(i," \x05[任务系统]\x01恭喜你完成了当前悬赏任务的\x07任务2\x01并获得\x07 300 \x01碎片和\x07 300\x01经验");
@@ -562,6 +566,7 @@ void MissionHumanDmgCount(int attacker,int victim,int dmg)
 {
 	if(GetClientCount(true)<mission_lowest_playernum)	return;
 	playermission_rounddata[attacker].hmdmg+=dmg;
+	playermission_rounddata[victim].zmtake+=dmg;
 	if(playermission_list[attacker].taskdata[3]<=10000000)
 	{
 		playermission_list[attacker].taskdata[3]+=dmg;
@@ -1438,16 +1443,22 @@ void ChallengeTask(int client)
 		return;
 	}
 	Menu menu = CreateMenu(ChallengeTaskMenuHandler);
-	menu.SetTitle("悬赏任务:新生");
-	menu.AddItem("",playermission_list[client].challenge[1]?"[已完成]":"任务1:窃取胜利果实\n尸变为母体僵尸，并以人类身份通关地图[300碎片+300经验]",ITEMDRAW_DISABLED);
-	menu.AddItem("",playermission_list[client].challenge[2]?"[已完成]":"任务2:僵尸猎人\n单局击杀3只僵尸[300碎片+300经验]",ITEMDRAW_DISABLED);
-	menu.AddItem("",playermission_list[client].challenge[3]?"[已完成]":"任务3:巴哈姆特绝境战[注意这并未要求你或其他人通关]\n在魔光炉v5_3地图的EX2难度下单局攻击BOSS/障碍500次[300碎片+300经验]\n[未完成]",ITEMDRAW_DISABLED);
+	menu.SetTitle("悬赏任务:20221119");
+	menu.AddItem("",playermission_list[client].challenge[1]?"[已完成]":"任务1:88-96-Music\n在!zbuy中单回合消费100,000金钱[300碎片+300经验]\n吧 吧吧 吧吧 吧吧\n捏 捏捏 捏捏 捏捏\n嘟 嘟嘟 嘟嘟 嘟嘟\n",ITEMDRAW_DISABLED);
+	menu.AddItem("",playermission_list[client].challenge[2]?"[已完成]":"任务2:我是抗压大王\n作为僵尸，单局承受超过100,000点伤害[300碎片+300经验]",ITEMDRAW_DISABLED);
+	menu.AddItem("",playermission_list[client].challenge[3]?"[已完成]":"任务3:大哲学家\n在狮子王第三幕单局攻击BOSS/障碍500次[300碎片+300经验]\n[未完成]",ITEMDRAW_DISABLED);
 	menu.AddItem("","提交任务[300碎片+600经验]");
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 	return;
 }
-
+int Native_RY_ZE_ZBUYCOUNT(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	int price = GetNativeCell(2);
+	playermission_rounddata[client].pay+=price;
+	return 0;
+}
 int ChallengeTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 {
 	if(client<=0||client>=65)

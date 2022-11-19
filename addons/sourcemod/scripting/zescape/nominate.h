@@ -2,7 +2,7 @@ enum struct Nomlist_Log
 {
 	int id;
 	char name[64];
-	int nominator_steamid;
+	int nominator_uid;
 	char nominator_name[64];
 	char nominator_steamauth[PLATFORM_MAX_PATH];
 	char nominator_steampage[PLATFORM_MAX_PATH];
@@ -271,7 +271,7 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 	nom_index = is_Nominator(client);
 	nommap.id = map.id;
 	strcopy(nommap.name,sizeof(nommap.name),map.name);
-	nommap.nominator_steamid = GetSteamAccountID(client,true);
+	nommap.nominator_uid = EXGUSERS_GetUserUID(client);
 	GetClientAuthId(client,AuthId_Steam2,nommap.nominator_steamauth,sizeof(nommap.nominator_steamauth),true);
 	GetClientName(client,nommap.nominator_name,sizeof(nommap.nominator_name));
 	int credits = 0;
@@ -377,12 +377,12 @@ bool isNominated(Map_Info map)
 int is_Nominator(int client)
 {
 	Nomlist_Log nom_log;
-	int steamid;
-	steamid = GetSteamAccountID(client,true);
+	int uid;
+	uid = EXGUSERS_GetUserUID(client);
 	for(int i = 0 ; i < Nom_Map_List.Length ; i++)
 	{
 		GetArrayArray(Nom_Map_List,i,nom_log,sizeof(nom_log));
-		if(steamid==nom_log.nominator_steamid)
+		if(uid==nom_log.nominator_uid)
 		{
 			return i;
 		}
@@ -444,13 +444,13 @@ void CancelNom(int index,int opt)
 {
 	Nomlist_Log nom_log;
 	char buffer[256];
-	int opt_steamid;
-	opt_steamid = GetSteamAccountID(opt,true);
+	int opt_uid;
+	opt_uid = EXGUSERS_GetUserUID(opt);
 	int nominator_credits,nominator_index;
 	char opt_name[64];
 	GetArrayArray(Nom_Map_List,index,nom_log,sizeof(nom_log));
 	nominator_index = -1;
-	if(nom_log.nominator_steamid==opt_steamid)
+	if(nom_log.nominator_uid==opt_uid)
 	{
 		Format(buffer,sizeof(buffer)," \x05[EMC]\x09%s\x01取消了自己预定的\x09%s\x01,费用\x09%d\x01积分已归还",nom_log.nominator_name,nom_log.name,nom_log.nom_cost);
 		PrintToChatAll(buffer);
@@ -467,7 +467,7 @@ void CancelNom(int index,int opt)
 		Format(buffer,sizeof(buffer),"[EMC]%s强制取消了%s预定的%s",opt_name,nom_log.nominator_name,nom_log.name);
 		for(int i = 1;i < MaxClients;i++)
 		{
-			if(GetSteamAccountID(i,true)==nom_log.nominator_steamid)
+			if(EXGUSERS_GetUserUID(i)==nom_log.nominator_uid)
 			{
 				nominator_index = i;
 				break;

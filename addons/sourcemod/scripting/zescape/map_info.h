@@ -12,7 +12,6 @@ char g_current_nominator_name[PLATFORM_MAX_PATH];
 char g_current_nominator_steamauth[PLATFORM_MAX_PATH];
 bool g_current_nominated;
 int g_Map_Interval_Count;
-bool g_Map_PlayerNum_Check=false;
 int g_Map_Round=0;
 bool g_Map_RuntimeUpdate_Checked;
 
@@ -20,9 +19,9 @@ bool g_Map_RuntimeUpdate_Checked;
 void MapInfoOnPluginStart()
 {
 	g_Map_Interval_Count = 0;
-	g_Map_PlayerNum_Check = false;
 	RegConsoleCmd("sm_mi", ActionMapInfoMenu);
 	RegConsoleCmd("sm_mapinfo", ActionMapInfoMenu);
+	RegConsoleCmd("sm_mh", ActionMapHistoryList);
 	Current_Map_Loaded = false;
 	Cvar_MP_TIMELIMIT = FindConVar("mp_timelimit");
 	Cvar_InfectSpawnTimeMin = FindConVar("zr_infect_spawntime_min");
@@ -32,7 +31,61 @@ void MapInfoOnPluginStart()
 	g_Map_Round = 0;
 	g_Map_RuntimeUpdate_Checked = false;
 }
+Action ActionMapHistoryList(int client,int args)
+{
+	if(client<=0||client>=65)	return Plugin_Handled;
+	if(!IsClientInGame(client))	return Plugin_Handled;
+	MapHistoryListMake(client);
+	return Plugin_Handled;
+}
+void MapHistoryListMake(int client)
+{
+	char query[512];
+	Format(query,sizeof(query),"SELECT * FROM exgze_maphistory LIMIT 300");
+	DbTQuery(MapHistoryListMakeCallback,query,client);
+}
+int MapHistoryListMakeCallback(Handle owner, Handle hndl, char[] error, any data)
+{
+	int client=data;
+	if(!hndl||!SQL_HasResultSet(hndl))
+	{
+		PrintToChat(client," \x05[地图系统]\x01暂无地图历史");
+		return 0;
+	}
+	Menu menu =CreateMenu(MapHistoryListHandler);
+	menu.SetTitle("地图历史");
+	int timestamp;
+	int uid;
+	int nom;
+	char nomname[64];
+	char mapname[64];
+	char svname[64];
+	char ctime[64];
+	char buffer[512];
+	while(SQL_FetchRow(hndl))
+	{
+		DbFetchString(hndl,"SVNAME",svname,sizeof(svname));
+		DbFetchString(hndl,"MAPNAME",mapname,sizeof(mapname));
+		DbFetchString(hndl,"NOMNAME",nomname,sizeof(nomname));
+		uid = DbFetchInt(hndl,"NOMUID");
+		timestamp = DbFetchInt(hndl,"TIMESTAMP");
+		nom = DbFetchInt(hndl,"NOM");
+		FormatTime(ctime,sizeof(ctime),NULL_STRING,timestamp);
+		Format(buffer,sizeof(buffer),"%s[%s]\n[%s]%s[UID:%d]",mapname,svname,ctime,nom?nomname:"野生",nom?uid:-1);
+		menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+	}
+	menu.Display(client,MENU_TIME_FOREVER);
+	return 0;
+}
 
+int MapHistoryListHandler(Menu menu, MenuAction action, int client, int param)
+{
+	if(action == MenuAction_End)
+	{
+		delete menu;
+	}
+	return 0;
+}
 void MapInfoOnMapStart()
 {
 	g_Map_Round = 0;
@@ -54,7 +107,6 @@ void MapInfoOnDbConnected_MapStartPost()
 	if(Maps.GetArray(map_name,Pmap,sizeof(Pmap)))
 	{
 		PrintToServer("[当前地图信息读取完毕]");
-
 		if(!Current_Map_Loaded&&current_server.sid!=0)
 		{
 			Current_Map_Fatigue = true;
@@ -64,11 +116,11 @@ void MapInfoOnDbConnected_MapStartPost()
 			//PrintToServer("疲劳计数:%d",g_Map_Interval_Count)
 				if(Pmap.difficulty>=2)
 				{
-					g_Map_Interval_Count = Min(2,g_Map_Interval_Count+Pmap.interval);				
+					g_Map_Interval_Count = Min(2,g_Map_Interval_Count+Pmap.interval);
 				}
 				else
 				{
-					g_Map_Interval_Count= Max(0,g_Map_Interval_Count-1);				
+					g_Map_Interval_Count= Max(0,g_Map_Interval_Count-1);
 				}
 				PrintToChatAll(" \x05[地图系统]\x01服务器启用神图疲劳");
 			}
@@ -93,7 +145,7 @@ void MapInfoOnDbConnected_MapStartPost()
 	}
 	else
 	{
-		PrintToServer("[地图信息读取失败:地图信息不存在]");		
+		PrintToServer("[地图信息读取失败:地图信息不存在]");
 		Current_Map_Loaded = false;
 	}
 
@@ -134,7 +186,7 @@ public int Native_RY_Map_GetMapInfo(Handle plugin, int numParams)
 	GetNativeString(1, map_name, sizeof(map_name));
 	if(Maps.GetArray(map_name,Map_Return,sizeof(Map_Return)))
 	{
-		SetNativeArray(2, view_as<int>(Map_Return), sizeof(Map_Info)); 
+		SetNativeArray(2, view_as<int>(Map_Return), sizeof(Map_Info));
 		return 1;
 	}
 	else
@@ -147,7 +199,7 @@ public int Native_RY_Map_GetCurrentMapInfo(Handle plugin, int numParams)
 {
 	Map_Info Map_Return;
 	Maps.GetArray(Pmap.name,Map_Return,sizeof(Map_Return));
-	SetNativeArray(1, view_as<int>(Map_Return), sizeof(Map_Info)); 
+	SetNativeArray(1, view_as<int>(Map_Return), sizeof(Map_Info));
 }
 public int Native_RY_Map_GetCurrentMapNominator(Handle plugin,int numParams)
 {
@@ -206,7 +258,7 @@ void MapInfoOnRoundStart()
 	{
 		int server_port = FindConVar("hostport").IntValue;
 		SERVER_LOG current_server;
-		EXGUSERS_GetServerByPort(server_port,current_server);		
+		EXGUSERS_GetServerByPort(server_port,current_server);
 		if(current_server.sid!=0)
 		{
 			Current_Map_Fatigue = true;
@@ -215,11 +267,11 @@ void MapInfoOnRoundStart()
 
 				if(Pmap.difficulty>=2)
 				{
-					g_Map_Interval_Count = Min(2,g_Map_Interval_Count+Pmap.interval);				
+					g_Map_Interval_Count = Min(2,g_Map_Interval_Count+Pmap.interval);
 				}
 				else
 				{
-					g_Map_Interval_Count= Max(0,g_Map_Interval_Count-1);				
+					g_Map_Interval_Count= Max(0,g_Map_Interval_Count-1);
 				}
 				PrintToChatAll(" \x05[地图系统]\x01服务器启用神图疲劳");
 			}
@@ -227,7 +279,7 @@ void MapInfoOnRoundStart()
 			{
 				PrintToChatAll(" \x05[地图系统]\x01服务器无神图疲劳，已清零");
 				g_Map_Interval_Count = 0;
-			}			
+			}
 		}
 	}
 	Cvar_DamageScale_1.SetFloat(Pmap.dmgscale,true,false);
@@ -238,7 +290,7 @@ void MapInfoOnRoundEnd(int winner)
 	Pmap_Reload();
 	if(winner==2)
 	{
-		Pmap.round++;	
+		Pmap.round++;
 	}
 	if(winner==3)
 	{
@@ -256,7 +308,7 @@ void MapInfoOnRoundEnd(int winner)
 	else
 	{
 		Cvar_InfectSpawnTimeMin = FindConVar("zr_infect_spawntime_min");
-		Cvar_InfectSpawnTimeMax = FindConVar("zr_infect_spawntime_max");		
+		Cvar_InfectSpawnTimeMax = FindConVar("zr_infect_spawntime_max");
 	}
 	MapCfgUpdate(Pmap);
 	CheckMapCoolDown();
@@ -280,10 +332,10 @@ void CheckMapCoolDown()
 				PrintToChatAll(" \x05[地图系统]\x01玩家人数超过20，计入地图CD");
 				Pmap.last_run_time = Time_MapStart;			//Check PlayerNum When MapEnd and if PlayerNum>20,Count Last Run Time
 			}
-			else 
+			else
 			{
-				PrintToChatAll(" \x05[地图系统]\x01玩家人数不足20, 不计入地图CD");				
+				PrintToChatAll(" \x05[地图系统]\x01玩家人数不足20, 不计入地图CD");
 			}
-			MapCfgUpdate(Pmap);		
+			MapCfgUpdate(Pmap);
 	}
 }
