@@ -1,6 +1,6 @@
 ConVar g_Cvar_RTV_MaxRounds;
 ConVar g_Cvar_RTV_PlayerNeededRatio;
-
+bool current_map_logged =false;
 int g_RTV_VotesNum;
 int g_RTV_Rounds;
 bool g_RTV_PlyVoted[65];
@@ -29,7 +29,7 @@ enum struct Maps_VoteInfo
 	char name_cn[PLATFORM_MAX_PATH];
 	bool nominated;
 	char nominator_name[PLATFORM_MAX_PATH];
-	int nominator_steamid;
+	int nominator_uid;
 	char nominator_steamauth[PLATFORM_MAX_PATH];
 	char nominator_steampage[PLATFORM_MAX_PATH];
 	int difficulty;
@@ -88,6 +88,7 @@ void RTVOnPluginStart()
 	{
 		g_RTV_Forward_NextMapSelected = CreateGlobalForward("EMC_Forward_NextmapSelected",ET_Ignore,Param_String);
 	}
+	current_map_logged = false;
 }
 
 void MapVoteLogClear()
@@ -112,7 +113,7 @@ void MapVoteLogSort()
 				mapvote_log_temp.map_param = mapvote_log_array[i].map_param;
 				strcopy(mapvote_log_temp.mapvote_name,sizeof(mapvote_log_temp.mapvote_name),mapvote_log_array[i].mapvote_name);
 				mapvote_log_temp.votes = mapvote_log_array[i].votes;
-				
+
 				mapvote_log_array[i].map_param = mapvote_log_array[j].map_param;
 				strcopy(mapvote_log_array[i].mapvote_name,sizeof(mapvote_log_temp.mapvote_name),mapvote_log_array[j].mapvote_name);
 				mapvote_log_array[i].votes=mapvote_log_array[j].votes;
@@ -169,6 +170,7 @@ void RTVOnMapStart()
 	ResetRTV();
 	g_RTV_Rounds = 0;
 	g_Extend_Vote = true;
+	current_map_logged = false;
 }
 public bool isMapCoolDownOver(Map_Info map)
 {
@@ -179,7 +181,7 @@ public bool isMapCoolDownOver(Map_Info map)
 	{
 		return true;
 	}
-	
+
 	return false;
 }
 public bool GetCurrentMapNominatorName(char nominator_name[PLATFORM_MAX_PATH],char nominator_steamauth[PLATFORM_MAX_PATH])
@@ -201,8 +203,8 @@ void RTVOnMapEnd()
 	CloseHandleSafe(MapVote_List);
 	CloseHandleSafe(RandomMap_Candidate);
 	MapVote_List = CreateArray(sizeof(Maps_VoteInfo));
-	RandomMap_Candidate = CreateArray(sizeof(Maps_VoteInfo));	
-	g_ChangeMap_Time = MapChangeTime_MapEnd;	
+	RandomMap_Candidate = CreateArray(sizeof(Maps_VoteInfo));
+	g_ChangeMap_Time = MapChangeTime_MapEnd;
 }
 void ResetRTV()
 {
@@ -230,7 +232,7 @@ void ResetRTV()
 	g_Nextmap_Result.name = "";
 	g_Nextmap_Result.nominated = false;
 	g_Nextmap_Result.nominator_name = "";
-	g_Nextmap_Result.nominator_steamid = 0;
+	g_Nextmap_Result.nominator_uid = 0;
 	g_Nextmap_Result.difficulty = 0;
 	g_Extend_Times = 0;
 }
@@ -247,8 +249,20 @@ void RTVOnRoundStart()
 		PrintToChatAll(buffer);
 		PrintToChatAll(buffer);
 		PrintToChatAll(buffer);
-		Format(buffer,sizeof(buffer),"[EMC]%s%s(STEAMID:%d)",g_LastRound_MapVoteSave.nominated?"预定者":"当前地图为野生",g_LastRound_MapVoteSave.nominated?g_LastRound_MapVoteSave.nominator_name:"",g_LastRound_MapVoteSave.nominator_steamid);
+		Format(buffer,sizeof(buffer),"[EMC]%s%s(UID:%d)",g_LastRound_MapVoteSave.nominated?"预定者":"当前地图为野生",g_LastRound_MapVoteSave.nominated?g_LastRound_MapVoteSave.nominator_name:"",g_LastRound_MapVoteSave.nominator_uid);
 		PrintToServer(buffer);
+	}
+	char query[512];
+	int server_port = FindConVar("hostport").IntValue;
+	if(!current_map_logged)
+	{
+		SERVER_LOG current_server;
+		EXGUSERS_GetServerByPort(server_port,current_server);
+		if(isDbConnected())
+		{
+			Format(query,sizeof(query),"INSERT INTO sourcemod.exgze_maphistory (SVNAME,NOM,NOMNAME,NOMUID,TIMESTAMP,MAPNAME) VALUES('%s',%d,'%s',%d,%d,'%s')",current_server.name,g_LastRound_MapVoteSave.nominated,g_LastRound_MapVoteSave.nominator_name,g_LastRound_MapVoteSave.nominator_uid,GetTime(),map_name);
+			DbTQuery(DbQueryErrorCallback,query);
+		}
 	}
 }
 void RTVOnRoundEnd()
@@ -264,7 +278,9 @@ Action ChangeMap_RoundEnd_Hndl(Handle timer)
 	char nextmap[64];
 	GetNextMap(nextmap,sizeof(nextmap));
 	g_WTimer_BeforeMapChange = INVALID_HANDLE;
-	ForceChangeLevel(nextmap,"[EMC]RoundEnd Change Map");
+	char buffer[256];
+	Format(buffer,sizeof(buffer),"map %s",nextmap);
+	ServerCommand(buffer);
 }
 public void OnClientSayCommand_Post(int client, const char[] command, const char[] sArgs)
 {
@@ -279,7 +295,7 @@ public void RTVOnClientDisconnect(int client)
 {
 	if(!IsFakeClient(client))
 	{
-	
+
 		if(g_RTV_PlyVoted[client])
 		{
 			g_RTV_PlyVoted[client]=false;
@@ -295,7 +311,7 @@ public void RTVOnClientDisconnect(int client)
 		g_Allow_RTV = false;
 		if(g_Instant_RTV)
 		{
-			StartMapVote(MapChangeTime_Instant);				
+			StartMapVote(MapChangeTime_Instant);
 		}
 		else
 		{
@@ -318,7 +334,7 @@ public void OnMapTimeLeftChanged()
 	{
 		g_ChangeMap_Time = MapChangeTime_MapEnd;
 		g_Allow_RTV = false;
-		StartMapVote(MapChangeTime_MapEnd);	
+		StartMapVote(MapChangeTime_MapEnd);
 	}
 	else
 	{
@@ -347,8 +363,10 @@ void AttemptRTV(int client)
 {
 	char buffer[256];
 	if(!IsClientInGame(client))	return;
-	if(!isDbConnected())	return;	
-	if(g_Nextmap_Selected||g_Instant_RTV)
+	if(!isDbConnected())	return;
+	int timeleft;
+	GetMapTimeLeft(timeleft);
+	if(g_Nextmap_Selected||g_Instant_RTV||timeleft<0)
 	{
 		AttemptInstantRTV(client);
 		return;
@@ -361,11 +379,11 @@ void AttemptRTV(int client)
 	if(g_MapVote_Proceeding||g_MapVote_Initiated)
 	{
 		PrintToChat(client," \x05[EMC] \x01地图投票正在进行中");
-		return;		
+		return;
 	}
 	int RTV_PlayerNeeded;
 
-	RTV_PlayerNeeded = RoundToFloor(GetClientCount(true) * GetConVarFloat(g_Cvar_RTV_PlayerNeededRatio)); 
+	RTV_PlayerNeeded = RoundToFloor(GetClientCount(true) * GetConVarFloat(g_Cvar_RTV_PlayerNeededRatio));
 	RTV_PlayerNeeded = Max(RTV_PlayerNeeded,1);
 	if(g_RTV_PlyVoted[client])
 	{
@@ -385,13 +403,13 @@ void AttemptRTV(int client)
 		g_Allow_RTV = false;
 		StartMapVote(MapChangeTime_RoundEnd);
 	}
-}  
+}
 void AttemptInstantRTV(int client)
 {
 	char buffer[256];
 	int RTV_PlayerNeeded;
-	RTV_PlayerNeeded = RoundToFloor(GetClientCount(true) * GetConVarFloat(g_Cvar_RTV_PlayerNeededRatio)); 
-	RTV_PlayerNeeded = Max(RTV_PlayerNeeded,1);	
+	RTV_PlayerNeeded = RoundToFloor(GetClientCount(true) * GetConVarFloat(g_Cvar_RTV_PlayerNeededRatio));
+	RTV_PlayerNeeded = Max(RTV_PlayerNeeded,1);
 	if(g_RTV_PlyVoted[client])
 	{
 		Format(buffer,sizeof(buffer)," \x05[EMC] \x01您已要求立即换图(当前\x08 %d票，还需\x09 %d票)",g_RTV_VotesNum,RTV_PlayerNeeded-g_RTV_VotesNum);
@@ -471,7 +489,7 @@ void CreateNextMapVote()
 		mapv.name = map.name;
 		mapv.nominated = true;
 		mapv.nominator_name = nomlog.nominator_name;
-		mapv.nominator_steamid = nomlog.nominator_steamid;
+		mapv.nominator_uid = nomlog.nominator_uid;
 		strcopy(mapv.nominator_steamauth,sizeof(mapv.nominator_steamauth),nomlog.nominator_steamauth);
 		mapv.name_cn = map.name_cn;
 		mapv.difficulty = map.difficulty;
@@ -482,6 +500,8 @@ void CreateNextMapVote()
 	int RandomMap_Picked,RandomMap_Order;
 	RandomMap_Picked = 0;
 	int server_port = FindConVar("hostport").IntValue;
+	SERVER_LOG current_server;
+	EXGUSERS_GetServerByPort(server_port,current_server);
 	if(Random_Num>0)
 	{
 		for(int i =0;i < snap.Length ; i++)
@@ -491,17 +511,17 @@ void CreateNextMapVote()
 			bool interval_status = true;
 			bool playernum_limit = true;
 			if(map.available&&map.exist&&map.download&&map.random)
-			{	
-				
+			{
+
 				if(map.difficulty>=2)
 				{
-					if(g_Map_Interval_Count>0)
+					if(g_Map_Interval_Count>0&&current_server.ze_fatigue)
 					{
 						interval_status = false;
 						//PrintToConsoleAll("地图%s由于疲劳机制被剔出了随机队列",map.name);
 					}
 				}
-				
+
 				if(map.tag&label_code[9])
 				{
 					if(GetClientCount(true)>30)
@@ -597,7 +617,7 @@ Action MapVote_CenterText_ShowTimer(Handle timer)
 	return Plugin_Stop;
 }
 
-int NextMapVoteHandler(Menu menu, MenuAction action, int param1, int param2) 
+int NextMapVoteHandler(Menu menu, MenuAction action, int param1, int param2)
 {
 	Maps_VoteInfo mapv;
 	int nominator_credits;
@@ -607,7 +627,7 @@ int NextMapVoteHandler(Menu menu, MenuAction action, int param1, int param2)
 	char voter_name[64];
 	if (action == MenuAction_End)
 	{
-		menu.Close();
+		delete menu;
 	}
 	else if (action == MenuAction_VoteCancel)
 	{
@@ -632,8 +652,8 @@ int NextMapVoteHandler(Menu menu, MenuAction action, int param1, int param2)
 			 		{
 			 			if(!IsClientInGame(j) || IsFakeClient(j))
 							continue;
-						
-			 			if(GetSteamAccountID(j,true)==mapv.nominator_steamid)
+
+			 			if(EXGUSERS_GetUserUID(j)==mapv.nominator_uid)
 			 			{
 							if (g_pStore)
 							{
@@ -642,7 +662,7 @@ int NextMapVoteHandler(Menu menu, MenuAction action, int param1, int param2)
 								Store_SetClientCredits(j,nominator_credits+credits_return);
 							}
 
-							PrintToChatAll(" \x05[EMC] \x09%s \x01预定的 \x07%s \x01未选上，\x07%d \x01积分已退还",mapv.nominator_name,mapv.name,credits_return);	 				
+							PrintToChatAll(" \x05[EMC] \x09%s \x01预定的 \x07%s \x01未选上，\x07%d \x01积分已退还",mapv.nominator_name,mapv.name,credits_return);
 			 			}
 			 		}
 			 	}
@@ -665,7 +685,7 @@ int NextMapVoteHandler(Menu menu, MenuAction action, int param1, int param2)
 				{
 					mapvote_log_array[i].votes++;
 					break;
-				}	
+				}
 			}
 		}
 	}
@@ -680,18 +700,18 @@ void ClearNomMapList()
 		for(int j = 1; j <=64 ;j++)
 		{
 		 	if(!IsClientInGame(j)||IsFakeClient(j))	continue;
-		 	if(GetSteamAccountID(j,true)==mapv.nominator_steamid)
+		 	if(EXGUSERS_GetUserUID(j)==mapv.nominator_uid)
 		 	{
 				if (g_pStore)
 				{
 					int nominator_credits = Store_GetClientCredits(j);
 					int credits_return = RoundToFloor(mapv.nom_cost * 0.75);
 					Store_SetClientCredits(j,nominator_credits+credits_return);
-					PrintToChatAll(" \x05[EMC] \x09%s \x01预定的 \x07%s \x01未选上，\x07%d \x01积分已退还",mapv.nominator_name,mapv.name,credits_return);	 				
+					PrintToChatAll(" \x05[EMC] \x09%s \x01预定的 \x07%s \x01未选上，\x07%d \x01积分已退还",mapv.nominator_name,mapv.name,credits_return);
 				}
 				else
 				{
-					PrintToChatAll(" \x05[EMC] \x09%s \x01预定的 \x07%s \x01未选上",mapv.nominator_name,mapv.name);	 				
+					PrintToChatAll(" \x05[EMC] \x09%s \x01预定的 \x07%s \x01未选上",mapv.nominator_name,mapv.name);
 				}
 			}
 		}
@@ -766,7 +786,7 @@ public void MapVoteHandler(Menu menu, int num_votes, int num_clients, const int[
 		 		for(int j = 1; j <= 64 ; j++)
 		 		{
 		 			if(!IsClientInGame(j)||IsFakeClient(j))	continue;
-		 			if(GetSteamAccountID(j,true)==mapv.nominator_steamid)
+		 			if(EXGUSERS_GetUserUID(j)==mapv.nominator_uid)
 		 			{
 						if (g_pStore)
 						{
@@ -774,13 +794,13 @@ public void MapVoteHandler(Menu menu, int num_votes, int num_clients, const int[
 							credits_return = RoundToFloor(mapv.nominate_cost * 0.5);
 							Store_SetClientCredits(j,nominator_credits+credits_return);
 						}
-						PrintToChatAll(" \x05[EMC] \x09%s \x01预定的 \x07%s \x01未选上，\x07%d \x01积分已退还",mapv.nominator_name,mapv.name,credits_return);	 				
+						PrintToChatAll(" \x05[EMC] \x09%s \x01预定的 \x07%s \x01未选上，\x07%d \x01积分已退还",mapv.nominator_name,mapv.name,credits_return);
 		 			}
 		 		}
 		 	}
 		}
 		delete menu;
-		Nom_Map_List.Clear();	
+		Nom_Map_List.Clear();
 		ChangeMap();
 	}
 }
@@ -802,20 +822,20 @@ void ChangeMap()
 		g_RTV_PlyVoted[i] = false;
 	}
 	if(g_ChangeMap_Time == MapChangeTime_RoundEnd)
-	{ 
+	{
 		PrintToChatAll(" \x05[EMC]\x01地图将在本回合结束后更换，再发起rtv可以立刻换图");
 		g_Instant_RTV = true;
 	}
 	else if(g_ChangeMap_Time == MapChangeTime_Instant)
-	{	
+	{
 		g_Instant_RTV = false;
 		KillTimerSafe(g_WTimer_BeforeMapChange);
 		g_WTimer_BeforeMapChange = CreateTimer(4.0,Instant_ChangeMap_Hndl, _,TIMER_FLAG_NO_MAPCHANGE);
 	}
 	else if(g_ChangeMap_Time == MapChangeTime_MapEnd)
 	{
-		PrintToChatAll(" x05[EMC]\x01地图将在时间结束后更换，再发起rtv可以立刻换图");	
-		g_Instant_RTV = true;	
+		PrintToChatAll(" x05[EMC]\x01地图将在时间结束后更换，再发起rtv可以立刻换图");
+		g_Instant_RTV = true;
 	}
 }
 
@@ -824,7 +844,9 @@ Action Instant_ChangeMap_Hndl(Handle timer)
 	char nextmap[64];
 	GetNextMap(nextmap,sizeof(nextmap));
 	g_WTimer_BeforeMapChange  = INVALID_HANDLE;
-	ForceChangeLevel(nextmap,"[EMC]Instant Change Map");
+	char buffer[256];
+	Format(buffer,sizeof(buffer),"map %s",nextmap);
+	ServerCommand(buffer);
 }
 
 Action ExtendCommand(int client,int args)
@@ -873,7 +895,7 @@ void ExtendMapVote(int client)
 			menu.AddItem("","同意");
 			menu.AddItem("","反对");
 			SetVoteResultCallback(menu,ExtendResultHandler1);
-			VoteMenuToAll(menu,15);			
+			VoteMenuToAll(menu,15);
 		}
 		else
 		{
@@ -894,13 +916,13 @@ void ExtendMapVote(int client)
 				menu.AddItem("Yes","同意");
 				menu.AddItem("No","反对");
 				SetVoteResultCallback(menu,ExtendResultHandler2);
-				VoteMenuToAll(menu,15);			
+				VoteMenuToAll(menu,15);
 			}
 		}
 	}
 }
 
-int ExtendMapVoteHandler(Menu menu, MenuAction action, int param1, int param2) 
+int ExtendMapVoteHandler(Menu menu, MenuAction action, int param1, int param2)
 {
 	if(action == MenuAction_End)
 	{
@@ -921,7 +943,7 @@ int ExtendMapVoteHandler(Menu menu, MenuAction action, int param1, int param2)
 			g_Extend_Vote_No++;
 			g_Extend_Vote_All++;
 			PrintToConsoleAll("[EMC]延长投票:%s选择了反对",voter_name);
-		}                                                                                                                                      
+		}
 	}
 }
 
@@ -938,7 +960,7 @@ public void ExtendResultHandler1(Menu menu, int num_votes, int num_clients, cons
 	else
 	{
 		PrintToChatAll(" \x05[EMC]\x01投票延长失败!地图将在回合结束后更换");
-		g_ChangeMap_Time = MapChangeTime_RoundEnd;		
+		g_ChangeMap_Time = MapChangeTime_RoundEnd;
 	}
 	delete menu;
 }
@@ -956,6 +978,6 @@ public void ExtendResultHandler2(Menu menu, int num_votes, int num_clients, cons
 	else
 	{
 		PrintToChatAll(" \x05[EMC]\x01投票延长失败!地图将在剩余时间结束后更换");
-		g_ChangeMap_Time = MapChangeTime_MapEnd;		
+		g_ChangeMap_Time = MapChangeTime_MapEnd;
 	}
 }

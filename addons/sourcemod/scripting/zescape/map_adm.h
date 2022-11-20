@@ -37,6 +37,13 @@
  	float mry;
  	float mrz;
 }*/
+enum AdmLog_Type
+{
+	DEFAULT = 0,
+	CHANGE_COOLDOWN = 1,
+	CHANGE_COST = 2,
+	TOGGLE_AVAILABLE = 3
+};
 int tag_num=11;
 char difficulty_name[5][10]={"简单","普通","困难","高难","傻逼"};
 char label_name[11][64]={"FF","卤粉","弹幕方块","经典","闯关","娱乐","休闲","对抗","长征","感染","活动"};
@@ -69,7 +76,7 @@ void MapAdmOnMapEnd()
 	PrintToServer("[MapAdm MapEnd]");
 	g_Map_Loaded = false;
 }
-void MapAdmOnPluginStart() 
+void MapAdmOnPluginStart()
 {
 	g_Map_Loaded = false;
 	Maps = CreateTrie();
@@ -85,7 +92,8 @@ void MapAdmOnPluginStart()
 	RegAdminCmd("sm_mapcd_update",MapCooldownCommand,ADMFLAG_GENERIC);
 	RegAdminCmd("sm_mapcost_update",MapCostCommand,ADMFLAG_GENERIC);
 	RegAdminCmd("sm_resetma",MapAdminResetCommand,ADMFLAG_GENERIC);
-	RegConsoleCmd("sm_mla",MapLabelCommand);
+	RegConsoleCmd("sm_mah",MapAdminHistoryCommand);
+	RegConsoleCmd("sm_mg",MapLabelCommand);
 	if(g_MapConfigLoaded == null)
 	{
 		g_MapConfigLoaded = CreateGlobalForward("EMC_Forward_MapConfigLoaded",ET_Ignore);
@@ -106,14 +114,197 @@ Action MapLabelCommand(int client,int args)
 	MapLabelMenuBuild(client);
 	return Plugin_Handled;
 }
+Action MapAdminHistoryCommand(int client,int args)
+{
+	if(client<=0||client>=65)	return Plugin_Handled;
+	if(!IsClientInGame(client))	return Plugin_Handled;
+	if(IsFakeClient(client))	return Plugin_Handled;
+	if (!args) {
+		MapAdminHistoryMenuBuild(client);
+		return Plugin_Handled;
+	}
+	char arg[PLATFORM_MAX_PATH];
+	GetCmdArg(1, arg, sizeof(arg));
+	MapAdminHistoryMenuBuild(client,arg);
+	return Plugin_Handled;
+}
+
+void MapAdminHistoryMenuBuild(int client,char[] trie_search="")
+{
+	if(client<=0||client>=65)	return;
+	if(!IsClientInGame(client))	return;
+	if(IsFakeClient(client))	return;
+	Map_Log map;
+	Map_Info mapt;
+	Menu menu = CreateMenu(MapAdminHistoryMenuHandler);
+	menu.SetTitle("地图管理记录查询");
+	for(int i = 0 ; i < Map_List.Length ; i++)
+	{
+		GetArrayArray(Map_List,i,map,sizeof(map));
+		if(strlen(trie_search) && StrContains(map.name,trie_search,false)==-1 && StrContains(map.name_cn,trie_search) == -1)	continue;
+		menu.AddItem(map.name,map.name);
+	}
+	if(strlen(trie_search))
+	{
+		if(menu.ItemCount == 0)
+		{
+			delete menu;
+			PrintToChat(client,"\x05[地图历史]\x01找不到匹配地图");
+			return;
+		}
+		if(menu.ItemCount == 1)
+		{
+			menu.GetItem(0, map.name, sizeof(map.name));
+			delete menu;
+			Maps.GetArray(map.name,mapt,sizeof(mapt));
+			MapAdminHistoryView(client,mapt);
+			return;
+		}
+		if(menu.ItemCount > 1)
+		{
+			menu.Display(client, MENU_TIME_FOREVER);
+			return;
+		}
+	}
+	else
+	{
+		menu.Display(client, MENU_TIME_FOREVER);
+	}
+
+}
+int MapAdminHistoryMenuHandler(Menu menu, MenuAction action, int client, int param)
+{
+	Map_Info map;
+	if (action == MenuAction_End)	delete menu;
+	else if (action == MenuAction_Select)
+	{
+		char buffer[PLATFORM_MAX_PATH];
+		menu.GetItem(param,buffer,sizeof(buffer));
+		Maps.GetArray(buffer,map,sizeof(map));
+		MapAdminHistoryView(client,map);
+	}
+	return 0;
+}
+void MapAdminHistoryView(int client,Map_Info map)
+{
+	char query[512];
+	Format(query,sizeof(query),"SELECT * FROM exgusers_mapadmlog WHERE TARGETSTR = '%s' LIMIT 300",map.name);
+	DbTQuery(MapAdminHistoryViewCallback,query,client);
+}
+void MapAdminHistoryViewCallback(Handle owner, Handle hndl, char[] error, any data)
+{
+	int client = data;
+	int count=-1;
+	if(!hndl)
+	{
+		PrintToChat(client," \x05[地图管理]\x01该地图没有管理日志!")
+		return;
+	}
+	if(!SQL_FetchRow(hndl))
+	{
+		PrintToChat(client," \x05[地图管理]\x01该地图没有管理日志!")
+		return;
+	}
+	else
+	{
+		Menu menu = CreateMenu(MapAdminHistoryViewMenuHandler);
+		char name[64],buffer[256];
+		DbFetchString(hndl,"TARGETSTR",name,sizeof(name));
+		menu.SetTitle(name);
+		int admin_uid;
+		int type;
+		int value;
+		int timestamp;
+		char ctime[64];
+		char valuestr[64];
+		char admin_name[64];
+		count++;
+		DbFetchString(hndl,"NAME",admin_name,sizeof(name));
+		admin_uid = DbFetchInt(hndl,"UID");
+		type = DbFetchInt(hndl,"TYPE");
+		timestamp = DbFetchInt(hndl,"TIMESTAMP");
+		value = DbFetchInt(hndl,"VALUE");
+		DbFetchString(hndl,"VALUESTR",valuestr,sizeof(valuestr));
+		FormatTime(ctime,64,NULL_STRING,timestamp);
+		switch(type)
+		{
+			case CHANGE_COOLDOWN:
+			{
+				Format(buffer,sizeof(buffer),"修改冷却时间至%d分钟[%s]\n操作人:[%d]%s",value,ctime,admin_uid,admin_name);
+				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+			}
+			case CHANGE_COST:
+			{
+				Format(buffer,sizeof(buffer),"修改地图定价至:%d积分[%s]\n操作人:[%d]%s",value,ctime,admin_uid,admin_name);
+				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+			}
+			case TOGGLE_AVAILABLE:
+			{
+				Format(buffer,sizeof(buffer),"开放订阅:%s[%s]\n操作人:[%d]%s",value?"开":"关",ctime,admin_uid,admin_name);
+				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+			}
+			default:
+			{
+				Format(buffer,sizeof(buffer),"未知操作[%s]\n操作人:[%d]%s",ctime,admin_uid,admin_name);
+				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+			}
+		}
+		while(SQL_FetchRow(hndl))
+		{
+			count++;
+			DbFetchString(hndl,"NAME",admin_name,sizeof(name));
+			admin_uid = DbFetchInt(hndl,"UID");
+			type = DbFetchInt(hndl,"TYPE");
+			timestamp = DbFetchInt(hndl,"TIMESTAMP");
+			DbFetchString(hndl,"VALUESTR",valuestr,sizeof(valuestr));
+			FormatTime(ctime,64,NULL_STRING,timestamp);
+			switch(type)
+			{
+				case CHANGE_COOLDOWN:
+				{
+					Format(buffer,sizeof(buffer),"修改冷却时间至%d分钟[%s]\n操作人:[%d]%s",value,ctime,admin_uid,admin_name);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case CHANGE_COST:
+				{
+					Format(buffer,sizeof(buffer),"修改地图定价至:%d积分[%s]\n操作人:[%d]%s",value,ctime,admin_uid,admin_name);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case TOGGLE_AVAILABLE:
+				{
+					Format(buffer,sizeof(buffer),"开放订阅:%s[%s]\n操作人:[%d]%s",value?"开":"关",ctime,admin_uid,admin_name);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				default:
+				{
+					Format(buffer,sizeof(buffer),"未知操作[%s]\n操作人:[%d]%s",ctime,admin_uid,admin_name);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+			}
+		}
+		menu.Display(client,MENU_TIME_FOREVER);
+		return;
+	}
+}
+
+int MapAdminHistoryViewMenuHandler(Menu menu, MenuAction action, int client, int param)
+{
+	if (action == MenuAction_End)	delete menu;
+	return 0;
+}
+
 void MapLabelMenuBuild(int client)
 {
 	if(client<=0||client>=65)	return;
 	if(!IsClientInGame(client))	return;
 	if(IsFakeClient(client))	return;
-	Menu menu = CreateMenu(MapLabelMenuHandler);
-	menu.SetTitle("活动地图组");
-	Map_Log map;
+	Menu menu = CreateMenu(MapGroupMenuHandler);
+	menu.SetTitle("地图组查询");
+	for(int i =0; i < tag_num; i++)
+	{
+		menu.AddItem("",label_name[i]);
+	}
+	/*Map_Log map;
 	Map_Info mapt;
 	for(int i = 0 ; i < Map_List.Length ; i++)
 	{
@@ -131,27 +322,78 @@ void MapLabelMenuBuild(int client)
 	else
 	{
 		menu.Display(client, MENU_TIME_FOREVER);
-	}
+	}*/
+	menu.Display(client,MENU_TIME_FOREVER);
 	return;
 }
 
-int MapLabelMenuHandler(Menu menu, MenuAction action, int client, int param) 
+int MapGroupMenuHandler(Menu menu, MenuAction action, int client, int param)
 {
-	Map_Info map;
 	char map_name[PLATFORM_MAX_PATH];
 	if (action == MenuAction_End)
 	{
-		menu.Close();
+		delete menu;
 	}
 	else if (action == MenuAction_Select)
-	{            
-		menu.GetItem(param,map_name,sizeof(map_name));
-		Maps.GetArray(map_name,map,sizeof(map));		
+	{
+		BuildGroupMapMenu(client,param);
+		/*menu.GetItem(param,map_name,sizeof(map_name));
+		Maps.GetArray(map_name,map,sizeof(map));
 		map.tag-=(1<<10);
 		MapCfgUpdate(map);
 		PrintToChat(client," \x05[地图管理]\x01移除了地图\x07 %s \x01的\x07[%s]\x01标签",map.name,label_name[10]);
-		MapLabelMenuBuild(client);
+		MapLabelMenuBuild(client);*/
 	}
+	return 0;
+}
+void BuildGroupMapMenu(int client,int group)
+{
+	Menu menu = CreateMenu(GroupMapListHandler);
+	menu.SetTitle(label_name[group]);
+	Map_Log map;
+	Map_Info mapt;
+	char group_id[64];
+	IntToString(group,group_id,sizeof(group_id));
+	menu.AddItem(group_id,"占位",ITEMDRAW_DISABLED);
+	for(int i = 0 ; i < Map_List.Length ; i++)
+	{
+		GetArrayArray(Map_List,i,map,sizeof(map));
+		Maps.GetArray(map.name,mapt,sizeof(mapt));
+		if(mapt.tag&(label_code[group]))
+		{
+			menu.AddItem(mapt.name,mapt.name,GetAdminFlag(GetUserAdmin(client),Admin_Generic) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+		}
+	}
+	if(menu.ItemCount<=1)
+	{
+		delete menu;
+	}
+	else
+	{
+		menu.Display(client, MENU_TIME_FOREVER);
+	}
+}
+int GroupMapListHandler(Menu menu, MenuAction action, int client, int param)
+{
+	char map_name[PLATFORM_MAX_PATH];
+	char group_id[64];
+	Map_Info map;
+	int group;
+	if (action == MenuAction_End)
+	{
+		delete menu;
+	}
+	else if (action == MenuAction_Select)
+	{
+		menu.GetItem(0,group_id,sizeof(group_id));
+		group = StringToInt(group_id);
+		menu.GetItem(param,map_name,sizeof(map_name));
+		Maps.GetArray(map_name,map,sizeof(map));
+		map.tag-=(label_code[group]);
+		MapCfgUpdate(map);
+		PrintToChat(client," \x05[地图管理]\x01移除了地图\x07 %s \x01的\x07[%s]\x01标签",map.name,label_name[group]);
+	}
+	return 0;
 }
 
 Action MapDataReloadCommand(int client,int args)
@@ -203,23 +445,23 @@ void MapDataLoadCallback(Handle owner, Handle hndl, char[] error, any data)
 		map.available = DbFetchInt(hndl, "AVAILABLE");
 		map.cost = DbFetchInt(hndl, "COST");
 		map.heat = DbFetchInt(hndl, "HEAT");
-		map.difficulty = DbFetchInt(hndl, "DIFFICULTY");		
+		map.difficulty = DbFetchInt(hndl, "DIFFICULTY");
 		map.tag = DbFetchInt(hndl, "TAG");
 		map.round = DbFetchInt(hndl, "ROUND");
 		map.wins = DbFetchInt(hndl, "WINS");
 		map.translated = DbFetchInt(hndl, "TRANSLATED");
-		map.download = DbFetchInt(hndl, "DOWNLOAD");		
-		map.roundtime = DbFetchInt(hndl, "ROUNDTIME");		
-		map.timelimit = DbFetchInt(hndl, "TIMELIMIT");		
-		map.infecttime = DbFetchFloat(hndl, "INFECTTIME");	
-		map.random = DbFetchInt(hndl, "RANDOM");			
+		map.download = DbFetchInt(hndl, "DOWNLOAD");
+		map.roundtime = DbFetchInt(hndl, "ROUNDTIME");
+		map.timelimit = DbFetchInt(hndl, "TIMELIMIT");
+		map.infecttime = DbFetchFloat(hndl, "INFECTTIME");
+		map.random = DbFetchInt(hndl, "RANDOM");
 		map.exist = 0;
-		map.extend = DbFetchInt(hndl, "EXTEND");	
+		map.extend = DbFetchInt(hndl, "EXTEND");
 		map.nohmskill = DbFetchInt(hndl,"NOHMSKILL");
 		map.nozmskill = DbFetchInt(hndl,"NOZMSKILL");
 		map.nojk = DbFetchInt(hndl,"NOJK");
 		map.nobhoplimit = DbFetchInt(hndl,"NOBHOPLIMIT");
-		map.interval = DbFetchInt(hndl,"FATIGUE"); 
+		map.interval = DbFetchInt(hndl,"FATIGUE");
 		map.ego = DbFetchInt(hndl,"EGO");
 		map.vis = DbFetchInt(hndl,"VIS");
 		map.dmgscale = DbFetchFloat(hndl,"DMGSCALE");
@@ -231,6 +473,8 @@ void MapDataLoadCallback(Handle owner, Handle hndl, char[] error, any data)
 		map.mrx = DbFetchFloat(hndl,"MRX");
 		map.mry = DbFetchFloat(hndl,"MRY");
 		map.mrz = DbFetchFloat(hndl,"MRZ");
+		map.pllower = DbFetchInt(hndl,"PLLOWER");
+		map.plupper = DbFetchInt(hndl,"PLUPPER");
 		Maps.SetArray(map.name, map, sizeof(map), true);
 //		Format(buffer,sizeof(buffer),"[MapDataLoad]Added Map List:%s",mapl.name);
 //		PrintToServer(buffer);
@@ -238,7 +482,7 @@ void MapDataLoadCallback(Handle owner, Handle hndl, char[] error, any data)
 		if(map.id>Map_Id_Max)	Map_Id_Max = map.id;
 		map.temp_cooldown = false;
 		//PrintToServer("%d %s",map.id,map.name);
-	}	
+	}
 	MapFileReload();
 }
 void MapFileReload()
@@ -259,10 +503,10 @@ void MapFileReload()
 		Map_Log mapl;
 		if(!Maps.GetArray(file_name,map,sizeof(map)))
 		{
-			map.name = file_name;	
+			map.name = file_name;
 			Map_Id_Max++;
 			map.id = Map_Id_Max;
-			map.exist = 1;	
+			map.exist = 1;
 			map.extend = 3;
 			map.temp_cooldown = false;
 			Maps.SetArray(map.name,map,sizeof(map),true);
@@ -305,7 +549,7 @@ void ResetFileExist()
 		Maps.GetArray(map.name, map, sizeof(map));
 
 		Format(query,sizeof(query),"UPDATE zemaps SET EXIST = %d where ID = %d",map.exist,map.id);
-		DbTQuery(DbQueryErrorCallback,query);		
+		DbTQuery(DbQueryErrorCallback,query);
 	}
 	snap.Close();
 }
@@ -343,21 +587,21 @@ void MapAdminMenu(int client,char trie_search[PLATFORM_MAX_PATH]="")
 	{
 		if(menu.ItemCount == 0)
 		{
-			menu.Close();
+			delete menu;
 			PrintToChat(client,"\x05地图管理：找不到匹配地图");
 			return;
 		}
 		if(menu.ItemCount == 1)
 		{
 			menu.GetItem(0, map.name, sizeof(map.name));
-			menu.Close();
+			delete menu;
 			Maps.GetArray(map.name,mapt,sizeof(mapt));
 			MapAdminConfigMenu(client,mapt);
 			return;
 		}
 		if(menu.ItemCount > 1)
 		{
-			menu.Display(client, MENU_TIME_FOREVER);			
+			menu.Display(client, MENU_TIME_FOREVER);
 			return;
 		}
 	}
@@ -369,10 +613,10 @@ void MapAdminMenu(int client,char trie_search[PLATFORM_MAX_PATH]="")
 
 int MapAdminMenuHandler(Menu menu, MenuAction action, int client, int param) {
 	Map_Info map;
-	if (action == MenuAction_End) menu.Close();
+	if (action == MenuAction_End)	delete menu;
 	else if (action == MenuAction_Select)
-	{                             
-		char buffer[PLATFORM_MAX_PATH];                                            
+	{
+		char buffer[PLATFORM_MAX_PATH];
 		menu.GetItem(param,buffer,sizeof(buffer));
 		Maps.GetArray(buffer,map,sizeof(map));
 		MapAdminConfigMenu(client,map);
@@ -447,27 +691,31 @@ void MapAdminConfigMenu(int client,Map_Info map)
 	menu.AddItem(map.name,buffer);
 	Format(buffer,sizeof(buffer),"血量系数:%f",map.zmhpscale);
 	menu.AddItem(map.name,buffer);
+	Format(buffer,sizeof(buffer),"人数下限:%d",map.pllower);
+	menu.AddItem(map.name,buffer);
+	Format(buffer,sizeof(buffer),"人数上限:%d",map.plupper);
+	menu.AddItem(map.name,buffer)
 	menu.Display(client, MENU_TIME_FOREVER);
 }
-int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param) 
+int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 {
 	char buffer[PLATFORM_MAX_PATH];
 	Map_Info map;
 	char map_name[PLATFORM_MAX_PATH];
 	if (action == MenuAction_End)
 	{
-		menu.Close();
+		delete menu;
 	}
 	else if (action == MenuAction_Select)
-	{            
+	{
 		menu.GetItem(param,map_name,sizeof(map_name));
-		Maps.GetArray(map_name,map,sizeof(map));		
+		Maps.GetArray(map_name,map,sizeof(map));
 		if(param == 0)
 		{
 			PrintToChat(client,"译名修改参数已发送至控制台");
 			Format(buffer,sizeof(buffer),"sm_mapnamecn_update \"%s\" \"%s\"",map.name,map.name_cn);
 			PrintToConsole(client,buffer);
-		}	
+		}
 		if(param == 1)
 		{
 			MapCooldownMenu(client,map);
@@ -501,20 +749,20 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 			admlog_add.value=map.available;
 			admlog_add.valuestr="";
 			admlog_add.target=0;
-			admlog_add.targetstr=map.name;		
+			admlog_add.targetstr=map.name;
 			admlog_add.timestamp = current_time;
 			EXGUSERS_AddAdminLog(admlog_add);
 
 			MapCfgUpdate(map);
 			MapAdminConfigMenu(client,map);
-		}	
+		}
 		if(param == 5)
 		{
 			if(map.download == 1)	map.download =0;
 			else map.download = 1;
 			MapCfgUpdate(map);
 			MapAdminConfigMenu(client,map);
-		}	
+		}
 		if(param == 6)
 		{
 			if(map.random == 1)	map.random =0;
@@ -616,14 +864,165 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 		{
 			MapZMHpScaleConfigMenu(client,map);
 		}
-	}	
+		if(param == 23)
+		{
+			MapUpperLimitMenu(client,map);
+		}
+		if(param == 24)
+		{
+			MapLowerLimitMenu(client,map);
+		}
+	}
+	return 0;
+}
+void MapUpperLimitMenu(int client,Map_Info map)
+{
+	Menu menu = CreateMenu(MapUpperLimitMenuHandler);
+	char buffer[256];
+	Format(buffer,sizeof(buffer),"%s:订图人数上限\n当前限制:%d%s",map.name,map.plupper,map.plupper==0?"(不限制)":"");
+	menu.SetTitle(buffer);
+	menu.AddItem(map.name,"+1人");
+	menu.AddItem(map.name,"+5人");
+	menu.AddItem(map.name,"+10人");
+	menu.AddItem(map.name,"-1人");
+	menu.AddItem(map.name,"-5人");
+	menu.AddItem(map.name,"-10人");
+	menu.ExitBackButton = true;
+	menu.Display(client,MENU_TIME_FOREVER);
+}
+int MapUpperLimitMenuHandler(Menu menu, MenuAction action, int client, int param)
+{
+	char map_name[64];
+	Map_Info map;
+	switch(action)
+	{
+		case MenuAction_End:
+		{
+			delete menu;
+		}
+		case MenuAction_Select:
+		{
+			menu.GetItem(param,map_name,sizeof(map_name));
+			Maps.GetArray(map_name,map,sizeof(map));
+			switch(param)
+			{
+				case 0:
+				{
+					map.plupper+=1;
+					if(map.plupper>=64)	map.plupper=0;
+				}
+				case 1:
+				{
+					map.plupper+=5;
+					if(map.plupper>=64)	map.plupper=0;
+				}
+				case 2:
+				{
+					map.plupper+=10;
+					if(map.plupper>=64)	map.plupper=0;
+				}
+				case 3:
+				{
+					map.plupper-=1;
+					if(map.plupper<=0)	map.plupper=0;
+				}
+				case 4:
+				{
+					map.plupper-=5;
+					if(map.plupper<=0)	map.plupper=0;
+				}
+				case 5:
+				{
+					map.plupper-=10;
+					if(map.plupper<=0)	map.plupper=0;
+				}
+			}
+			MapUpperLimitMenu(client,map);
+		}
+		case MenuCancel_ExitBack:
+		{
+			MapAdminConfigMenu(client,map);
+		}
+	}
+	return 0;
+}
+void MapLowerLimitMenu(int client,Map_Info map)
+{
+	Menu menu = CreateMenu(MapLowerLimitMenuHandler);
+	char buffer[256];
+	Format(buffer,sizeof(buffer),"%s:订图人数下限\n当前限制:%d%s",map.name,map.plupper,map.plupper==0?"(不限制)":"");
+	menu.SetTitle(buffer);
+	menu.AddItem(map.name,"+1人");
+	menu.AddItem(map.name,"+5人");
+	menu.AddItem(map.name,"+10人");
+	menu.AddItem(map.name,"-1人");
+	menu.AddItem(map.name,"-5人");
+	menu.AddItem(map.name,"-10人");
+	menu.ExitBackButton = true;
+	menu.Display(client,MENU_TIME_FOREVER);
+}
+int MapLowerLimitMenuHandler(Menu menu, MenuAction action, int client, int param)
+{
+	char map_name[64];
+	Map_Info map;
+	switch(action)
+	{
+		case MenuAction_End:
+		{
+			delete menu;
+		}
+		case MenuAction_Select:
+		{
+			menu.GetItem(param,map_name,sizeof(map_name));
+			Maps.GetArray(map_name,map,sizeof(map));
+			switch(param)
+			{
+				case 0:
+				{
+					map.pllower+=1;
+					if(map.pllower>=64)	map.pllower=0;
+				}
+				case 1:
+				{
+					map.pllower+=5;
+					if(map.pllower>=64)	map.pllower=0;
+				}
+				case 2:
+				{
+					map.pllower+=10;
+					if(map.pllower>=64)	map.pllower=0;
+				}
+				case 3:
+				{
+					map.pllower-=1;
+					if(map.pllower<=0)	map.pllower=0;
+				}
+				case 4:
+				{
+					map.pllower-=5;
+					if(map.pllower<=0)	map.pllower=0;
+				}
+				case 5:
+				{
+					map.pllower-=10;
+					if(map.pllower<=0)	map.pllower=0;
+				}
+			}
+			MapLowerLimitMenu(client,map);
+		}
+		case MenuCancel_ExitBack:
+		{
+			MapAdminConfigMenu(client,map);
+		}
+	}
+	return 0;
 }
 void MapCfgUpdate(Map_Info map)
 {
 	char query[2048];
-	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d, WINS = %d, FATIGUE = %d, INFECTTIME = %f,EGO = %d,VIS = %d, TAG = %d, DMGSCALE = %f, TAGSCALE = %d, KNOCKBACK = %f, ZMCLASS = %d, ZMHPSCALE = %f, MR = %d, MRX = %f, MRY = %f, MRZ = %f WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.wins,map.interval,map.infecttime,map.ego,map.vis,map.tag,map.dmgscale,map.tagscale,map.knockback,map.zmclass,map.zmhpscale,map.mr,map.mrx,map.mry,map.mrz,map.id,map.name);
+	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d, WINS = %d, FATIGUE = %d, INFECTTIME = %f,EGO = %d,VIS = %d, TAG = %d, DMGSCALE = %f, TAGSCALE = %d, KNOCKBACK = %f, ZMCLASS = %d, ZMHPSCALE = %f, MR = %d, MRX = %f, MRY = %f, MRZ = %f, PLUPPER = %d, PLLOWER = %d WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.wins,map.interval,map.infecttime,map.ego,map.vis,map.tag,map.dmgscale,map.tagscale,map.knockback,map.zmclass,map.zmhpscale,map.mr,map.mrx,map.mry,map.mrz,map.plupper,map.pllower,map.id,map.name);
 	PrintToServer(query);
-	DbTQuery(DbQueryErrorCallback,query);	
+	DbTQuery(DbQueryErrorCallback,query);
 	Map_Log mapl;
 	Maps.SetArray(map.name,map,sizeof(map),true);
 	for(int i = 0 ; i < Map_List.Length ; i++)
@@ -673,18 +1072,18 @@ void MapCooldownMenu(int client,Map_Info map)
 
 }
 
-int MapCooldownCfgHandler(Menu menu, MenuAction action, int client, int param) 
+int MapCooldownCfgHandler(Menu menu, MenuAction action, int client, int param)
 {
 	char buffer[256];
 	char map_name[PLATFORM_MAX_PATH];
 	Map_Info map;
 	if (action == MenuAction_End)
 	{
-		menu.Close();
+		delete menu;
 	}
 	else if (action == MenuAction_Select) {
 		menu.GetItem(param,map_name,sizeof(map_name));
-		Maps.GetArray(map_name,map,sizeof(map));		
+		Maps.GetArray(map_name,map,sizeof(map));
 		if (param == 0) map.cooldown = Max(0, map.cooldown-10);
 		else if (param == 1) map.cooldown = Max(0, map.cooldown-60);
 		else if (param == 2) map.cooldown = Max(0, map.cooldown-360);
@@ -713,7 +1112,7 @@ int MapCooldownCfgHandler(Menu menu, MenuAction action, int client, int param)
 		admlog_add.value=map.cooldown;
 		admlog_add.valuestr="";
 		admlog_add.target=0;
-		admlog_add.targetstr=map.name;		
+		admlog_add.targetstr=map.name;
 		EXGUSERS_AddAdminLog(admlog_add);
 		MapCfgUpdate(map);
 		MapCooldownMenu(client,map);
@@ -782,18 +1181,18 @@ void MapCostMenu(int client,Map_Info map)
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
-int MapCostCfgHandler(Menu menu, MenuAction action, int client, int param) 
+int MapCostCfgHandler(Menu menu, MenuAction action, int client, int param)
 {
 	char buffer[256];
 	char map_name[PLATFORM_MAX_PATH];
 	Map_Info map;
 	if (action == MenuAction_End)
 	{
-		menu.Close();
+		delete menu;
 	}
 	else if (action == MenuAction_Select) {
 		menu.GetItem(param,map_name,sizeof(map_name));
-		Maps.GetArray(map_name,map,sizeof(map));		
+		Maps.GetArray(map_name,map,sizeof(map));
 		if (param == 0) map.cost = Max(0, map.cost-10);
 		else if (param == 1) map.cost = Max(0, map.cost-50);
 		else if (param == 2) map.cost = Max(0, map.cost-200);
@@ -821,12 +1220,12 @@ int MapCostCfgHandler(Menu menu, MenuAction action, int client, int param)
 		admlog_add.value=map.cost;
 		admlog_add.valuestr="";
 		admlog_add.target=0;
-		admlog_add.targetstr=map.name;		
+		admlog_add.targetstr=map.name;
 		EXGUSERS_AddAdminLog(admlog_add);
 		MapCfgUpdate(map);
 		MapCostMenu(client,map);
 		return 0;
-	}	
+	}
 	else if (param == MenuCancel_ExitBack)
 	{
 		menu.GetItem(0,map_name,sizeof(map_name));
@@ -863,7 +1262,7 @@ Action MapCostCommand(int client,int args)
 	admlog_add.value=map.cost;
 	admlog_add.valuestr="";
 	admlog_add.target=0;
-	admlog_add.targetstr=map.name;		
+	admlog_add.targetstr=map.name;
 	EXGUSERS_AddAdminLog(admlog_add);
 	MapCfgUpdate(map);
 	return Plugin_Handled;
@@ -887,17 +1286,17 @@ void MapTimeLimitMenu(int client,Map_Info map)
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
-int MapTimeLimitMenuHandler(Menu menu, MenuAction action, int client, int param) 
+int MapTimeLimitMenuHandler(Menu menu, MenuAction action, int client, int param)
 {
 	char map_name[PLATFORM_MAX_PATH];
 	Map_Info map;
 	if (action == MenuAction_End)
 	{
-		menu.Close();
+		delete menu;
 	}
 	else if (action == MenuAction_Select) {
 		menu.GetItem(param,map_name,sizeof(map_name));
-		Maps.GetArray(map_name,map,sizeof(map));		
+		Maps.GetArray(map_name,map,sizeof(map));
 		if (param == 0) map.timelimit = Min(120, map.timelimit+5);
 		else if (param == 1) map.timelimit = Min(120, map.timelimit+10);
 		else if (param == 2) map.timelimit = Min(120, map.timelimit+30);
@@ -940,17 +1339,17 @@ void MapInfectTimeMenu(int client,Map_Info map)
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
-int MapInfectTimeHandler(Menu menu, MenuAction action, int client, int param) 
+int MapInfectTimeHandler(Menu menu, MenuAction action, int client, int param)
 {
 	char map_name[PLATFORM_MAX_PATH];
 	Map_Info map;
 	if (action == MenuAction_End)
 	{
-		menu.Close();
+		delete menu;
 	}
 	else if (action == MenuAction_Select) {
 		menu.GetItem(param,map_name,sizeof(map_name));
-		Maps.GetArray(map_name,map,sizeof(map));		
+		Maps.GetArray(map_name,map,sizeof(map));
 		if (param == 0) map.infecttime = fMin(60.0, map.infecttime+0.1);
 		else if (param == 1) map.infecttime = fMin(60.0, map.infecttime+0.5);
 		else if (param == 2) map.infecttime = fMin(60.0, map.infecttime+1.0);
@@ -1000,7 +1399,7 @@ int MapTagConfigMenuHandler(Menu menu, MenuAction action, int client, int param)
 	Map_Info map;
 	if( action == MenuAction_End )
 	{
-		menu.Close();
+		delete menu;
 	}
 	else if (action == MenuAction_Select)
 	{
@@ -1048,7 +1447,7 @@ int MapDmgScaleConfigMenuHandler(Menu menu, MenuAction action, int client, int p
 	Map_Info map;
 	if( action == MenuAction_End )
 	{
-		menu.Close();
+		delete menu;
 	}
 	else if (action == MenuAction_Select)
 	{
@@ -1062,7 +1461,7 @@ int MapDmgScaleConfigMenuHandler(Menu menu, MenuAction action, int client, int p
 		if(param==5)	map.dmgscale = fMax(0.1,map.dmgscale-1.0);
 		MapCfgUpdate(map);
 		MapDmgscaleConfigMenu(client,map);
-	}	
+	}
 	else if (param == MenuCancel_ExitBack)
 	{
 		menu.GetItem(0,map_name,sizeof(map_name));
@@ -1093,7 +1492,7 @@ int MapTagscaleConfigMenuHandler(Menu menu, MenuAction action, int client, int p
 	Map_Info map;
 	if( action == MenuAction_End )
 	{
-		menu.Close();
+		delete menu;
 	}
 	else if (action == MenuAction_Select)
 	{
@@ -1107,7 +1506,7 @@ int MapTagscaleConfigMenuHandler(Menu menu, MenuAction action, int client, int p
 		if(param==5)	map.tagscale = Max(1,map.tagscale-10);
 		MapCfgUpdate(map);
 		MapTagscaleConfigMenu(client,map);
-	}	
+	}
 	else if (param == MenuCancel_ExitBack)
 	{
 		menu.GetItem(0,map_name,sizeof(map_name));
@@ -1138,7 +1537,7 @@ int MapKnockbackConfigMenuHandler(Menu menu, MenuAction action, int client, int 
 	Map_Info map;
 	if( action == MenuAction_End )
 	{
-		menu.Close();
+		delete menu;
 	}
 	else if (action == MenuAction_Select)
 	{
@@ -1152,7 +1551,7 @@ int MapKnockbackConfigMenuHandler(Menu menu, MenuAction action, int client, int 
 		if(param==5)	map.knockback = fMax(0.1,map.knockback-1.0);
 		MapCfgUpdate(map);
 		MapKnockbackConfigMenu(client,map);
-	}	
+	}
 	else if (param == MenuCancel_ExitBack)
 	{
 		menu.GetItem(0,map_name,sizeof(map_name));
@@ -1183,7 +1582,7 @@ int MapZMHpScaleConfigMenuHandler(Menu menu, MenuAction action, int client, int 
 	Map_Info map;
 	if( action == MenuAction_End )
 	{
-		menu.Close();
+		delete menu;
 	}
 	else if (action == MenuAction_Select)
 	{
@@ -1197,7 +1596,7 @@ int MapZMHpScaleConfigMenuHandler(Menu menu, MenuAction action, int client, int 
 		if(param==5)	map.zmhpscale = fMax(0.1,map.zmhpscale-0.5);
 		MapCfgUpdate(map);
 		MapZMHpScaleConfigMenu(client,map);
-	}	
+	}
 	else if (param == MenuCancel_ExitBack)
 	{
 		menu.GetItem(0,map_name,sizeof(map_name));

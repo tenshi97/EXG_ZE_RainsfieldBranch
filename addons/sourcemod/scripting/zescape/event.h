@@ -23,6 +23,7 @@ void EventOnPluginStart() {
 	HookEntityOutput("func_physbox","OnHealthChanged",Hitbox_OnHealthChanged);
 	HookEntityOutput("func_physbox_multiplayer","OnHealthChanged",Hitbox_OnHealthChanged);
 	HookEntityOutput("func_breakable","OnHealthChanged",Hitbox_OnHealthChanged);
+	HookEntityOutput("prop_dynamic","OnHealthChanged",Hitbox_OnHealthChanged);
 }
 void Hitbox_OnHealthChanged(const char[] output, int caller, int activator, float delay)
 {

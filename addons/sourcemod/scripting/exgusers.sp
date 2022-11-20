@@ -16,6 +16,7 @@ bool g_pStore = false;
 #include <outputinfo>
 #pragma semicolon 1
 #pragma newdecls required
+#include "exgusers/timer.h"
 #include "zescape/basic_func.h"
 #include "exgusers/users.h"
 #include "exgusers/db.h"
@@ -24,6 +25,9 @@ bool g_pStore = false;
 #include "exgusers/adminlog.h"
 #include "exgusers/server.h"
 #include "exgusers/monitor.h"
+#include "exgusers/nomban.h"
+#include "exgusers/uadmin.h"
+const int TIME_PERMANENT = 2000000000;
 public Plugin myinfo = {
 	name = " EXG_CSGO_Users",
 	author = "Rainsfield&WackoD&ExgNullable",
@@ -53,15 +57,17 @@ public void OnPluginStart()
 	DbOnPluginStart();
 	AnnouncementOnPluginStart();
 	UsersAdmOnPluginStart();
-	AdminLogOnPluginStart();
 	ServerOnPluginStart();
 	MonitorOnPluginStart();
+	TimerOnPluginStart();
+	uAdminOnPluginStart();
 }
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	CreateNative("EXGUSERS_AddAdminLog",Native_EXGUSERS_AddAdminLog);
 	CreateNative("EXGUSERS_GetUserInfo",Native_EXGUSERS_GetUserInfo);
 	CreateNative("EXGUSERS_GetServerByPort",Native_EXGUSERS_GetServerByPort);
+	CreateNative("EXGUSERS_GetUserUID",Native_EXGUSERS_GetUserUID);
 	RegPluginLibrary("exgusers");
 	MarkNativeAsOptional("Store_GetClientCredits");
 	MarkNativeAsOptional("Store_SetClientCredits");
@@ -71,7 +77,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 }
 public void OnMapStart()
 {
-	if(!isDbConnected())	return;	
+	if(!isDbConnected())	return;
 	AnnouncementOnMapStart();
 }
 

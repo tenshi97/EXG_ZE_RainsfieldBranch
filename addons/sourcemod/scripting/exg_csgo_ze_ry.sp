@@ -1,5 +1,4 @@
-bool g_pStore = false;
-#include <clientprefs>
+bool g_pStore;
 #include <cstrike>
 #include <sdktools>
 #include <sdkhooks>
@@ -27,7 +26,6 @@ bool g_pStore = false;
 #include "zescape/rtv.h"
 #include "zescape/round.h"
 #include "zescape/fly.h"
-#include "zescape/jump.h"
 #include "zescape/trigger_output.h"
 #include "zescape/voice_chat.h"
 #include "zescape/spec.h"
@@ -38,7 +36,6 @@ bool g_pStore = false;
 //#include "zescape/entwatchedit.h"
 Handle g_Warmup_Timer;
 ConVar g_Cvar_Mp_Warmup_Time;
-
 public Plugin myinfo = {
 	name = " EXG_Zombie_Escape_RY",
 	author = "Rainsfield&WackoD&EXGNullable",
@@ -57,8 +54,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CreateNative("RY_Map_GetMapInfo",Native_RY_Map_GetMapInfo);
 	CreateNative("RY_Map_GetCurrentMapInfo",Native_RY_Map_GetCurrentMapInfo);
 	CreateNative("RY_Map_GetCurrentMapNominator",Native_RY_Map_GetCurrentMapNominator);
+	CreateNative("RY_ZE_ZBUYCOUNT",Native_RY_ZE_ZBUYCOUNT);
 //	CreateNative("RY_Map_GetMapDataByMapName",Native_Map_GetMapDataByMapName);
-//	CreateNative("RY_MapProperty_GetMapPushBackFactor");	
+//	CreateNative("RY_MapProperty_GetMapPushBackFactor");
 
 	MarkNativeAsOptional("Store_GetClientCredits");
 	MarkNativeAsOptional("Store_SetClientCredits");
@@ -87,7 +85,7 @@ public void OnLibraryRemoved(const char[] name)
 	}
 }
 
-public void OnPluginStart()	
+public void OnPluginStart()
 {
 	FlyOnPluginStart();
 	EventOnPluginStart();
@@ -97,7 +95,6 @@ public void OnPluginStart()
 	NominateOnPluginStart();
 	RTVOnPluginStart();
 	LoadTranslations("common.phrases");
-	JumpOnPluginStart();
 	VoiceChatOnPluginStart();
 	SpecOnPluginStart();
 	TimeOnPluginStart();
@@ -107,7 +104,7 @@ public void OnPluginStart()
 	MapRoomOnPluginStart();
 }
 
-public void OnMapStart() 
+public void OnMapStart()
 {
 	PrintToServer("[OnMapStart]");
 	//TriggerOutputOnMapStart();
@@ -120,7 +117,7 @@ public void OnMapStart()
 	//RoundOnMapStart();
 	if(!isDbConnected())	return;			//未连接，return，通过Db连接函数的函数执行Post，已连接则通直接Post使得换图后重载各插件数据
 	PrintToServer("DbOnDbConnected_MapStartPost");
-	DbOnDbConnected_MapStartPost();	
+	DbOnDbConnected_MapStartPost();
 	//EWEditOnMapStart();
 }
 public void OnEntityCreated(int entity, const char[] classname)
@@ -145,12 +142,12 @@ Action OnWarmUpEnd(Handle timer)
 	MapInfoOnWarmUpEnd();
 }
 
-public void OnPluginEnd() 
+public void OnPluginEnd()
 {
     Db_Close();
 }
 
-public void OnMapEnd() 
+public void OnMapEnd()
 {
 	MapAdmOnMapEnd();
 	NominateOnMapEnd();
@@ -159,11 +156,12 @@ public void OnMapEnd()
 	QuestOnMapEnd();
 }
 
-public int ZR_OnClientInfected(int client, int attacker, bool motherInfect, bool respawnOverride, bool respawn) 
+public int ZR_OnClientInfected(int client, int attacker, bool motherInfect, bool respawnOverride, bool respawn)
 {
 	if(motherInfect)
 	{
 		OnRoundInfected();
+		MissionOnRoundBuffer_MotherZM(client);
 	}
 	if(attacker>=1&&attacker<=64&&client>=1&&client<=64)
 	{
