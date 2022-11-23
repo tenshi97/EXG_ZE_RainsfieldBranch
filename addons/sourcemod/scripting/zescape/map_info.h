@@ -24,6 +24,7 @@ void MapInfoOnPluginStart()
 	RegConsoleCmd("sm_mh", ActionMapHistoryList);
 	Current_Map_Loaded = false;
 	Cvar_MP_TIMELIMIT = FindConVar("mp_timelimit");
+	Cvar_MP_TIMELIMIT.SetFloat(30.0,true,false);
 	Cvar_InfectSpawnTimeMin = FindConVar("zr_infect_spawntime_min");
 	Cvar_InfectSpawnTimeMax = FindConVar("zr_infect_spawntime_max");
 	Cvar_DamageScale_1 = FindConVar("mp_damage_scale_t_body");

@@ -132,4 +132,11 @@ public int ZR_OnClientInfected(int client, int attacker, bool motherInfect, bool
 	{
 		HideLeaderIcon();
 	}
+	else
+	{
+		if(motherInfect&&Leader_CurrentLeader()!=-1)
+		{
+			CreateLeaderIcon(Leader_CurrentLeader());
+		}
+	}
 }

@@ -277,7 +277,7 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 	int credits = 0;
 	if (g_pStore)
 		credits = Store_GetClientCredits(client);
-	if(map.tag&label_code[9]&&forcenom==0)
+	if(forcenom==0)
 	{
 		if(map.plupper!=0)
 		{

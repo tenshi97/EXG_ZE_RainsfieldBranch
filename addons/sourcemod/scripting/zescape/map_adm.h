@@ -866,11 +866,11 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 		}
 		if(param == 23)
 		{
-			MapUpperLimitMenu(client,map);
+			MapLowerLimitMenu(client,map);
 		}
 		if(param == 24)
 		{
-			MapLowerLimitMenu(client,map);
+			MapUpperLimitMenu(client,map);
 		}
 	}
 	return 0;
@@ -937,11 +937,15 @@ int MapUpperLimitMenuHandler(Menu menu, MenuAction action, int client, int param
 					if(map.plupper<=0)	map.plupper=0;
 				}
 			}
+			MapCfgUpdate(map);
 			MapUpperLimitMenu(client,map);
 		}
-		case MenuCancel_ExitBack:
+		default:
 		{
-			MapAdminConfigMenu(client,map);
+			if (param == MenuCancel_ExitBack)
+			{
+				MapAdminConfigMenu(client,map);
+			}
 		}
 	}
 	return 0;
@@ -950,7 +954,7 @@ void MapLowerLimitMenu(int client,Map_Info map)
 {
 	Menu menu = CreateMenu(MapLowerLimitMenuHandler);
 	char buffer[256];
-	Format(buffer,sizeof(buffer),"%s:订图人数下限\n当前限制:%d%s",map.name,map.plupper,map.plupper==0?"(不限制)":"");
+	Format(buffer,sizeof(buffer),"%s:订图人数下限\n当前限制:%d%s",map.name,map.pllower,map.pllower==0?"(不限制)":"");
 	menu.SetTitle(buffer);
 	menu.AddItem(map.name,"+1人");
 	menu.AddItem(map.name,"+5人");
@@ -1008,11 +1012,15 @@ int MapLowerLimitMenuHandler(Menu menu, MenuAction action, int client, int param
 					if(map.pllower<=0)	map.pllower=0;
 				}
 			}
+			MapCfgUpdate(map);
 			MapLowerLimitMenu(client,map);
 		}
-		case MenuCancel_ExitBack:
+		default:
 		{
-			MapAdminConfigMenu(client,map);
+			if (param == MenuCancel_ExitBack)
+			{
+				MapAdminConfigMenu(client,map);
+			}
 		}
 	}
 	return 0;

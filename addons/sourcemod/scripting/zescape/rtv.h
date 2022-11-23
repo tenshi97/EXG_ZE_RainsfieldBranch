@@ -625,6 +625,10 @@ int NextMapVoteHandler(Menu menu, MenuAction action, int param1, int param2)
 	char buffer[256];
 	char votemap_name[64];
 	char voter_name[64];
+	if(!menu||menu == INVALID_HANDLE)
+	{
+		return;
+	}
 	if (action == MenuAction_End)
 	{
 		delete menu;
@@ -814,6 +818,12 @@ void ChangeMap()
 	g_Nextmap_Selected = true;
 	g_MapVote_Initiated = false;
 	g_MapVote_Proceeding = false;
+	if(strcmp(g_Nextmap_Result.name,"",false)==0)
+	{
+		g_Nextmap_Result.name = "zm_lostcities_p";
+		g_Nextmap_Result.nominated = 0;
+		g_Nextmap_Result.nominator_name = "";
+	}
 	Format(buffer,sizeof(buffer)," \x05下一张地图为: \09%s %s \x07%s",g_Nextmap_Result.name,g_Nextmap_Result.nominated?" \x01预定者:":"",g_Nextmap_Result.nominated?g_Nextmap_Result.nominator_name:"");
 	PrintToChatAll(buffer);
 	g_RTV_VotesNum = 0;

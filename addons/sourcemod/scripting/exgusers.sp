@@ -1,3 +1,5 @@
+
+
 bool g_pStore = false;
 #include <clientprefs>
 #include <cstrike>
@@ -5,7 +7,6 @@ bool g_pStore = false;
 #include <sdkhooks>
 //#include <json>
 //#include <outputinfo>
-#include <zombiereloaded>
 #include <store>
 #include <timers>
 #include <nextmap>
@@ -17,7 +18,7 @@ bool g_pStore = false;
 #pragma semicolon 1
 #pragma newdecls required
 #include "exgusers/timer.h"
-#include "zescape/basic_func.h"
+#include "exgusers/basic_func.h"
 #include "exgusers/users.h"
 #include "exgusers/db.h"
 #include "exgusers/announcement.h"

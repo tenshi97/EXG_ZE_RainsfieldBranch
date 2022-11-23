@@ -1,7 +1,9 @@
+
 bool g_pStore;
+#include <sourcemod>
+#include <sdkhooks>
 #include <cstrike>
 #include <sdktools>
-#include <sdkhooks>
 //#include <json>
 #include <outputinfo>
 #include <zombiereloaded>
