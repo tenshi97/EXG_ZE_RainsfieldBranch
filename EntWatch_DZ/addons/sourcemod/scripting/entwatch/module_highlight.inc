@@ -100,7 +100,7 @@ public Action EWM_HLight_Timer(Handle timer, int client)
 						{
 						 Highlight_Color(j, g_iHL_RGB[0], g_iHL_RGB[1], g_iHL_RGB[2]);
 						 Highlight_SetAll(j);
-						 SetEntityRenderMode(j,RENDER_TRANSALPHA)  ;
+					//	 SetEntityRenderMode(j,RENDER_TRANSALPHA)  ;
 						 SetEntityRenderColor(j,255,255,255,0)   ;
 						 EWM_HLight_UpdateRGB();
 						 }
