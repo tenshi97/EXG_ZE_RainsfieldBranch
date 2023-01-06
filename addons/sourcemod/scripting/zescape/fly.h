@@ -3,8 +3,8 @@ void FlyOnPluginStart() {
 	RegConsoleCmd("sm_go", FlyCommand);
 	RegConsoleCmd("sm_fly", FlyCommand);
 	RegConsoleCmd("sm_efly", FlyCommand);
-//	AddCommandListener(AimFly, "chatwheel_ping");
-//	AddCommandListener(AimFly, "player_ping");
+	AddCommandListener(AimFly, "chatwheel_ping");
+	AddCommandListener(AimFly, "player_ping");
 }
 
 Action FlyCommand(int client, int args) {
@@ -31,17 +31,18 @@ public Action AimFly(int client, const char[] command, int argc)
 		PrintCenterText(client,"当前地图禁用开局传送");
 		return Plugin_Handled;
 	}
+	if(client<=0||client>64)	return Plugin_Handled
 	if(!IsClientInGame(client))	return Plugin_Handled;
 	if (Round.Infected)	return Plugin_Handled;
 	int target;
 	target = GetClientAimTarget(client,true);
-	if(target>0||target<=64)
+	if(target>0&&target<=64)
 	{
 		if(!IsClientInGame(target))	return Plugin_Handled;
 		if (!IsClientInGame(target)) return Plugin_Handled;
 		if(IsValidHumanorBot(target))
 		{
-			FlyTarget(client, target);			
+			FlyTarget(client, target);
 		}
 	}
 	return Plugin_Handled;
@@ -74,7 +75,6 @@ int FlyMenuHandler(Menu menu, MenuAction action, int client, int param) {
 		FlyTarget(client, StringToInt(index));
 	}
 }
-
 void FlyTarget(int client, int target) {
 	if (Round.Infected) {
 		PrintCenterText(client, "[开局传送失败：尸变已发生]:");

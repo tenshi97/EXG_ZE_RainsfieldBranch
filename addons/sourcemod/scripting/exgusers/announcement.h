@@ -2,6 +2,7 @@ Handle g_Timer_SuperChat_Check;
 void AnnouncementOnPluginStart()
 {
 	RegConsoleCmd("sm_sch",SuperChatCommand);
+	g_Timer_SuperChat_Check = CreateTimer(10.0,g_Timer_SuperChat_Check_Hndl,_, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 }
 void AnnouncementOnMapStart()
 {

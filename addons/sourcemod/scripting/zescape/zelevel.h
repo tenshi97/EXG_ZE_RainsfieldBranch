@@ -7,12 +7,12 @@ LEVEL_LOG current_level,default_level;
 
 GlobalForward g_fwOnLevelSet;
 
-char LEVEL_DIFFICULTY[][] = 
+char LEVEL_DIFFICULTY[][] =
 {
     "简单/默认",    //mako Normal
     "普通",   //Minas Stage2~3    mako Hard/EX
     "困难",   //Minas Stage4~EX1  mako EX 2
-    "高难",   //Minas EX2~EX4 westersand81 god 
+    "高难",   //Minas EX2~EX4 westersand81 god
     "极难",   //EX寒渊  westersand81 insane god 死核D npstv1_2+boss 狮子王ACT3里世界
     "绝境",   //死核s7 Insane D EX狮子王ACT3里世界
     "梦魇",   //死核s7 Knightmare D EX寒渊
@@ -122,7 +122,7 @@ void LevelOnEntityCreated(int entity, const char[] classname)
 void LevelOnEntitySpawned(int entity)
 {
 	char ent_name[64];
-	GetEntPropString(entity,Prop_Data,"m_iName",ent_name,sizeof(ent_name));		
+	GetEntPropString(entity,Prop_Data,"m_iName",ent_name,sizeof(ent_name));
 	int ent_id = GetEntProp(entity, Prop_Data, "m_iHammerID");
 	LEVEL_LOG level_temp;
 	//PrintToConsoleAll(" [Basic Debug]%s",ent_name);
@@ -137,7 +137,7 @@ void LevelOnEntitySpawned(int entity)
 	}
 	SDKUnhook(entity, SDKHook_SpawnPost, LevelOnEntitySpawned);
 }
-public void LevelOnOutput(const char[] output, int caller, int activator, float delay)
+void LevelOnOutput(const char[] output, int caller, int activator, float delay)
 {
 	char ent_name[64];
 	GetEntPropString(caller,Prop_Data,"m_iName",ent_name,sizeof(ent_name));
@@ -171,7 +171,7 @@ public void LevelOnOutput(const char[] output, int caller, int activator, float 
 				PrintToConsoleAll(" [DEBUG TEST] %d",level_temp.extra);
 				for(int j=0;j<g_mlevel_list.Length;j++)
 				{
-					GetArrayArray(g_mlevel_list,j,level_extra_buffer,sizeof(level_extra_buffer));				
+					GetArrayArray(g_mlevel_list,j,level_extra_buffer,sizeof(level_extra_buffer));
 					if(level_extra_buffer.id==level_temp.extra)
 					{
 						LevelOnSetLevel(level_extra_buffer);
@@ -221,7 +221,7 @@ void LevelOnSetLevel(LEVEL_LOG level_set)
 	if(current_level.diff<3)
 	{
 		level_icon = Icon_tip;
-	}	
+	}
 	else if(current_level.diff<5)
 	{
 		g=0;
@@ -243,7 +243,7 @@ void LevelOnSetLevel(LEVEL_LOG level_set)
 	Call_StartForward(g_fwOnLevelSet);
 	Call_PushArray(level_set,sizeof(LEVEL_LOG));
 	Call_Finish();
-}	
+}
 
 public int Native_GetLevelDiffName(Handle plugin, int numParams)
 {

@@ -15,7 +15,7 @@ void HdOnPluginStart()
 }
 void HdOnMapStart()
 {
-	passbonus_status = false; 
+	passbonus_status = false;
 }
 Action ServerHdConfig(int client,int args)
 {
@@ -27,11 +27,12 @@ Action ServerHdConfig(int client,int args)
 void CreateHdConfigMenu(int client)
 {
 	Menu menu = CreateMenu(ServerHdMenuHandler);
-	menu.SetTitle("服务器活动设置");
-	menu.AddItem("","发放箱子");
-	menu.AddItem("","通关奖励");
-	menu.AddItem("","随机掉落");
-	menu.AddItem("","订价倍率");
+	menu.SetTitle(g_pStore?"服务器活动设置":"服务器活动设置/暂时关闭");
+	int iStyle = (g_pStore) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED;
+	menu.AddItem("","发放箱子",iStyle);
+	menu.AddItem("","通关奖励",iStyle);
+	menu.AddItem("","随机掉落",iStyle);
+	menu.AddItem("","订价倍率",iStyle);
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 int ServerHdMenuHandler(Menu menu, MenuAction action, int client, int param)
@@ -42,7 +43,7 @@ int ServerHdMenuHandler(Menu menu, MenuAction action, int client, int param)
 	}
 	else if(action == MenuAction_Select)
 	{
-		if(param == 0)	
+		if(param == 0)
 		{
 			SendCrate(client);
 		}
@@ -74,14 +75,18 @@ void SendCrate(int client)
 
 int SendCrateHandler(Menu menu, MenuAction action, int client, int param)
 {
-	int item_id = Store_GetItemIdbyUniqueId("uid_lootbox_freecase1");
 	if (action == MenuAction_End||client<=0||client>=65)
 	{
 		menu.Close();
 	}
 	else if(action == MenuAction_Select)
 	{
-		if(param == 0)	
+		if(!g_pStore)
+		{
+			return 0;
+		}
+		int item_id = Store_GetItemIdbyUniqueId("uid_lootbox_freecase1");
+		if(param == 0)
 		{
 			PrintToChatAll(" \x05[活动系统]\x01善良的狗管理给全体玩家发放了一个\x9 活动箱子");
 			for(int i=1;i<=64;i++)
@@ -163,8 +168,8 @@ int SendCrateToPlayerMenuHandler(Menu menu, MenuAction action, int client, int p
 			Format(buffer,sizeof(buffer),"\x05[活动系统]\x01管理员\x07%s\x01给\x07%s\x01赠送了一个\x09活动箱子\x01,这其中必有什么交易",client_name,target_name);
 			PrintToChatAll(buffer);
 			Store_GiveItem(target,item_id,0,0,0);
-		}			
-	}	
+		}
+	}
 }
 
 void PassBonusSet(int client)
@@ -208,7 +213,7 @@ int PassBonusMenuHandler(Menu menu, MenuAction action, int client, int param)
 				Format(buffer,sizeof(buffer)," \x05[活动系统]\x01类型:%s 额外积分:%d 额外箱子:%s",passbonus_type?"伐木":"攻略",passbonus_extracredits,passbonus_extracrates?"有":"无");
 				PrintToChatAll(buffer);
 			}
-		}	
+		}
 		else if(param == 1)
 		{
 			if(passbonus_type)	//伐木
@@ -220,11 +225,11 @@ int PassBonusMenuHandler(Menu menu, MenuAction action, int client, int param)
 				passbonus_type = true;
 			}
 			PassBonusSet(client);
-		}	
+		}
 		else if(param == 2)
 		{
 			SetExtraCredits(client);
-		}	
+		}
 		else if(param == 3)
 		{
 			if(passbonus_extracrates)
@@ -237,7 +242,7 @@ int PassBonusMenuHandler(Menu menu, MenuAction action, int client, int param)
 			}
 			PassBonusSet(client);
 		}
-	}		
+	}
 	else if (param == MenuCancel_ExitBack) 	CreateHdConfigMenu(client);
 }
 
@@ -282,12 +287,16 @@ int SetExtraCreditsMenuHandler(Menu menu, MenuAction action, int client, int par
 			passbonus_extracredits = Max(0,passbonus_extracredits);
 			SetExtraCredits(client);
 		}
-	}		
+	}
 }
 
 void HdOnRoundEnd(int winner)
 {
 	int client_credits;
+	if(!g_pStore)
+	{
+		return;
+	}
 	int item_id = Store_GetItemIdbyUniqueId("uid_lootbox_freecase1");
 	if(winner==3)
 	{
@@ -315,8 +324,8 @@ void HdOnRoundEnd(int winner)
 								{
 									Store_GiveItem(i,item_id,0,0,0);
 									PrintToChat(i," \x05[活动系统]\x01完成地图活动，获得了特殊箱子");
-								}	
-							}						
+								}
+							}
 						}
 					}
 				}
@@ -340,8 +349,8 @@ void HdOnRoundEnd(int winner)
 								{
 									Store_GiveItem(i,item_id,0,0,0);
 									PrintToChat(i," \x05[活动系统]\x01完成地图活动，获得了特殊箱子");
-								}	
-							}					
+								}
+							}
 						}
 					}
 				}
@@ -450,6 +459,6 @@ int RandomDropMenuHandler(Menu menu, MenuAction action, int client, int param)
 		}
 		RandomDropSet(client);
 	}
-	else if (param == MenuCancel_ExitBack) 	CreateHdConfigMenu(client);		
+	else if (param == MenuCancel_ExitBack) 	CreateHdConfigMenu(client);
 }
 

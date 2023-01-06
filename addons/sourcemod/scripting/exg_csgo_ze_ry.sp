@@ -125,6 +125,7 @@ public void OnMapStart()
 public void OnEntityCreated(int entity, const char[] classname)
 {
 	TriggerOnEntityCreated(entity, classname);
+	MissionOnEntitySpawned(entity,classname);
 }
 void WarmUpTimerBuild()
 {

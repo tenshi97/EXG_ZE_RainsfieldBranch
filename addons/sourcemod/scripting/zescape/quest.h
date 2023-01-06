@@ -14,6 +14,8 @@ enum struct PlayerQuestInfo
 	int loaded;
 	int timestamp;
 	int uid;
+	int fest[4];
+	int fest_reward;
 }
 ArrayList QuestList;
 PlayerQuestInfo playerquest_list[65];
@@ -21,9 +23,34 @@ void QuestOnPluginStart()
 {
 	RegConsoleCmd("sm_rw",QuestCommand);
 	RegConsoleCmd("sm_quest",QuestCommand);
+	RegAdminCmd("sm_raffleuser",PrintRaffleUser,ADMFLAG_GENERIC);
 	ReloadAllPlayerQuestInfo();
 	QuestSet();
 }
+Action PrintRaffleUser(int client,int args)
+{
+	char query[256];
+	Format(query,sizeof(query),"SELECT * FROM zequest WHERE FEST1 = 1 AND FEST2 = 1 AND FEST3 = -1 AND FEST4 = -1");
+	DbTQuery(RaffleUserQueryCallback,query);
+}
+void RaffleUserQueryCallback(Handle owner, Handle hndl, char[] error, any data)
+{
+	char raffle_path[256];
+	BuildPath(Path_SM,raffle_path,sizeof(raffle_path),"configs/raffle.txt");
+	File rafflefile = OpenFile(raffle_path,"w");
+	if(!hndl)
+	{
+		return;
+	}
+	while(SQL_FetchRow(hndl))
+	{
+		int uid = DbFetchInt(hndl,"UID");
+		PrintToChatAll("%d",uid);
+		rafflefile.WriteLine("%d",uid);
+	}
+	delete rafflefile;
+}
+
 void QuestOnMapStart()
 {
 	CloseHandleSafe(QuestList);
@@ -40,7 +67,7 @@ void QuestOnMapEnd()
 				UpdatePlayerQuestInfo(i);
 			}
 		}
-	}	
+	}
 }
 void QuestOnDailyUpdate()
 {
@@ -59,9 +86,10 @@ Action QuestCommand(int client,int args)
 	}
 	Menu menu = CreateMenu(QuestMenuHandler);
 	menu.SetTitle("任务系统");
-	menu.AddItem("","每日任务");
+	menu.AddItem("","每日任务",ITEMDRAW_DISABLED);
 	menu.AddItem("","每周任务",ITEMDRAW_DISABLED);
 	menu.AddItem("","赛季任务");
+	menu.AddItem("","季节活动~元旦");
 	menu.Display(client, MENU_TIME_FOREVER);
 	return Plugin_Handled;
 }
@@ -86,6 +114,10 @@ int QuestMenuHandler(Menu menu, MenuAction action, int client, int param)
 		{
 			MissionMenuBuild(client);
 		}
+		if(param == 3)
+		{
+			FestivalMenuBuild(client);
+		}
 		return 0;
 	}
 }
@@ -109,7 +141,7 @@ void DailyQuestMenu(int client)
 		else
 		{
 			Format(buffer,sizeof(buffer),"%s:%d/%d",quest.name,playerquest_list[client].taskdata[i],quest.num);
-			menu.AddItem(questid, buffer, iStyle);			
+			menu.AddItem(questid, buffer, iStyle);
 		}
 	}
 	menu.Display(client, MENU_TIME_FOREVER);
@@ -120,7 +152,7 @@ int DailyQuestMenuHandler(Menu menu, MenuAction action, int client, int param)
 {
 	if (action == MenuAction_End||client<=0||client>=65)
 	{
-		menu.Close();
+		delete menu;
 		return 0;
 	}
 	else if(action == MenuAction_Select)
@@ -139,7 +171,7 @@ int DailyQuestMenuHandler(Menu menu, MenuAction action, int client, int param)
 		{
 			if(playerquest_list[client].taskdata[questid]>=quest.num)
 			{
-				PrintToChat(client," \x05[任务系统]\x01完成了每日任务[%s]，获得%d积分",quest.name,quest.award);	
+				PrintToChat(client," \x05[任务系统]\x01完成了每日任务[%s]，获得%d积分",quest.name,quest.award);
 				playerquest_list[client].taskcomplete[questid]=1;
 				Store_SetClientCredits(client,credits+quest.award);
 			}
@@ -195,7 +227,7 @@ void LoadPlayerQuestInfo(int client)
 	DbTQuery(LoadPlayerQuestInfoCallBack,query,client);
 }
 void LoadPlayerQuestInfoCallBack(Handle owner, Handle hndl, char[] error, any data)
-{	
+{
 
 	char query[512];
 	int client = data;
@@ -220,7 +252,13 @@ void LoadPlayerQuestInfoCallBack(Handle owner, Handle hndl, char[] error, any da
 		playerquest_list[client].taskcomplete[3]=DbFetchInt(hndl,"DT4C");
 		playerquest_list[client].taskcomplete[4]=DbFetchInt(hndl,"DT5C");
 		playerquest_list[client].taskcomplete[5]=DbFetchInt(hndl,"DT6C");
-		Format(query,sizeof(query),"UPDATE zequest SET TIMESTAMP = %d WHERE UID = %d",current_time,playerquest_list[client].uid);	
+		playerquest_list[client].fest[0]=DbFetchInt(hndl,"FEST1");
+		playerquest_list[client].fest[1]=DbFetchInt(hndl,"FEST2");
+		playerquest_list[client].fest[2]=DbFetchInt(hndl,"FEST3");
+		playerquest_list[client].fest[3]=DbFetchInt(hndl,"FEST4");
+		playerquest_list[client].fest_reward=DbFetchInt(hndl,"FESTRE");
+
+		Format(query,sizeof(query),"UPDATE zequest SET TIMESTAMP = %d WHERE UID = %d",current_time,playerquest_list[client].uid);
 		if(playerquest_list[client].timestamp<g_daily_timestamp)
 		{
 			ClearPlayerDailyQuestInfo(client);
@@ -287,7 +325,7 @@ void UpdatePlayerQuestInfo(int client)
 		taskdata[i]=playerquest_list[client].taskdata[i];
 		taskcomplete[i]=playerquest_list[client].taskcomplete[i];
 	}
-	Format(query,sizeof(query),"UPDATE zequest SET TIMESTAMP = %d, DINFECT = %d, DKILL = %d, DDMGTAKE = %d, DDMGMAKE = %d, DPASS = %d, DNADE = %d, DT1C = %d, DT2C = %d, DT3C = %d, DT4C = %d, DT5C = %d, DT6C = %d WHERE UID = %d",current_time,taskdata[0],taskdata[1],taskdata[2],taskdata[3],taskdata[4],taskdata[5],taskcomplete[0],taskcomplete[1],taskcomplete[2],taskcomplete[3],taskcomplete[4],taskcomplete[5],playerquest_list[client].uid);
+	Format(query,sizeof(query),"UPDATE zequest SET TIMESTAMP = %d, DINFECT = %d, DKILL = %d, DDMGTAKE = %d, DDMGMAKE = %d, DPASS = %d, DNADE = %d, DT1C = %d, DT2C = %d, DT3C = %d, DT4C = %d, DT5C = %d, DT6C = %d, FEST1 = %d, FEST2 = %d, FEST3 = %d, FEST4 = %d, FESTRE = %d WHERE UID = %d",current_time,taskdata[0],taskdata[1],taskdata[2],taskdata[3],taskdata[4],taskdata[5],taskcomplete[0],taskcomplete[1],taskcomplete[2],taskcomplete[3],taskcomplete[4],taskcomplete[5],playerquest_list[client].fest[0],playerquest_list[client].fest[1],playerquest_list[client].fest[2],playerquest_list[client].fest[3],playerquest_list[client].fest_reward,playerquest_list[client].uid);
 	DbTQuery(DbQueryErrorCallback,query);
 }
 
@@ -310,7 +348,7 @@ void QuestOnRoundEnd(int winner)
 		{
 			if(!IsFakeClient(i))
 			{
-				if(winner==3&&IsPlayerAlive(i)&&ZR_IsClientHuman(i)&&GetClientCount(true)>=0)
+				if(winner==3&&IsPlayerAlive(i)&&ZR_IsClientHuman(i)&&GetClientCount(true)>=20)
 				{
 					if(playerquest_list[i].taskdata[4]<=10000)
 					{
@@ -405,7 +443,7 @@ void QuestSet()
 }
 void QuestZombieInfectHuman(int attacker)
 {
-	if(GetClientCount(true)<0)	return;
+	if(GetClientCount(true)<20)	return;
 	if(playerquest_list[attacker].taskdata[0]<=1000)
 	{
 		playerquest_list[attacker].taskdata[0]++;
@@ -413,7 +451,7 @@ void QuestZombieInfectHuman(int attacker)
 }
 void QuestHumanKillZombie(int attacker)
 {
-	if(GetClientCount(true)<0)	return;
+	if(GetClientCount(true)<20)	return;
 	if(playerquest_list[attacker].taskdata[1]<=1000)
 	{
 		playerquest_list[attacker].taskdata[1]++;
@@ -421,7 +459,7 @@ void QuestHumanKillZombie(int attacker)
 }
 void QuestHumanDmgCount(int attacker,int victim,int dmg)
 {
-	if(GetClientCount(true)<0)	return;
+	if(GetClientCount(true)<20)	return;
 	if(playerquest_list[victim].taskdata[2]<1000000)
 	{
 		playerquest_list[victim].taskdata[2]+=dmg;
@@ -439,4 +477,123 @@ void QuestHumanNadeCount(int client)
 	{
 		playerquest_list[client].taskdata[5]++;
 	}
+}
+
+void FestivalMenuBuild(int client)
+{
+	Menu menu = CreateMenu(FestivalMenuHandler);
+	menu.SetTitle("元旦活动~2023也请支持EXG");
+	menu.AddItem("","节日打卡",ITEMDRAW_DISABLED);
+	menu.AddItem("","节日任务");
+	menu.AddItem("","庆典活动");
+	bool quest_complete = false;
+	if(playerquest_list[client].fest[0]==1&&playerquest_list[client].fest[1]==1&&playerquest_list[client].fest[2]==-1&&playerquest_list[client].fest[3]==-1)
+	{
+		quest_complete = true;
+	}
+	menu.AddItem("","领取任务奖励-10级经验",quest_complete?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.Display(client,MENU_TIME_FOREVER);
+}
+
+int FestivalMenuHandler(Menu menu, MenuAction action, int client, int param)
+{
+	if (action == MenuAction_End||client<=0||client>=65)
+	{
+		delete menu;
+		return 0;
+	}
+	else if(action == MenuAction_Select)
+	{
+		if(param==1)
+		{
+			FestivalTaskMenuBuild(client);
+		}
+		if(param==2)
+		{
+			FestivalEventMenuBuild(client);
+		}
+		if(param==3)
+		{
+			if(playerquest_list[client].fest_reward == 1)
+			{
+				PrintToChat(client," \x05[活动系统]\x01你已经领取过奖励了，不要想着薅羊毛!");
+			}
+			else
+			{
+				GrantExp(client,10000);
+				playerquest_list[client].fest_reward = 1;
+				PrintToChat(client," \x05[活动系统]\x01领取奖励成功");
+				UpdatePlayerQuestInfo(client);
+			}
+		}
+		return 0;
+	}
+}
+
+void FestivalTaskMenuBuild(int client)
+{
+	Menu menu = CreateMenu(FestivalTaskMenuHandler);
+	menu.SetTitle("元旦活动:节日任务[任务3和4需要服务器内20人以上才可完成]");
+	char buffer[256];
+	Format(buffer,sizeof(buffer),"%s",playerquest_list[client].fest[0]?"[元]":"完成节日打卡");
+	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"%s",playerquest_list[client].fest[1]?"[旦]":"在2023年1月1日0点~24点间输入任意含有2023的语句\n获得M4A4-星际重炮7日");
+	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"%s",playerquest_list[client].fest[2]<0?"[快]":"在12月31日~1月3日期间累计对僵尸造成202300伤害\n获得2023积分");
+	if(playerquest_list[client].fest[2]>=0)
+	{
+		Format(buffer,sizeof(buffer),"%s\n[当前:%d]",buffer,playerquest_list[client].fest[2]);
+	}
+	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"%s",playerquest_list[client].fest[3]<0?"[乐]":"在12月31日~1月3日期间通任意地图5次\n获得M249-赤色彗星7日");
+	if(playerquest_list[client].fest[3]>=0)
+	{
+		Format(buffer,sizeof(buffer),"%s\n[当前:%d]",buffer,playerquest_list[client].fest[3]);
+	}
+	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+	menu.ExitBackButton = true;
+	menu.Display(client,MENU_TIME_FOREVER);
+}
+
+int FestivalTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
+{
+	if (action == MenuAction_End||client<=0||client>=65)
+	{
+		delete menu;
+		return 0;
+	}
+	else if(action == MenuAction_Select)
+	{
+		return 0;
+	}
+	else if (param == MenuCancel_ExitBack) FestivalMenuBuild(client);
+}
+
+void FestivalEventMenuBuild(int client)
+{
+	Menu menu = CreateMenu(FestivalEventMenuHandler);
+	menu.SetTitle("元旦活动:庆典活动");
+	char buffer[256];
+	Format(buffer,sizeof(buffer),"在节日任务内集齐[元][旦][快][乐]四字，自动参与抽奖");
+	menu.AddItem("",buffer);
+	Format(buffer,sizeof(buffer),"开奖时间:2023年1月4日0时\n开奖方式:游戏内公开抽奖[待定,可能会有其他形式]");
+	menu.AddItem("",buffer);
+	Format(buffer,sizeof(buffer),"奖品:参与者皆赠送10000点赛季活动经验\n 三等奖:随机高级皮肤 15天+2023积分 5人\n二等奖: 40000赛季经验 3人\n一等奖: 赛季等级满级直升 1人\n神秘奖: 1人(与前述奖品平行抽取)");
+	menu.AddItem("",buffer);
+	menu.ExitBackButton = true;
+	menu.Display(client,MENU_TIME_FOREVER);
+}
+
+int FestivalEventMenuHandler(Menu menu, MenuAction action, int client, int param)
+{
+	if (action == MenuAction_End||client<=0||client>=65)
+	{
+		delete menu;
+		return 0;
+	}
+	else if(action == MenuAction_Select)
+	{
+		return 0;
+	}
+	else if (param == MenuCancel_ExitBack) FestivalMenuBuild(client);
 }

@@ -59,7 +59,6 @@ public void OnPluginStart()
 	AnnouncementOnPluginStart();
 	UsersAdmOnPluginStart();
 	ServerOnPluginStart();
-	MonitorOnPluginStart();
 	TimerOnPluginStart();
 	uAdminOnPluginStart();
 }
@@ -69,6 +68,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CreateNative("EXGUSERS_GetUserInfo",Native_EXGUSERS_GetUserInfo);
 	CreateNative("EXGUSERS_GetServerByPort",Native_EXGUSERS_GetServerByPort);
 	CreateNative("EXGUSERS_GetUserUID",Native_EXGUSERS_GetUserUID);
+//	CreateNative("EXGUSERS_GetUserInfoByUID",Native_EXGUSERS_GetUserInfoByUID);
 	RegPluginLibrary("exgusers");
 	MarkNativeAsOptional("Store_GetClientCredits");
 	MarkNativeAsOptional("Store_SetClientCredits");

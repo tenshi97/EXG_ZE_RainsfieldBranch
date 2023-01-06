@@ -93,13 +93,21 @@ void OnPlayerDeathPost(Event event, const char[] name, bool dontBroadcast)
 {
 	int victim = GetClientOfUserId(event.GetInt("userid"));
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
+	bool headshot = event.GetBool("headshot");
 	if(victim<=0||victim>=65||attacker<=0||attacker>=65)	return;
 	if(!IsClientInGame(victim)||!IsClientInGame(attacker))	return;
 	if(victim==attacker)	return;
 	if(!IsPlayerAlive(attacker))	return;
 	if(ZR_IsClientHuman(attacker))
 	{
-		MissionHumanKillZombie(attacker);
+		if(headshot)
+		{
+			MissionHumanKillZombie(attacker,1);			
+		}
+		else
+		{
+			MissionHumanKillZombie(attacker);			
+		}
 		QuestHumanKillZombie(attacker);
 	}
 }

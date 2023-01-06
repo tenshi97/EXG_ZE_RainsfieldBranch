@@ -5,6 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="789a9c5b-c461-46d0-9fee-50ebcbe025d2" name="变更" comment="">
+      <change beforePath="$PROJECT_DIR$/../../addons/sourcemod/scripting/exg_ze_misc.sp" beforeDir="false" afterPath="$PROJECT_DIR$/../../addons/sourcemod/scripting/exg_ze_misc.sp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../addons/sourcemod/scripting/zescape/fly.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../addons/sourcemod/scripting/zescape/fly.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../addons/sourcemod/scripting/zescape/leaderspr.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../addons/sourcemod/scripting/zescape/leaderspr.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../addons/sourcemod/scripting/zescape/nominate.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../addons/sourcemod/scripting/zescape/nominate.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../addons/sourcemod/scripting/zescape/rtv.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../addons/sourcemod/scripting/zescape/rtv.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../addons/sourcemod/scripting/zescape/zelevel.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../addons/sourcemod/scripting/zescape/zelevel.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

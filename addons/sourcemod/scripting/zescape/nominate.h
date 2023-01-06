@@ -283,7 +283,7 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 		{
 			if(GetClientCount(true)>map.plupper)
 			{
-				PrintToChat(client," \x05[地图系统]\x01人数超过\x09 人数上限[%d人] \x01，无法订阅该地图");
+				PrintToChat(client," \x05[地图系统]\x01人数超过\x09 人数上限[%d人] \x01，无法订阅该地图",map.plupper);
 				return;
 			}
 		}
@@ -291,7 +291,7 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 		{
 			if(GetClientCount(true)<map.pllower)
 			{
-				PrintToChat(client," \x05[地图系统]\x01人数未达到\x09 人数下限[%d人] \x01，无法订阅该地图");
+				PrintToChat(client," \x05[地图系统]\x01人数未达到\x09 人数下限[%d人] \x01，无法订阅该地图",map.pllower);
 				return;
 			}
 		}

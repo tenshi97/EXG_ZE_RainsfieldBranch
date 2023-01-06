@@ -1,0 +1,4 @@
+void JumpOnPluginStart()
+{
+    RegConsoleCmd();
+}

@@ -13,13 +13,8 @@ void LeaderSpriteOnMapStart()
 void LeaderSpriteOnRoundStart()
 {
     leader_spr_created = false;
-    if(Leader_CurrentLeader()!=-1)
-    {
-        PrintToChatAll(" \x05[指挥系统]\x01自动开启指挥头标");
-        CreateLeaderIcon(Leader_CurrentLeader());
-    }
 }
-/*Action LeaderSpriteTest(int client,int args)
+Action LeaderSpriteTest(int client,int args)
 {
     if(!IsClientInGame(client)) return Plugin_Handled;
     if(IsFakeClient(client))    return Plugin_Handled;
@@ -36,7 +31,7 @@ void LeaderSpriteOnRoundStart()
     leader_spr_created = true;
     leader_spr_entity = UTIL.CreateParticle(client,leader_pos,_,_,"leader_icon",0.0);
     return Plugin_Handled;
-}*/
+}
 
 void CreateLeaderIcon(int leader)
 {

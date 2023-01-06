@@ -290,7 +290,70 @@ public void OnClientSayCommand_Post(int client, const char[] command, const char
 		AttemptRTV(client);
 	}
 }
+void RandomMapChange()
+{
+	g_RTV_VotesNum = 0;
+	for(int i = 1; i <= 64; i++)
+	{
+		g_RTV_PlyVoted[i] = false;
+	}
+	char buffer[256];
+	Map_Info map;
+	StringMapSnapshot snap=Maps.Snapshot();
+	int server_port = FindConVar("hostport").IntValue;
+	SERVER_LOG current_server;
+	EXGUSERS_GetServerByPort(server_port,current_server);
+	int player_num = GetClientCount(true);
+	ArrayList RandomMapChange_List = CreateArray(sizeof(Map_Info));
+	char current_mapname[64];
+	GetCurrentMap(current_mapname,sizeof(current_mapname));
+	for(int i =0;i < snap.Length ; i++)
+	{
+		snap.GetKey(i, map.name, sizeof(map.name));
+		Maps.GetArray(map.name, map, sizeof(map));
+		bool interval_status = true;
+		bool playernum_limit = true;
+		if(map.available&&map.exist&&map.download&&map.random)
+		{
 
+			if(map.difficulty>=2)
+			{
+				if(g_Map_Interval_Count>0&&current_server.ze_fatigue)
+				{
+					interval_status = false;
+					//PrintToConsoleAll("地图%s由于疲劳机制被剔出了随机队列",map.name);
+				}
+			}
+			if(player_num>map.plupper&&map.plupper!=0){
+				playernum_limit = false;
+			}
+			if(player_num<map.pllower&&map.pllower!=0)
+			{
+				playernum_limit = false;
+			}
+			if(!isNominated(map)&&isMapCoolDownOver(map)&&interval_status&&playernum_limit&&strcmp(current_mapname,map.name)!=0)
+			{
+				RandomMapChange_List.PushArray(map,sizeof(map));
+			}
+		}
+	}
+	int random_order = GetURandomInt()%(RandomMapChange_List.Length);
+	Map_Info random_nextmap;
+	GetArrayArray(RandomMapChange_List,random_order,random_nextmap,sizeof(random_nextmap));
+	g_Nextmap_Result.name = random_nextmap.name;
+	g_Nextmap_Result.nominated = 0;
+	g_Nextmap_Result.nominator_name = "";
+	Cvar_SM_NEXTMAP.SetString(g_Nextmap_Result.name,true,false);
+	PrintToChatAll(" \x05[地图系统]\x01由于管理员设置或者地图系统出现问题，随机选择并更换地图为%s",g_Nextmap_Result.name);
+	CreateTimer(15.0,Timer_RandomChangeMap_Hndl,_,TIMER_FLAG_NO_MAPCHANGE);
+}
+Action Timer_RandomChangeMap_Hndl(Handle timer)
+{
+	char buffer[256];
+	Format(buffer,sizeof(buffer),"map %s",g_Nextmap_Result.name);
+	ServerCommand(buffer);
+	return Plugin_Handled;
+}
 public void RTVOnClientDisconnect(int client)
 {
 	if(!IsFakeClient(client))
@@ -521,14 +584,7 @@ void CreateNextMapVote()
 						//PrintToConsoleAll("地图%s由于疲劳机制被剔出了随机队列",map.name);
 					}
 				}
-
-				if(map.tag&label_code[9])
-				{
-					if(GetClientCount(true)>30)
-					{
-						playernum_limit = false;
-					}
-				}
+				//待实现:人数上下限满足检测
 				if(!isNominated(map)&&isMapCoolDownOver(map)&&interval_status&&playernum_limit)
 				{
 					//PrintToConsoleAll("Random+ %s",map.name);
@@ -552,7 +608,7 @@ void CreateNextMapVote()
 			RandomMap_Picked++;
 		}
 	}
-	snap.Close();
+	delete snap;
 	ArrayList Temp_MapVote_List;
 	Temp_MapVote_List = CreateArray(sizeof(Maps_VoteInfo));
 	int select_random;
@@ -625,12 +681,9 @@ int NextMapVoteHandler(Menu menu, MenuAction action, int param1, int param2)
 	char buffer[256];
 	char votemap_name[64];
 	char voter_name[64];
-	if(!menu||menu == INVALID_HANDLE)
-	{
-		return;
-	}
 	if (action == MenuAction_End)
 	{
+		menu = null;
 		delete menu;
 	}
 	else if (action == MenuAction_VoteCancel)
@@ -766,8 +819,8 @@ public void MapVoteHandler(Menu menu, int num_votes, int num_clients, const int[
 		GetMapTimeLeft(timeleft_check);
 		if(timeleft_check<180)
 		{
-			PrintToChatAll(" \x05[EMC]地图剩余时间不足，补偿4分钟");
-			ExtendMapTimeLimit(240);
+			PrintToChatAll(" \x05[EMC]地图剩余时间不足，补偿至4分钟");
+			ExtendMapTimeLimit(240-timeleft_check);
 		}
 		delete menu;
 	}
@@ -818,11 +871,12 @@ void ChangeMap()
 	g_Nextmap_Selected = true;
 	g_MapVote_Initiated = false;
 	g_MapVote_Proceeding = false;
-	if(strcmp(g_Nextmap_Result.name,"",false)==0)
+	char current_mapname[64];
+	GetCurrentMap(current_mapname,sizeof(current_mapname))
+	if(strcmp(g_Nextmap_Result.name,"",false)==0||strcmp(g_Nextmap_Result.name,current_mapname,false)==0)
 	{
-		g_Nextmap_Result.name = "zm_lostcities_p";
-		g_Nextmap_Result.nominated = 0;
-		g_Nextmap_Result.nominator_name = "";
+		RandomMapChange();
+		return;
 	}
 	Format(buffer,sizeof(buffer)," \x05下一张地图为: \09%s %s \x07%s",g_Nextmap_Result.name,g_Nextmap_Result.nominated?" \x01预定者:":"",g_Nextmap_Result.nominated?g_Nextmap_Result.nominator_name:"");
 	PrintToChatAll(buffer);
@@ -936,6 +990,7 @@ int ExtendMapVoteHandler(Menu menu, MenuAction action, int param1, int param2)
 {
 	if(action == MenuAction_End)
 	{
+		menu = null;
 		delete menu;
 	}
 	if(action == MenuAction_Select)

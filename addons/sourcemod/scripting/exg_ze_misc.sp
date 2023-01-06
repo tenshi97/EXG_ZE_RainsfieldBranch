@@ -84,15 +84,6 @@ public void OnEntityCreated(int entity, const char[] classname)
 }
 
 
-public void OnPluginEnd()
-{
-
-}
-
-public void OnMapEnd()
-{
-
-}
 public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 {
 	LeaderSpriteOnRoundStart();
