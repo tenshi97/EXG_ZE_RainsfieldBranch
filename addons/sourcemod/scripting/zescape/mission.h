@@ -59,6 +59,46 @@ enum struct PlayerMissionRoundBuffer
 	int hmkill;
 	int pay;
 }
+
+char MissionRewardItems[][]
+{
+	"uid_wepskin_dualg18",
+	"uid_lootbox_freecase1",
+	"uid_wepskin_cso2axe",
+	"uid_model_lemalin",
+	"uid_wepskin_lvreji",
+	"uid_wepskin_elcjb",
+	"uid_wepskin_carbizon",
+	"uid_wepskin_dualdyhj",
+	"uid_lootbox_freecase1",
+	"uid_model_lemalin2",
+	"uid_model_lemalin3",
+	"uid_wepskin_yhmachak",
+	"uid_model_lemalin4",
+	"uid_model_xieshen",
+	"uid_wepskin_ggneawp",
+	"uid_model_xieshen2",
+};
+char MissionRewardInfos[][]
+{
+	"LV25:双枪-GLOCK[360天]",
+	"LV50:活动箱子+1000积分",
+	"LV75:战斧-极寒冲击[360天]",
+	"LV100:恶毒-1[永久]",
+	"LV125:手雷-铝热剂[360天]",
+	"LV150:匕首-恶灵苦无[360天]",
+	"LV175:野牛-CAR(浊心斯卡蒂)[360天]",
+	"LV200:双枪-双持沙鹰(印花集)[360天]",
+	"LV225:活动箱子+2000积分",
+	"LV250:恶毒-2[永久]",
+	"LV275:恶毒-3[永久]",
+	"LV300:M249-旋风AK(野荷)[360天]",
+	"LV325:恶毒-4[永久]",
+	"LV350:邪神[永久]",
+	"LV375:MAG7-AWP(永恒)[360天]",
+	"LV400:邪神(泳装)[永久]",
+};
+
 PlayerMissionRoundBuffer playermission_rounddata[65];
 PlayerMissionRoundBuffer nullrounddata;
 ArrayList Current_Mission_Tasklist;
@@ -977,7 +1017,7 @@ void DailyTaskMenu(int client)
 			IntToString(i,buffer,sizeof(buffer));
 			if(playermission_list[client].taskstage[i]>=task.stage)
 			{
-				Format(buffer2,sizeof(buffer2),"%s已完成",task.name);
+				Format(buffer2,sizeof(buffer2),"%s >已完成<",task.name);
 				menu.AddItem(buffer,buffer2,ITEMDRAW_DISABLED);
 			}
 			else
@@ -1014,7 +1054,7 @@ int DailyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 		GetArrayArray(Current_Mission_Tasklist,taskid,task,sizeof(task));
 		if(playermission_list[client].taskstage[taskid]>=task.stage)
 		{
-			PrintToChat(client," \x05[任务系统]你已完成该任务!");
+			PrintToChat(client," \x05[任务系统]\x01你已完成该任务!");
 		}
 		if(task.type==ZM_DMGTAKE||task.type==HM_DMGMAKE)
 		{
@@ -1027,7 +1067,7 @@ int DailyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 			}
 			else
 			{
-				PrintToChat(client," \x05[任务系统]未达成任务条件");
+				PrintToChat(client," \x05[任务系统]\x01未达成任务条件");
 			}
 		}
 		else
@@ -1041,7 +1081,7 @@ int DailyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 			}
 			else
 			{
-					PrintToChat(client," \x05[任务系统]未达成任务条件");
+					PrintToChat(client," \x05[任务系统]\x01未达成任务条件");
 			}
 		}
 		UpdatePlayerMissionInfo(client);
@@ -1071,7 +1111,7 @@ void WeeklyTaskMenu(int client)
 			IntToString(i,buffer,sizeof(buffer));
 			if(playermission_list[client].taskstage[i]>=task.stage)
 			{
-				Format(buffer2,sizeof(buffer2),"%s已完成",task.name);
+				Format(buffer2,sizeof(buffer2),"%s >已完成<",task.name);
 				menu.AddItem(buffer,buffer2,ITEMDRAW_DISABLED);
 			}
 			else
@@ -1108,7 +1148,7 @@ int WeeklyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 		GetArrayArray(Current_Mission_Tasklist,taskid,task,sizeof(task));
 		if(playermission_list[client].taskstage[taskid]>=task.stage)
 		{
-			PrintToChat(client," \x05[任务系统]你已完成该任务!");
+			PrintToChat(client," \x05[任务系统]\x01你已完成该任务!");
 		}
 		if(task.type==ZM_DMGTAKE||task.type==HM_DMGMAKE)
 		{
@@ -1121,7 +1161,7 @@ int WeeklyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 			}
 			else
 			{
-				PrintToChat(client," \x05[任务系统]未达成任务条件");
+				PrintToChat(client," \x05[任务系统]\x01未达成任务条件");
 			}
 		}
 		else
@@ -1135,7 +1175,7 @@ int WeeklyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 			}
 			else
 			{
-				PrintToChat(client," \x05[任务系统]未达成任务条件");
+				PrintToChat(client," \x05[任务系统]\x01未达成任务条件");
 			}
 		}
 		UpdatePlayerMissionInfo(client);
@@ -1188,22 +1228,12 @@ void AwardMenu(int client)
 	Menu menu = CreateMenu(AwardMenuHandle);
 	int iStyle = (g_pStore) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED;
 	menu.SetTitle("特典奖励领取\n%s", (g_pStore) ? "点击对应选项领取奖励" : "商店插件未加载, 请稍后再试");
-	menu.AddItem("uid_wepskin_dualg18","LV25:双枪-GLOCK[360天]", iStyle);
-	menu.AddItem("uid_lootbox_freecase1","LV50:活动箱子+1000积分", iStyle);
-	menu.AddItem("uid_wepskin_cso2axe","LV75:战斧-极寒冲击[360天]", iStyle);
-	menu.AddItem("uid_model_lemalin","LV100:恶毒-1[永久]", iStyle);
-	menu.AddItem("uid_wepskin_lvreji","LV125:手雷-铝热剂[360天]", iStyle);
-	menu.AddItem("uid_wepskin_elcjb","LV150:匕首-恶灵苦无[360天]", iStyle);
-	menu.AddItem("uid_wepskin_carbizon","LV175:野牛-CAR(浊心斯卡蒂)[360天]", iStyle);
-	menu.AddItem("uid_wepskin_dualdyhj","LV200:双枪-双持沙鹰(印花集)[360天]", iStyle);
-	menu.AddItem("uid_lootbox_freecase1","LV225:活动箱子+2000积分", iStyle);
-	menu.AddItem("uid_model_lemalin2","LV250:恶毒-2[永久]", iStyle);
-	menu.AddItem("uid_model_lemalin3","LV275:恶毒-3[永久]", iStyle);
-	menu.AddItem("uid_wepskin_yhmachak","LV300:M249-旋风AK(野荷)[360天]", iStyle);
-	menu.AddItem("uid_model_lemalin4","LV325:恶毒-4[永久]", iStyle);
-	menu.AddItem("uid_model_xieshen","LV350:邪神[永久]", iStyle);
-	menu.AddItem("uid_wepskin_ggneawp","LV375:MAG7-AWP(永恒)[360天]", iStyle);
-	menu.AddItem("uid_model_xieshen2","LV400:邪神(泳装)[永久]", iStyle);
+	for (int i=0; i<sizeof(MissionRewardInfos), i++)
+	{
+		iStyle = (!g_pStore) ? ITEMDRAW_DISABLED : (playermission_list[client].sp&(1<<(i))) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT;
+		menu.addItem(MissionRewardItems[i], MissionRewardInfos[i], iStyle);
+	}
+
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }
@@ -1562,7 +1592,7 @@ int ChallengeTaskMenuHandler(Menu menu, MenuAction action, int client, int param
 	}
 	if(!playermission_list[client].loaded)
 	{
-		PrintToChat(client," \x05[任务系统]数据未载入，无法购买(请等待下一回合或换图)");
+		PrintToChat(client," \x05[任务系统]\x01数据未载入，无法购买(请等待下一回合或换图)");
 		menu.Close();
 		return 0;
 	}

@@ -190,7 +190,7 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 	}
 	USER_LOG nominator_userlog;
 	EXGUSERS_GetUserInfo(client,nominator_userlog);
-	Format(buffer,sizeof(buffer),"预定地图%s",nominator_userlog.nomban?"[订图封禁]":"");
+	Format(buffer,sizeof(buffer),"预定地图 %s",nominator_userlog.nomban?"[订图封禁]":!Tmap.available?"[不可预订]":!(cooldown_over||Tmap.temp_cooldown)?"[等待冷却]":!g_Interval_Allow?"[神图冷却]":!Tmap.download?"[未传下载]":!Tmap.exist?"[本地无图]":"");
 	menu.AddItem(Tmap.name,buffer,(g_Interval_Allow&&Tmap.available&&(cooldown_over||Tmap.temp_cooldown)&&Tmap.download&&Tmap.exist&&(!nominator_userlog.nomban)) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(Tmap.name,"重置冷却",GetAdminFlag(GetUserAdmin(client),Admin_Generic) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 	menu.AddItem(Tmap.name,"强制提名",GetAdminFlag(GetUserAdmin(client),Admin_Generic) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);

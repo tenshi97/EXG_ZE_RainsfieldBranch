@@ -577,11 +577,18 @@ void MapAdminMenu(int client,char trie_search[PLATFORM_MAX_PATH]="")
 	Map_Log map;
 	Map_Info mapt;
 	menu.SetTitle("地图管理菜单");
+	char info[256];
 	for(int i = 0 ; i < Map_List.Length ; i++)
 	{
 		GetArrayArray(Map_List,i,map,sizeof(map));
-		if(strlen(trie_search) && StrContains(map.name,trie_search,false)==-1 && StrContains(map.name_cn,trie_search) == -1)	continue;
-		menu.AddItem(map.name,map.name);
+		if(strlen(trie_search) && StrContains(map.name,trie_search,false)==-1 && StrContains(map.name_cn,trie_search) == -1)
+			continue;
+
+		Format(info, 256, "%s", map.name);
+		if (map.name_cn[0] == NULL_STRING[0])
+			StrCat(info, 256, "[无译名]");
+
+		menu.AddItem(map.name, info);
 	}
 	if(strlen(trie_search))
 	{
