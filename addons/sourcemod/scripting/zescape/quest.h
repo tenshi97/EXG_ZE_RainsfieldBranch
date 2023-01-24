@@ -625,6 +625,11 @@ void QuestOnRoundEnd(int winner)
 							}
 						}
 					}
+					if(g_pStore)
+					{
+						int item_id = Store_GetItemIdbyUniqueId("uid_lootbox_freecase1");
+						Store_GiveItem(i,item_id,0,0,0);
+					}
 				}
 				UpdatePlayerQuestInfo(i);
 			}
@@ -992,8 +997,8 @@ void FestivalShopMenuBuild(int client)
 	menu.AddItem("",buffer,playerquest_list[client].crate>=1?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
 	Format(buffer,sizeof(buffer),"兑换*M249-草神*[180天]\n消耗50个贺岁红包");
 	menu.AddItem("",buffer,playerquest_list[client].crate_total>=50?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
-	Format(buffer,sizeof(buffer),"兑换*[快]字*\n消耗120个贺岁红包");
-	menu.AddItem("",buffer,playerquest_list[client].crate_total>=120?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"兑换*[快]字*\n消耗100个贺岁红包");
+	menu.AddItem("",buffer,playerquest_list[client].crate_total>=100?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }
@@ -1066,8 +1071,8 @@ int FestivalShopMenuHandler(Menu menu, MenuAction action, int client, int param)
 			else
 			{
 				playerquest_list[client].letter[5]+=1;
-				playerquest_list[client].crate_total -= 120;
-				PrintToChat(client," \x05[活动系统]\x01消耗120个\x07*贺岁红包*\x01兑换了\x07*M249-草神* 180天");
+				playerquest_list[client].crate_total -= 100;
+				PrintToChat(client," \x05[活动系统]\x01消耗100个\x07*贺岁红包*\x01兑换了\x07*M249-草神* 180天");
 			}
 		}
 		UpdatePlayerQuestInfo(client);
