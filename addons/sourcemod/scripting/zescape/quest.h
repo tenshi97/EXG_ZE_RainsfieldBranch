@@ -14,45 +14,233 @@ enum struct PlayerQuestInfo
 	int loaded;
 	int timestamp;
 	int uid;
-	int fest[4];
-	int fest_reward;
+	int letter[7];
+	int letter_daily[7];
+	int crate;
+	int crate_total;
+	int frag;
+	int frag_daily;
+}
+char festcrate_awardlist[][] = {
+	"fest_letter",	//2%
+	"100credits",	//30%
+	"500credits",	//15%
+	"uid_wepskin_naxitan",	//180d,5%
+	"uid_ride_thomasthank",	//180d,3%
+	"uid_wepskin_blthm",	//30d,10%
+	"uid_wepskin_sfrif",	//30d,10%
+	"uid_wepskin_akcfhd",	//30d,10%
+	"uid_wepskin_thomson",	//30d,10%
+	"uid_mvp_sound_gongxifacai" //180d,5%
+}
+char letter_map[][]={
+	"mako_reactor_v5_3", 	//3
+	"lotr_minas_tirith",	//7
+	"lotr_minas_tirith",	//8
+	"obj_npst_v2",			//-1
+	"santa",				//3
+	"westersand_v8zeta1k",	//3
+	"djinn",				//-1
+	"uchiha_legacy",		//3
+	"a_e_s",				//-1
+	"slender",				//3
+	"paramina",				//3
+	"pirates_port_royal",	//5
+	"sandstorm",			//5
+	"tesv",					//4
+	"cosmo_canyon_v5k_fix",	//4
+	"ancient_wrath_v2_test27",	//4
+	"deadcore",				//-1
+	"grau",					//1
+	"frozen_abyss",			//-1
+	"predator_ultiamte",	//3
+	"lila_panic",			//7
+	"ashen",				//1
+	"ashen",				//2
+	"cosmo_canyon_v5r",		//4
+	"castlevania",			//2
+	"castlevania",			//5
+	"obj_insane",			//-1
+	"shroomforest2"			//7
+};
+int letter_map_level[28]=
+{
+	3,7,8,-1,3,3,-1,3,-1,3,3,5,5,4,4,4,-1,1,-1,3,7,1,2,4,2,5,-1,7
 }
 ArrayList QuestList;
 PlayerQuestInfo playerquest_list[65];
+LEVEL_LOG Quest_Current_Level;
+const int quest_plimit = 20;
+bool RollDice(int possibility)
+{
+	int result = GetURandomInt()%100;
+	if(result<possibility)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+void OpenCrate(int client)
+{
+	if(!g_pStore)
+	{
+		PrintToChat(client," \x05[活动系统]\x01商店系统未载入!");
+		return;
+	}
+	playerquest_list[client].crate-=1;
+	playerquest_list[client].crate_total+=1;
+	PrintToChat(client," \x05[活动系统]\x01打开新春箱子获得\x07贺岁红包\x01一个")
+	char player_name[64];
+	GetClientName(client,player_name,sizeof(player_name));
+	int credits = Store_GetClientCredits(client);
+	int result = GetURandomInt()%100;
+	int current_time = GetTime();
+	int item_id;
+	char unid[64];
+	UpdatePlayerQuestInfo(client);
+	if(result<2)
+	{
+		playerquest_list[client].letter[5]++;
+		playerquest_list[client].letter_daily[5]++;
+		PrintToChatAll(" \x05[活动系统]\x01玩家%s抽中了金奖-\x07[快]字",player_name);
+		UpdatePlayerQuestInfo(client);
+		return;
+	}
+	if(result<32)
+	{
+		Store_SetClientCredits(client,credits+100);
+		PrintToChat(client," \x05[活动系统]\x01你抽中了铜奖-100积分");
+		return;
+	}
+	if(result<47)
+	{
+		Store_SetClientCredits(client,credits+500);
+		PrintToChat(client," \x05[活动系统]\x01你抽中了铜奖-500积分");
+		return;
+	}
+	if(result<52)
+	{
+		strcopy(unid,sizeof(unid),festcrate_awardlist[3]);
+		item_id = Store_GetItemIdbyUniqueId(unid);
+		if(Store_HasClientItem(client,item_id))
+		{
+			Store_SetClientCredits(client,credits+300);
+			PrintToChat(client," \x05[活动系统]\x01你抽中了银奖草神M249，但你已经有该道具了，返还300积分");
+		}
+		else
+		{
+			Store_GiveItem(client,item_id,0,current_time+180*86400,0);
+			PrintToChat(client," \x05[活动系统]\x01你抽中了银奖-\x08草神M249180天");
+		}
+		return;
+	}
+	if(result<55)
+	{
+		strcopy(unid,sizeof(unid),festcrate_awardlist[4]);
+		item_id = Store_GetItemIdbyUniqueId(unid);
+		if(Store_HasClientItem(client,item_id))
+		{
+			Store_SetClientCredits(client,credits+300);
+			PrintToChat(client," \x05[活动系统]\x01你抽中了银奖托马斯小火车，但你已经有该道具了，返还300积分");
+		}
+		else
+		{
+			Store_GiveItem(client,item_id,0,current_time+30*86400,0);
+			PrintToChat(client," \x05[活动系统]\x01你抽中了银奖-\x08托马斯小火车30天");
+		}
+		return;
+	}
+	if(result<65)
+	{
+		strcopy(unid,sizeof(unid),festcrate_awardlist[5]);
+		item_id = Store_GetItemIdbyUniqueId(unid);
+		if(Store_HasClientItem(client,item_id))
+		{
+			Store_SetClientCredits(client,credits+100);
+			PrintToChat(client," \x05[活动系统]\x01你抽中了铜奖巴雷特毁灭，但你已经有该道具了，返还100积分");
+		}
+		else
+		{
+			Store_GiveItem(client,item_id,0,current_time+30*86400,0);
+			PrintToChat(client," \x05[活动系统]\x01你抽中了铜奖-\x08AWP-巴雷特毁灭-30天");
+		}
+		return;
+	}
+	if(result<75)
+	{
+		strcopy(unid,sizeof(unid),festcrate_awardlist[6]);
+		item_id = Store_GetItemIdbyUniqueId(unid);
+		if(Store_HasClientItem(client,item_id))
+		{
+			Store_SetClientCredits(client,credits+100);
+			PrintToChat(client," \x05[活动系统]\x01你抽中了铜奖星际重炮，但你已经有该道具了，返还100积分");
+		}
+		else
+		{
+			Store_GiveItem(client,item_id,0,current_time+30*86400,0);
+			PrintToChat(client," \x05[活动系统]\x01你抽中了铜奖-\x08M4A4-星际重炮-30天");
+		}
+		return;
+	}
+	if(result<85)
+	{
+		strcopy(unid,sizeof(unid),festcrate_awardlist[7]);
+		item_id = Store_GetItemIdbyUniqueId(unid);
+		if(Store_HasClientItem(client,item_id))
+		{
+			Store_SetClientCredits(client,credits+100);
+			PrintToChat(client," \x05[活动系统]\x01你抽中了铜奖末日审判，但你已经有该道具了，返还100积分");
+		}
+		else
+		{
+			Store_GiveItem(client,item_id,0,current_time+30*86400,0);
+			PrintToChat(client," \x05[活动系统]\x01你抽中了铜奖-\x08AK47-末日审判-30天");
+		}
+		return;
+	}
+	if(result<95)
+	{
+		strcopy(unid,sizeof(unid),festcrate_awardlist[8]);
+		item_id = Store_GetItemIdbyUniqueId(unid);
+		if(Store_HasClientItem(client,item_id))
+		{
+			Store_SetClientCredits(client,credits+100);
+			PrintToChat(client," \x05[活动系统]\x01你抽中了铜奖星标汤姆逊，但你已经有该道具了，返还100积分");
+		}
+		else
+		{
+			Store_GiveItem(client,item_id,0,current_time+30*86400,0);
+			PrintToChat(client," \x05[活动系统]\x01你抽中了铜奖-\x08野牛-星标汤姆逊-30天");
+		}
+		return;
+	}
+	strcopy(unid,sizeof(unid),festcrate_awardlist[8]);
+	item_id = Store_GetItemIdbyUniqueId(unid);
+	if(Store_HasClientItem(client,item_id))
+	{
+		Store_SetClientCredits(client,credits+300);
+		PrintToChat(client," \x05[活动系统]\x01你抽中了银奖恭喜发财，但你已经有该道具了，返还300积分");
+	}
+	else
+	{
+		Store_GiveItem(client,item_id,0,current_time+180*86400,0);
+		PrintToChat(client," \x05[活动系统]\x01你抽中了银奖-\x08MVP音乐-恭喜发财-180天");
+	}
+	return;
+}
 void QuestOnPluginStart()
 {
 	RegConsoleCmd("sm_rw",QuestCommand);
 	RegConsoleCmd("sm_quest",QuestCommand);
-	RegAdminCmd("sm_raffleuser",PrintRaffleUser,ADMFLAG_GENERIC);
 	ReloadAllPlayerQuestInfo();
 	QuestSet();
 }
-Action PrintRaffleUser(int client,int args)
-{
-	char query[256];
-	Format(query,sizeof(query),"SELECT * FROM zequest WHERE FEST1 = 1 AND FEST2 = 1 AND FEST3 = -1 AND FEST4 = -1");
-	DbTQuery(RaffleUserQueryCallback,query);
-}
-void RaffleUserQueryCallback(Handle owner, Handle hndl, char[] error, any data)
-{
-	char raffle_path[256];
-	BuildPath(Path_SM,raffle_path,sizeof(raffle_path),"configs/raffle.txt");
-	File rafflefile = OpenFile(raffle_path,"w");
-	if(!hndl)
-	{
-		return;
-	}
-	while(SQL_FetchRow(hndl))
-	{
-		int uid = DbFetchInt(hndl,"UID");
-		PrintToChatAll("%d",uid);
-		rafflefile.WriteLine("%d",uid);
-	}
-	delete rafflefile;
-}
-
 void QuestOnMapStart()
 {
+	Quest_Current_Level.id = -1;
 	CloseHandleSafe(QuestList);
 	QuestSet();
 }
@@ -86,10 +274,10 @@ Action QuestCommand(int client,int args)
 	}
 	Menu menu = CreateMenu(QuestMenuHandler);
 	menu.SetTitle("任务系统");
-	menu.AddItem("","每日任务",ITEMDRAW_DISABLED);
+	menu.AddItem("","每日任务");
 	menu.AddItem("","每周任务",ITEMDRAW_DISABLED);
 	menu.AddItem("","赛季任务");
-	menu.AddItem("","季节活动~元旦");
+	menu.AddItem("","季节活动~春节");
 	menu.Display(client, MENU_TIME_FOREVER);
 	return Plugin_Handled;
 }
@@ -97,7 +285,7 @@ int QuestMenuHandler(Menu menu, MenuAction action, int client, int param)
 {
 	if (action == MenuAction_End)
 	{
-		menu.Close();
+		delete menu;
 		return 0;
 	}
 	else if (action == MenuAction_Select)
@@ -171,9 +359,12 @@ int DailyQuestMenuHandler(Menu menu, MenuAction action, int client, int param)
 		{
 			if(playerquest_list[client].taskdata[questid]>=quest.num)
 			{
-				PrintToChat(client," \x05[任务系统]\x01完成了每日任务[%s]，获得%d积分",quest.name,quest.award);
+				PrintToChat(client," \x05[任务系统]\x01完成了每日任务[%s]，获得%d积分并获得一张[2]字",quest.name,quest.award);
 				playerquest_list[client].taskcomplete[questid]=1;
 				Store_SetClientCredits(client,credits+quest.award);
+				playerquest_list[client].letter[0]++;
+				playerquest_list[client].letter_daily[0]++;
+
 			}
 			else
 			{
@@ -252,16 +443,24 @@ void LoadPlayerQuestInfoCallBack(Handle owner, Handle hndl, char[] error, any da
 		playerquest_list[client].taskcomplete[3]=DbFetchInt(hndl,"DT4C");
 		playerquest_list[client].taskcomplete[4]=DbFetchInt(hndl,"DT5C");
 		playerquest_list[client].taskcomplete[5]=DbFetchInt(hndl,"DT6C");
-		playerquest_list[client].fest[0]=DbFetchInt(hndl,"FEST1");
-		playerquest_list[client].fest[1]=DbFetchInt(hndl,"FEST2");
-		playerquest_list[client].fest[2]=DbFetchInt(hndl,"FEST3");
-		playerquest_list[client].fest[3]=DbFetchInt(hndl,"FEST4");
-		playerquest_list[client].fest_reward=DbFetchInt(hndl,"FESTRE");
-
+		char section[64];
+		for(int i=0;i<=6;i++)
+		{
+			Format(section,sizeof(section),"LET%d",i+1);
+			playerquest_list[client].letter[i]=DbFetchInt(hndl,section);
+			Format(section,sizeof(section),"LETD%d",i+1);
+			playerquest_list[client].letter_daily[i]=DbFetchInt(hndl,section);
+		}
+		playerquest_list[client].crate = DbFetchInt(hndl,"CRATE");
+		playerquest_list[client].crate_total = DbFetchInt(hndl,"CRATET");
+		playerquest_list[client].frag = DbFetchInt(hndl,"FRAG");
+		playerquest_list[client].frag_daily = DbFetchInt(hndl,"FRAGD");
 		Format(query,sizeof(query),"UPDATE zequest SET TIMESTAMP = %d WHERE UID = %d",current_time,playerquest_list[client].uid);
 		if(playerquest_list[client].timestamp<g_daily_timestamp)
 		{
 			ClearPlayerDailyQuestInfo(client);
+			playerquest_list[client].letter[0]+=1;
+			playerquest_list[client].letter_daily[0]=1;
 		}
 	}
 	playerquest_list[client].timestamp = current_time;
@@ -298,7 +497,7 @@ void ClearAllPlayerQuestInfo()
 			playerquest_list[i].taskcomplete[j]=0;
 		}
 	}
-	Format(query,sizeof(query),"UPDATE zequest SET DINFECT = 0, DKILL = 0, DDMGTAKE = 0, DDMGMAKE = 0, DPASS = 0, DNADE = 0, DT1C = 0, DT2C = 0, DT3C = 0, DT4C = 0, DT5C = 0, DT6C = 0");
+	Format(query,sizeof(query),"UPDATE zequest SET DINFECT = 0, DKILL = 0, DDMGTAKE = 0, DDMGMAKE = 0, DPASS = 0, DNADE = 0, DT1C = 0, DT2C = 0, DT3C = 0, DT4C = 0, DT5C = 0, DT6C = 0, LETD1 = 0, LETD2 = 0, LETD3 = 0, LETD4 =0, LETD5 = 0, LETD6 = 0, LETD7 = 0, FRAGD = 0");
 	DbTQuery(DbClearPlayerQuestInfoCallback,query);
 }
 
@@ -318,14 +517,21 @@ void UpdatePlayerQuestInfo(int client)
 	}
 	int taskdata[16];
 	int taskcomplete[16];
+	int letter[7];
+	int letterd[7];
 	int current_time = GetTime();
-	char query[1024];
+	char query[2048];
 	for(int i=0;i<=5;i++)
 	{
 		taskdata[i]=playerquest_list[client].taskdata[i];
 		taskcomplete[i]=playerquest_list[client].taskcomplete[i];
 	}
-	Format(query,sizeof(query),"UPDATE zequest SET TIMESTAMP = %d, DINFECT = %d, DKILL = %d, DDMGTAKE = %d, DDMGMAKE = %d, DPASS = %d, DNADE = %d, DT1C = %d, DT2C = %d, DT3C = %d, DT4C = %d, DT5C = %d, DT6C = %d, FEST1 = %d, FEST2 = %d, FEST3 = %d, FEST4 = %d, FESTRE = %d WHERE UID = %d",current_time,taskdata[0],taskdata[1],taskdata[2],taskdata[3],taskdata[4],taskdata[5],taskcomplete[0],taskcomplete[1],taskcomplete[2],taskcomplete[3],taskcomplete[4],taskcomplete[5],playerquest_list[client].fest[0],playerquest_list[client].fest[1],playerquest_list[client].fest[2],playerquest_list[client].fest[3],playerquest_list[client].fest_reward,playerquest_list[client].uid);
+	for(int i=0;i<=6;i++)
+	{
+		letter[i]=playerquest_list[client].letter[i];
+		letterd[i]=playerquest_list[client].letter_daily[i];
+	}
+	Format(query,sizeof(query),"UPDATE zequest SET TIMESTAMP = %d, DINFECT = %d, DKILL = %d, DDMGTAKE = %d, DDMGMAKE = %d, DPASS = %d, DNADE = %d, DT1C = %d, DT2C = %d, DT3C = %d, DT4C = %d, DT5C = %d, DT6C = %d, LET1 = %d, LET2 = %d, LET3 = %d, LET4 = %d, LET5 = %d, LET6 = %d, LET7 = %d, LETD1 = %d, LETD2 = %d, LETD3 = %d, LETD4 = %d, LETD5 = %d, LETD6 = %d, LETD7 = %d, CRATE = %d, CRATET = %d, FRAG = %d, FRAGD = %d WHERE UID = %d",current_time,taskdata[0],taskdata[1],taskdata[2],taskdata[3],taskdata[4],taskdata[5],taskcomplete[0],taskcomplete[1],taskcomplete[2],taskcomplete[3],taskcomplete[4],taskcomplete[5],letter[0],letter[1],letter[2],letter[3],letter[4],letter[5],letter[6],letterd[0],letterd[1],letterd[2],letterd[3],letterd[4],letterd[5],letterd[6],playerquest_list[client].crate,playerquest_list[client].crate_total,playerquest_list[client].frag,playerquest_list[client].frag_daily,playerquest_list[client].uid);
 	DbTQuery(DbQueryErrorCallback,query);
 }
 
@@ -337,8 +543,17 @@ void ClearPlayerDailyQuestInfo(int client)
 		playerquest_list[client].taskdata[i] = 0;
 		playerquest_list[client].taskcomplete[i] = 0;
 	}
+	for(int i=0;i<=6;i++)
+	{
+		playerquest_list[client].letter_daily[i]=0;
+	}
+	playerquest_list[client].frag_daily = 0;
 	playerquest_list[client].loaded = 1;
 	UpdatePlayerQuestInfo(client);
+}
+void QuestOnLevelSet(any level[sizeof(LEVEL_LOG)])
+{
+	Quest_Current_Level = level;
 }
 void QuestOnRoundEnd(int winner)
 {
@@ -348,11 +563,67 @@ void QuestOnRoundEnd(int winner)
 		{
 			if(!IsFakeClient(i))
 			{
-				if(winner==3&&IsPlayerAlive(i)&&ZR_IsClientHuman(i)&&GetClientCount(true)>=20)
+				if(winner==3&&IsPlayerAlive(i)&&ZR_IsClientHuman(i)&&GetClientCount(true)>=quest_plimit)
 				{
 					if(playerquest_list[i].taskdata[4]<=10000)
 					{
 						playerquest_list[i].taskdata[4]++;
+					}
+					//春节活动-[0]字判定
+					if(playerquest_list[i].letter_daily[1]<3)
+					{
+						if(RollDice(50))
+						{
+							PrintToChat(i," \x05[活动系统]\x01你获得了\x07[0]\x01字一张");
+						}
+						playerquest_list[i].letter[1]++;
+						playerquest_list[i].letter_daily[1]++;
+					}
+					//春节活动[3]字判定
+					if(Pmap.tag&label_code[10])
+					{
+						if(playerquest_list[i].letter_daily[2]<3)
+						{
+							if(RollDice(50))
+							{
+								PrintToChat(i," \x05[活动系统]\x01你获得了\x07[3]\x01字一张");
+							}
+							playerquest_list[i].letter[2]++;
+							playerquest_list[i].letter_daily[2]++;
+						}
+					}
+					//春节活动[新]字判定
+					if(Pmap.difficulty>=2)
+					{
+						if(playerquest_list[i].letter_daily[3]<3)
+						{
+							if(RollDice(50))
+							{
+								PrintToChat(i," \x05[活动系统]\x01你获得了\x07[新]\x01字一张");
+							}
+							playerquest_list[i].letter[3]++;
+							playerquest_list[i].letter_daily[3]++;
+						}
+					}
+					//春节活动[春]字判定
+					for(int j=0;j<=27;j++)
+					{
+						if(StrContains(Pmap.name,letter_map[j],false)!=-1)
+						{
+							if(letter_map_level[j]==-1||(Quest_Current_Level.id!=-1&&Quest_Current_Level.id==letter_map_level[j]))
+							{
+								if(playerquest_list[i].frag_daily<1)
+								{
+									PrintToChat(i," \x05[活动系统]\x01你获得了\x07一个庆典碎片");
+									playerquest_list[i].frag+=1;
+									playerquest_list[i].frag_daily+=1;
+								}
+								else
+								{
+									PrintToChat(i," \x05[活动系统]\x01今日无法再掉落庆典碎片");
+								}
+							}
+						}
 					}
 				}
 				UpdatePlayerQuestInfo(i);
@@ -443,7 +714,7 @@ void QuestSet()
 }
 void QuestZombieInfectHuman(int attacker)
 {
-	if(GetClientCount(true)<20)	return;
+	if(GetClientCount(true)<quest_plimit)	return;
 	if(playerquest_list[attacker].taskdata[0]<=1000)
 	{
 		playerquest_list[attacker].taskdata[0]++;
@@ -451,7 +722,7 @@ void QuestZombieInfectHuman(int attacker)
 }
 void QuestHumanKillZombie(int attacker)
 {
-	if(GetClientCount(true)<20)	return;
+	if(GetClientCount(true)<quest_plimit)	return;
 	if(playerquest_list[attacker].taskdata[1]<=1000)
 	{
 		playerquest_list[attacker].taskdata[1]++;
@@ -459,7 +730,7 @@ void QuestHumanKillZombie(int attacker)
 }
 void QuestHumanDmgCount(int attacker,int victim,int dmg)
 {
-	if(GetClientCount(true)<20)	return;
+	if(GetClientCount(true)<quest_plimit)	return;
 	if(playerquest_list[victim].taskdata[2]<1000000)
 	{
 		playerquest_list[victim].taskdata[2]+=dmg;
@@ -472,7 +743,7 @@ void QuestHumanDmgCount(int attacker,int victim,int dmg)
 
 void QuestHumanNadeCount(int client)
 {
-	if(GetClientCount(true)<0)	return;
+	if(GetClientCount(true)<quest_plimit)	return;
 	if(playerquest_list[client].taskdata[5]<=1000)
 	{
 		playerquest_list[client].taskdata[5]++;
@@ -482,16 +753,11 @@ void QuestHumanNadeCount(int client)
 void FestivalMenuBuild(int client)
 {
 	Menu menu = CreateMenu(FestivalMenuHandler);
-	menu.SetTitle("元旦活动~2023也请支持EXG");
-	menu.AddItem("","节日打卡",ITEMDRAW_DISABLED);
-	menu.AddItem("","节日任务");
-	menu.AddItem("","庆典活动");
-	bool quest_complete = false;
-	if(playerquest_list[client].fest[0]==1&&playerquest_list[client].fest[1]==1&&playerquest_list[client].fest[2]==-1&&playerquest_list[client].fest[3]==-1)
-	{
-		quest_complete = true;
-	}
-	menu.AddItem("","领取任务奖励-10级经验",quest_complete?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.SetTitle("春节活动~恭贺新年");
+	menu.AddItem("","活动仓库");
+	menu.AddItem("","奖励兑换");
+	menu.AddItem("","活动商店");
+	menu.AddItem("","活动指南");
 	menu.Display(client,MENU_TIME_FOREVER);
 }
 
@@ -504,58 +770,42 @@ int FestivalMenuHandler(Menu menu, MenuAction action, int client, int param)
 	}
 	else if(action == MenuAction_Select)
 	{
+		if(param==0)
+		{
+			FestivalInvMenuBuild(client);
+		}
 		if(param==1)
 		{
-			FestivalTaskMenuBuild(client);
+			FestivalAwardMenuBuild(client);
 		}
 		if(param==2)
 		{
-			FestivalEventMenuBuild(client);
+			FestivalShopMenuBuild(client);
 		}
 		if(param==3)
 		{
-			if(playerquest_list[client].fest_reward == 1)
-			{
-				PrintToChat(client," \x05[活动系统]\x01你已经领取过奖励了，不要想着薅羊毛!");
-			}
-			else
-			{
-				GrantExp(client,10000);
-				playerquest_list[client].fest_reward = 1;
-				PrintToChat(client," \x05[活动系统]\x01领取奖励成功");
-				UpdatePlayerQuestInfo(client);
-			}
+			FestivalInstructMenuBuild(client);
 		}
 		return 0;
 	}
 }
 
-void FestivalTaskMenuBuild(int client)
+void FestivalInvMenuBuild(int client)
 {
-	Menu menu = CreateMenu(FestivalTaskMenuHandler);
-	menu.SetTitle("元旦活动:节日任务[任务3和4需要服务器内20人以上才可完成]");
 	char buffer[256];
-	Format(buffer,sizeof(buffer),"%s",playerquest_list[client].fest[0]?"[元]":"完成节日打卡");
+	Menu menu = CreateMenu(FestivalInvMenuHandler);
+	menu.SetTitle("活动仓库-括号内为今日掉落数");
+	Format(buffer,sizeof(buffer),"[2]:%d张(%d)\n[0]:%d张(%d)\n[3]:%d张(%d)",playerquest_list[client].letter[0],playerquest_list[client].letter_daily[0],playerquest_list[client].letter[1],playerquest_list[client].letter_daily[1],playerquest_list[client].letter[2],playerquest_list[client].letter_daily[2]);
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-	Format(buffer,sizeof(buffer),"%s",playerquest_list[client].fest[1]?"[旦]":"在2023年1月1日0点~24点间输入任意含有2023的语句\n获得M4A4-星际重炮7日");
+	Format(buffer,sizeof(buffer),"[新]:%d张(%d)\n[春]:%d张(%d)\n[快]:%d张(%d)\n[乐]:%d张(%d)",playerquest_list[client].letter[3],playerquest_list[client].letter_daily[3],playerquest_list[client].letter[4],playerquest_list[client].letter_daily[4],playerquest_list[client].letter[5],playerquest_list[client].letter_daily[5],playerquest_list[client].letter[6],playerquest_list[client].letter_daily[6]);
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-	Format(buffer,sizeof(buffer),"%s",playerquest_list[client].fest[2]<0?"[快]":"在12月31日~1月3日期间累计对僵尸造成202300伤害\n获得2023积分");
-	if(playerquest_list[client].fest[2]>=0)
-	{
-		Format(buffer,sizeof(buffer),"%s\n[当前:%d]",buffer,playerquest_list[client].fest[2]);
-	}
-	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-	Format(buffer,sizeof(buffer),"%s",playerquest_list[client].fest[3]<0?"[乐]":"在12月31日~1月3日期间通任意地图5次\n获得M249-赤色彗星7日");
-	if(playerquest_list[client].fest[3]>=0)
-	{
-		Format(buffer,sizeof(buffer),"%s\n[当前:%d]",buffer,playerquest_list[client].fest[3]);
-	}
+	Format(buffer,sizeof(buffer),"贺岁红包剩余数量:%d",playerquest_list[client].crate_total);
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }
 
-int FestivalTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
+int FestivalInvMenuHandler(Menu menu, MenuAction action, int client, int param)
 {
 	if (action == MenuAction_End||client<=0||client>=65)
 	{
@@ -569,22 +819,286 @@ int FestivalTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 	else if (param == MenuCancel_ExitBack) FestivalMenuBuild(client);
 }
 
-void FestivalEventMenuBuild(int client)
+void FestivalAwardMenuBuild(int client)
 {
-	Menu menu = CreateMenu(FestivalEventMenuHandler);
-	menu.SetTitle("元旦活动:庆典活动");
+	Menu menu = CreateMenu(FestivalAwardMenuHandler);
+	menu.SetTitle("奖励兑换");
 	char buffer[256];
-	Format(buffer,sizeof(buffer),"在节日任务内集齐[元][旦][快][乐]四字，自动参与抽奖");
+	Format(buffer,sizeof(buffer),"兑换一个新春箱子\n消耗一组[2023]");
 	menu.AddItem("",buffer);
-	Format(buffer,sizeof(buffer),"开奖时间:2023年1月4日0时\n开奖方式:游戏内公开抽奖[待定,可能会有其他形式]");
+	Format(buffer,sizeof(buffer),"兑换[乐]\n消耗六组[2023]");
 	menu.AddItem("",buffer);
-	Format(buffer,sizeof(buffer),"奖品:参与者皆赠送10000点赛季活动经验\n 三等奖:随机高级皮肤 15天+2023积分 5人\n二等奖: 40000赛季经验 3人\n一等奖: 赛季等级满级直升 1人\n神秘奖: 1人(与前述奖品平行抽取)");
+	Format(buffer,sizeof(buffer),"兑换MVP音乐[好运来][180天]\n消耗一组[2023]");
 	menu.AddItem("",buffer);
+	Format(buffer,sizeof(buffer),"兑换人物模型-Padoru[永久]\n消耗一组[新春快乐]");
+	menu.AddItem("",buffer);
+	Format(buffer,sizeof(buffer),"打开新春箱子-剩余%d个",playerquest_list[client].crate);
+	menu.AddItem("",buffer,playerquest_list[client].crate>=1?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"兑换[春]字-消耗3个庆典碎片\n剩余%d个",playerquest_list[client].frag);
+	menu.AddItem("",buffer,playerquest_list[client].frag>=3?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }
 
-int FestivalEventMenuHandler(Menu menu, MenuAction action, int client, int param)
+int FestivalAwardMenuHandler(Menu menu, MenuAction action, int client, int param)
+{
+	if (action == MenuAction_End||client<=0||client>=65)
+	{
+		delete menu;
+		return 0;
+	}
+	else if(action == MenuAction_Select)
+	{
+		int item_id;
+		int current_time = GetTime();
+		if(param==0)
+		{
+			if(playerquest_list[client].letter[0]>=2&&playerquest_list[client].letter[1]>=1&&playerquest_list[client].letter[2]>=1&&playerquest_list[client].crate<=99)
+			{
+				playerquest_list[client].letter[0]-=2;
+				playerquest_list[client].letter[1]-=1;
+				playerquest_list[client].letter[2]-=1;
+				playerquest_list[client].crate+=1;
+				PrintToChat(client," \x05[活动系统]\x01你获得了新春箱子*1");
+			}
+			else
+			{
+				PrintToChat(client," \x05[活动系统]\x01你没有集齐对应的字或者你的箱子太多了!");
+			}
+		}
+		if(param==1)
+		{
+			if(playerquest_list[client].letter[0]>=12&&playerquest_list[client].letter[1]>=6&&playerquest_list[client].letter[2]>=6)
+			{
+				playerquest_list[client].letter[0]-=12;
+				playerquest_list[client].letter[1]-=6
+				playerquest_list[client].letter[2]-=6;
+				playerquest_list[client].letter[6]+=1;
+				PrintToChat(client," \x05[活动系统]\x01你获得了[乐]*1");
+			}
+			else
+			{
+				PrintToChat(client," \x05[活动系统]\x01你没有集齐对应的字!");
+			}
+		}
+		if(param==2)
+		{
+			if(!g_pStore)
+			{
+				PrintToChat(client," \x05[活动系统]\x01商店插件未载入!");
+				return 0;
+			}
+			if(playerquest_list[client].letter[0]>=2&&playerquest_list[client].letter[1]>=1&&playerquest_list[client].letter[2]>=1)
+			{
+				item_id = Store_GetItemIdbyUniqueId("uid_mvp_sound_haoyunlai");
+				if(Store_HasClientItem(client,item_id))
+				{
+					PrintToChat(client," \x05[活动系统]\x01你已经拥有该物品!");
+				}
+				else
+				{
+					playerquest_list[client].letter[0]-=2;
+					playerquest_list[client].letter[1]-=1;
+					playerquest_list[client].letter[2]-=1;
+					Store_GiveItem(client,item_id,0,current_time+180*86400,0);
+					PrintToChat(client," \x05[活动系统]\x01恭喜你获得道具\x07MVP音乐*好运来* 180天");
+				}
+			}
+			else
+			{
+				PrintToChat(client," \x05[活动系统]\x01你没有集齐对应的字!");
+			}
+		}
+		if(param==3)
+		{
+			if(!g_pStore)
+			{
+				PrintToChat(client," \x05[活动系统]\x01商店插件未载入!");
+				return 0;
+			}
+			if(playerquest_list[client].letter[3]>=2&&playerquest_list[client].letter[4]>=1&&playerquest_list[client].letter[5]>=1&&playerquest_list[client].letter[6]>=1)
+			{
+				item_id = Store_GetItemIdbyUniqueId("uid_model_Padoru");
+				if(Store_HasClientItem(client,item_id))
+				{
+					PrintToChat(client," \x05[活动系统]\x01你已经拥有该物品!");
+				}
+				else
+				{
+					playerquest_list[client].letter[3]-=1;
+					playerquest_list[client].letter[4]-=1;
+					playerquest_list[client].letter[5]-=1;
+					playerquest_list[client].letter[6]-=1;
+					char player_name[64];
+					GetClientName(client,player_name,sizeof(player_name))
+					Store_GiveItem(client,item_id,0,0,0);
+					PrintToChatAll(" \x05[活动系统]\x01恭喜玩家%s获得道具\x07人物模型-Padoru[永久]",player_name);
+				}
+			}
+			else
+			{
+				PrintToChat(client," \x05[活动系统]\x01你没有集齐对应的字!");
+			}
+		}
+		if(param==4)
+		{
+			if(!g_pStore)
+			{
+				PrintToChat(client," \x05[活动系统]\x01商店插件未载入!");
+				return 0;
+			}
+			if(playerquest_list[client].crate>=1)
+			{
+				OpenCrate(client);
+			}
+			else
+			{
+				PrintToChat(client," \x05[活动系统]\x01你还没有多余的新春箱子!");
+			}
+		}
+		if(param==5)
+		{
+			if(playerquest_list[client].frag>=3)
+			{
+				playerquest_list[client].frag-=3;
+				playerquest_list[client].letter[4]+=1;
+				PrintToChat(client," \x05[活动系统]\x01使用3个庆典碎片兑换了一个\x07[春]\x01字");
+			}
+			else
+			{
+				PrintToChat(client," \x05[活动系统]\x01你还没有足够的庆典碎片");
+			}
+		}
+		UpdatePlayerQuestInfo(client);
+		return 0;
+	}
+	else if (param == MenuCancel_ExitBack) FestivalMenuBuild(client);
+}
+
+void FestivalShopMenuBuild(int client)
+{
+	if(!g_pStore)
+	{
+		PrintToChat(client," \x05[活动系统]\x01商店插件未载入!");
+		return;
+	}
+	Menu menu = CreateMenu(FestivalShopMenuHandler);
+	menu.SetTitle("活动商店");
+	char buffer[256];
+	int credits = Store_GetClientCredits(client);
+	Format(buffer,sizeof(buffer),"购买一个新春箱子\n消耗2000积分");
+	menu.AddItem("",buffer,credits>=2000?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"打开新春箱子-剩余%d个",playerquest_list[client].crate);
+	menu.AddItem("",buffer,playerquest_list[client].crate>=1?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"兑换*M249-草神*[180天]\n消耗50个贺岁红包");
+	menu.AddItem("",buffer,playerquest_list[client].crate_total>=50?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"兑换*[快]字*\n消耗120个贺岁红包");
+	menu.AddItem("",buffer,playerquest_list[client].crate_total>=120?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.ExitBackButton = true;
+	menu.Display(client,MENU_TIME_FOREVER);
+}
+int FestivalShopMenuHandler(Menu menu, MenuAction action, int client, int param)
+{
+	if (action == MenuAction_End||client<=0||client>=65)
+	{
+		delete menu;
+		return 0;
+	}
+	else if(action == MenuAction_Select)
+	{
+		if(param==0)
+		{
+			int credits = Store_GetClientCredits(client);
+			if(credits>=2000&&playerquest_list[client].crate<=99)
+			{
+				Store_SetClientCredits(client,credits-2000);
+				playerquest_list[client].crate++;
+				PrintToChat(client," \x05[活动系统]\x01购买了一个新春箱子")
+			}
+			else
+			{
+				PrintToChat(client," \x05[活动系统]\x01你没有足够的积分或者你箱子太多了");
+			}
+		}
+		if(param==1)
+		{
+			if(!g_pStore)
+			{
+				PrintToChat(client," \x05[活动系统]\x01商店插件未载入!");
+				return 0;
+			}
+			if(playerquest_list[client].crate>=1)
+			{
+				OpenCrate(client);
+			}
+			else
+			{
+				PrintToChat(client," \x05[活动系统]\x01你还没有多余的新春箱子!");
+			}
+		}
+		if(param==2)
+		{
+			if(!g_pStore)
+			{
+				PrintToChat(client," \x05[活动系统]\x01商店插件未载入!");
+				return 0;
+			}
+			int item_id = Store_GetItemIdbyUniqueId("uid_wepskin_naxitan");
+			if(Store_HasClientItem(client,item_id))
+			{
+				PrintToChat(client," \x05[活动系统]\x01您已拥有该道具，请勿重复兑换!");
+				return 0;
+			}
+			else
+			{
+				playerquest_list[client].crate_total -= 50;
+				Store_GiveItem(client,item_id,0,GetTime()+180*86400,0);
+				PrintToChat(client," \x05[活动系统]\x01消耗50个\x07*贺岁红包*\x01兑换了\x07*M249-草神* 180天");
+			}
+		}
+		if(param==3)
+		{
+			if(playerquest_list[client].letter[5]>=1)
+			{
+				PrintToChat(client," \x05[活动系统]\x01您已拥有该道具，请勿重复兑换!");
+				return 0;
+			}
+			else
+			{
+				playerquest_list[client].letter[5]+=1;
+				playerquest_list[client].crate_total -= 120;
+				PrintToChat(client," \x05[活动系统]\x01消耗120个\x07*贺岁红包*\x01兑换了\x07*M249-草神* 180天");
+			}
+		}
+		UpdatePlayerQuestInfo(client);
+		return 0;
+	}
+	else if (param == MenuCancel_ExitBack) FestivalMenuBuild(client);
+}
+
+void FestivalInstructMenuBuild(int client)
+{
+	Menu menu = CreateMenu(FestivalInstructMenuHandler);
+	menu.SetTitle("活动指南");
+	menu.AddItem("","----获得字---",ITEMDRAW_DISABLED);
+	menu.AddItem("","[2]:登录,完成每日任务各一张",ITEMDRAW_DISABLED);
+	menu.AddItem("","[0]:通关任意地图50%概率掉落(每日最多3张)",ITEMDRAW_DISABLED);
+	menu.AddItem("","[3]:通关任意[活动]地图50%概率掉落(每日最多3张)",ITEMDRAW_DISABLED);
+	menu.AddItem("","[新]:通关任意[困难]地图50%概率掉落(每日最多3张)",ITEMDRAW_DISABLED);
+	menu.AddItem("","[春]:使用3个庆典碎片兑换，庆典碎片通过完成指定地图/关卡可获得(每日仅1次):",ITEMDRAW_DISABLED);
+	menu.AddItem("","[快]:在节日箱子内抽取(概率2%)",ITEMDRAW_DISABLED);
+	menu.AddItem("","[乐]:6组[2023]兑换",ITEMDRAW_DISABLED);
+	menu.AddItem("","----新春箱子------",ITEMDRAW_DISABLED);
+	menu.AddItem("","2%获得[快]字",ITEMDRAW_DISABLED);
+	menu.AddItem("","5%获得草神M249180天",ITEMDRAW_DISABLED);
+	menu.AddItem("","3%获得托马斯小火车坐骑30天",ITEMDRAW_DISABLED);
+	menu.AddItem("","5%获得MVP音乐*恭喜发财*180天",ITEMDRAW_DISABLED);
+	menu.AddItem("","必定掉落一个贺岁红包，其余普通奖励见论坛",ITEMDRAW_DISABLED);
+	menu.ExitBackButton = true;
+	menu.Display(client,MENU_TIME_FOREVER);
+}
+
+int FestivalInstructMenuHandler(Menu menu, MenuAction action, int client, int param)
 {
 	if (action == MenuAction_End||client<=0||client>=65)
 	{

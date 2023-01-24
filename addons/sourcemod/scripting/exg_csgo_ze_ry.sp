@@ -125,7 +125,6 @@ public void OnMapStart()
 public void OnEntityCreated(int entity, const char[] classname)
 {
 	TriggerOnEntityCreated(entity, classname);
-	MissionOnEntitySpawned(entity,classname);
 }
 void WarmUpTimerBuild()
 {
@@ -196,4 +195,5 @@ public void EXGUSERS_OnUserLoaded(int client)
 public void EXGZE_OnLevelSet(any level[sizeof(LEVEL_LOG)])
 {
 	MissionOnLevelSet(level);
+	QuestOnLevelSet(level);
 }

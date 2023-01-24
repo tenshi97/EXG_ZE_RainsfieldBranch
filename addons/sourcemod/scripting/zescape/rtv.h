@@ -70,7 +70,7 @@ void RTVOnPluginStart()
 	RegConsoleCmd("sm_mct",MapChangeTimeCommand);
 	RegConsoleCmd("sm_ext",ExtendCommand);
 	RegAdminCmd("sm_forcertv",ForceRTVCommand,ADMFLAG_GENERIC);
-	g_Cvar_RTV_PlayerNeededRatio = CreateConVar("emc_rtv_needed","0.5","Percentage of RTV Votes needed to start(def:0.45)",0, true, 0.05, true, 1.0);
+	g_Cvar_RTV_PlayerNeededRatio = CreateConVar("emc_rtv_needed","0.4","Percentage of RTV Votes needed to start(def:0.45)",0, true, 0.05, true, 1.0);
 	g_Cvar_RTV_MaxRounds = CreateConVar("emc_max_rounds","50","Percentage of RTV Votes needed to start(def:0.45)",0, true, 0.05, true, 1.0);
 	if(g_RTV_Forward_StartMapVote == null)
 	{

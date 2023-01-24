@@ -63,7 +63,7 @@ void LoadMapLevelSetting()
 }
 void PrintLevel(LEVEL_LOG level)
 {
-	PrintToChatAll( "\x05[关卡系统]\x01读入关卡[%s],实体名[%s],触发名[%s]",level.name,level.entity_name,level.output_name);
+	PrintToChatAll( "\x05[关卡系统]\x01读入关卡[%s],实体名[%s],触发名[%s],触发id[%d]",level.name,level.entity_name,level.output_name,level.entity_id);
 }
 void LevelReload()
 {
@@ -114,7 +114,7 @@ void LevelOnRoundEnd()
 }
 void LevelOnEntityCreated(int entity, const char[] classname)
 {
-	if(strcmp(classname,"logic_case")==0||strcmp(classname,"trigger_once")==0||strcmp(classname,"trigger_multiple")==0||strcmp(classname,"logic_relay")==0||strcmp(classname,"trigger_teleport")==0||strcmp(classname,"point_template")==0)
+	if(strcmp(classname,"logic_case")==0||strcmp(classname,"trigger_once")==0||strcmp(classname,"trigger_multiple")==0||strcmp(classname,"logic_relay")==0)
 	{
     	SDKHook(entity, SDKHook_SpawnPost, LevelOnEntitySpawned);
     }
@@ -129,9 +129,9 @@ void LevelOnEntitySpawned(int entity)
 	for(int i=0;i<g_mlevel_list.Length;i++)
 	{
 		GetArrayArray(g_mlevel_list,i,level_temp,sizeof(level_temp));
-		if(strcmp(ent_name,level_temp.entity_name)==0||(level_temp.entity_id!=0&&level_temp.entity_id == ent_id))
+		if((strcmp(level_temp.entity_name,"",false)!=0&&strcmp(ent_name,level_temp.entity_name)==0)||(level_temp.entity_id!=0&&level_temp.entity_id == ent_id))
 		{
-			PrintToConsoleAll(" [Debug][%s][%s]",ent_name,level_temp.output_name);
+			PrintToConsoleAll(" [Debug][%s][%s][%d]",ent_name,level_temp.output_name,ent_id);
 			HookSingleEntityOutput(entity,level_temp.output_name,LevelOnOutput,true);
 		}
 	}
