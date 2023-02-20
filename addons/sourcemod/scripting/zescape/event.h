@@ -37,13 +37,14 @@ void Hitbox_OnHealthChanged(const char[] output, int caller, int activator, floa
 		MissionOnHit(activator);
 	}
 }
-void OnRoundPreStart(Event event, const char[] name, bool dontBroadcast) 
+
+void OnRoundPreStart(Event event, const char[] name, bool dontBroadcast)
 {
 	PrintToServer("[OnRoundPreStart]");
 	RoundOnRoundPreStart();
 }
 
-void OnRoundFreezeEnd(Event event, const char[] name, bool dontBroadcast) 
+void OnRoundFreezeEnd(Event event, const char[] name, bool dontBroadcast)
 {
 	PrintToServer("[OnRoundFreezeEnd]");
 	//RoundOnRoundFreezeEnd();
@@ -52,14 +53,15 @@ void OnRoundInfected() {
 	RoundOnInfected();
 	PrintToServer("[OnRoundInfected]");
 }
-void OnRoundStart(Event event, const char[] name, bool dontBroadcast) 
+void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 {
 	PrintToServer("[RoundStart]");
 	RTVOnRoundStart();
 	MapInfoOnRoundStart();
 	MissionOnRoundStart();
+	QuestOnRoundStart();
 }
-void OnRoundEnd(Event event, const char[] name, bool dontBroadcast) 
+void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 {
 	int winner = event.GetInt("winner");
 	PrintToServer("[RoundEnd] [winner:%d]",winner);
@@ -102,11 +104,11 @@ void OnPlayerDeathPost(Event event, const char[] name, bool dontBroadcast)
 	{
 		if(headshot)
 		{
-			MissionHumanKillZombie(attacker,1);			
+			MissionHumanKillZombie(attacker,1);
 		}
 		else
 		{
-			MissionHumanKillZombie(attacker);			
+			MissionHumanKillZombie(attacker);
 		}
 		QuestHumanKillZombie(attacker);
 	}

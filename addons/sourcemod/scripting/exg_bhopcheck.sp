@@ -336,7 +336,8 @@ void SuspectReport(int client,int pattern)
 			char name[64];
 			GetClientName(client,name,sizeof(name));
 			GetClientAuthId(client, AuthId_Steam2, auth_id, sizeof(auth_id), true);
-			PrintToChat(i," \x05[连跳检测]\x01玩家\x07%s\x01有疑似\x07连跳作弊/宏\x01嫌疑，若您有空请检测其数据并观察其视角进行录像[玩家UID:%d,STEAMID:%s]\n注意，由于地图自带的推力（包括神器和风的吸推）、下坡、低重力区域会导致数据异常，请遵循疑罪从无原则",name,uid,auth_id);
+			PrintToChat(i," \x05[连跳检测]\x01玩家\x07%s\x01有疑似\x07连跳作弊/宏\x01嫌疑，若您有空请检测其数据并观察其视角进行录像[玩家UID:%d,STEAMID:%s]",name,uid,auth_id);
+			PrintToChat(i," \x05[连跳检测]\x06注意，由于地图自带的推力（包括神器和风的吸推）、下坡、低重力区域会导致数据异常，请遵循疑罪从无原则");
 		}
 	}
 }

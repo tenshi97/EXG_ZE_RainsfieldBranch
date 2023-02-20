@@ -39,6 +39,7 @@ char letter_map[][]={
 	"lotr_minas_tirith",	//8
 	"obj_npst_v2",			//-1
 	"santa",				//3
+	"santa",				//4
 	"westersand_v8zeta1k",	//3
 	"djinn",				//-1
 	"uchiha_legacy",		//3
@@ -53,7 +54,7 @@ char letter_map[][]={
 	"deadcore",				//-1
 	"grau",					//1
 	"frozen_abyss",			//-1
-	"predator_ultiamte",	//3
+	"predator_ultimate",	//3
 	"lila_panic",			//7
 	"ashen",				//1
 	"ashen",				//2
@@ -61,16 +62,27 @@ char letter_map[][]={
 	"castlevania",			//2
 	"castlevania",			//5
 	"obj_insane",			//-1
-	"shroomforest2"			//7
+	"shroomforest2",		//7
+	"yueyingchuanshuo_10_9_f3",	//0
+	"yueyingchuanshuo_10_9_f3",	//1
+	"wanderers_palace_v6",	//3
+	"wanderers_palace_v6",	//4
+	"serpentis_temple_csgo5",//2
+	"serpentis_temple_csgo5",//3
+	"serpentis_temple_csgo5",//4
+	"stalker_ultimate_v2_3_gg",	//4
+	"fapescape_rote_v1_3",	//4
+	"fapescape_rote_v1_3",	//5
 };
-int letter_map_level[28]=
+int letter_map_level[39]=
 {
-	3,7,8,-1,3,3,-1,3,-1,3,3,5,5,4,4,4,-1,1,-1,3,7,1,2,4,2,5,-1,7
+	3,7,8,-1,3,4,3,-1,3,-1,3,3,5,5,4,4,4,-1,1,-1,3,7,1,2,4,2,5,-1,7,0,1,3,4,2,3,4,4,4,5
 }
 ArrayList QuestList;
 PlayerQuestInfo playerquest_list[65];
 LEVEL_LOG Quest_Current_Level;
 const int quest_plimit = 20;
+int quest_roundstart_time;
 bool RollDice(int possibility)
 {
 	int result = GetURandomInt()%100;
@@ -237,6 +249,7 @@ void QuestOnPluginStart()
 	RegConsoleCmd("sm_quest",QuestCommand);
 	ReloadAllPlayerQuestInfo();
 	QuestSet();
+	quest_roundstart_time = GetTime();
 }
 void QuestOnMapStart()
 {
@@ -277,7 +290,6 @@ Action QuestCommand(int client,int args)
 	menu.AddItem("","每日任务");
 	menu.AddItem("","每周任务",ITEMDRAW_DISABLED);
 	menu.AddItem("","赛季任务");
-	menu.AddItem("","季节活动~春节");
 	menu.Display(client, MENU_TIME_FOREVER);
 	return Plugin_Handled;
 }
@@ -301,10 +313,6 @@ int QuestMenuHandler(Menu menu, MenuAction action, int client, int param)
 		if(param == 2)
 		{
 			MissionMenuBuild(client);
-		}
-		if(param == 3)
-		{
-			FestivalMenuBuild(client);
 		}
 		return 0;
 	}
@@ -359,11 +367,8 @@ int DailyQuestMenuHandler(Menu menu, MenuAction action, int client, int param)
 		{
 			if(playerquest_list[client].taskdata[questid]>=quest.num)
 			{
-				PrintToChat(client," \x05[任务系统]\x01完成了每日任务[%s]，获得%d积分并获得一张[2]字",quest.name,quest.award);
 				playerquest_list[client].taskcomplete[questid]=1;
 				Store_SetClientCredits(client,credits+quest.award);
-				playerquest_list[client].letter[0]++;
-				playerquest_list[client].letter_daily[0]++;
 
 			}
 			else
@@ -555,80 +560,31 @@ void QuestOnLevelSet(any level[sizeof(LEVEL_LOG)])
 {
 	Quest_Current_Level = level;
 }
+void QuestOnRoundStart()
+{
+	quest_roundstart_time = GetTime();
+}
 void QuestOnRoundEnd(int winner)
 {
+	int quest_round_time = GetTime()-quest_roundstart_time;
 	for(int i=1;i<=64;i++)
 	{
 		if(IsClientInGame(i))
 		{
 			if(!IsFakeClient(i))
 			{
-				if(winner==3&&IsPlayerAlive(i)&&ZR_IsClientHuman(i)&&GetClientCount(true)>=quest_plimit)
+				if(winner==3&&IsPlayerAlive(i)&&ZR_IsClientHuman(i)&&GetClientCount(true)>=quest_plimit&&quest_round_time>=120)
 				{
 					if(playerquest_list[i].taskdata[4]<=10000)
 					{
 						playerquest_list[i].taskdata[4]++;
 					}
-					//春节活动-[0]字判定
-					if(playerquest_list[i].letter_daily[1]<3)
+				}
+				else
+				{
+					if(GetClientCount(true)<quest_plimit||quest_round_time<120)
 					{
-						if(RollDice(50))
-						{
-							PrintToChat(i," \x05[活动系统]\x01你获得了\x07[0]\x01字一张");
-						}
-						playerquest_list[i].letter[1]++;
-						playerquest_list[i].letter_daily[1]++;
-					}
-					//春节活动[3]字判定
-					if(Pmap.tag&label_code[10])
-					{
-						if(playerquest_list[i].letter_daily[2]<3)
-						{
-							if(RollDice(50))
-							{
-								PrintToChat(i," \x05[活动系统]\x01你获得了\x07[3]\x01字一张");
-							}
-							playerquest_list[i].letter[2]++;
-							playerquest_list[i].letter_daily[2]++;
-						}
-					}
-					//春节活动[新]字判定
-					if(Pmap.difficulty>=2)
-					{
-						if(playerquest_list[i].letter_daily[3]<3)
-						{
-							if(RollDice(50))
-							{
-								PrintToChat(i," \x05[活动系统]\x01你获得了\x07[新]\x01字一张");
-							}
-							playerquest_list[i].letter[3]++;
-							playerquest_list[i].letter_daily[3]++;
-						}
-					}
-					//春节活动[春]字判定
-					for(int j=0;j<=27;j++)
-					{
-						if(StrContains(Pmap.name,letter_map[j],false)!=-1)
-						{
-							if(letter_map_level[j]==-1||(Quest_Current_Level.id!=-1&&Quest_Current_Level.id==letter_map_level[j]))
-							{
-								if(playerquest_list[i].frag_daily<1)
-								{
-									PrintToChat(i," \x05[活动系统]\x01你获得了\x07一个庆典碎片");
-									playerquest_list[i].frag+=1;
-									playerquest_list[i].frag_daily+=1;
-								}
-								else
-								{
-									PrintToChat(i," \x05[活动系统]\x01今日无法再掉落庆典碎片");
-								}
-							}
-						}
-					}
-					if(g_pStore)
-					{
-						int item_id = Store_GetItemIdbyUniqueId("uid_lootbox_freecase1");
-						Store_GiveItem(i,item_id,0,0,0);
+						PrintToChat(i," \x05[任务系统]\x01人数少于20或回合时间小于2分钟，不结算![%d][%d]",GetClientCount(true),quest_round_time);
 					}
 				}
 				UpdatePlayerQuestInfo(i);
@@ -1072,7 +1028,7 @@ int FestivalShopMenuHandler(Menu menu, MenuAction action, int client, int param)
 			{
 				playerquest_list[client].letter[5]+=1;
 				playerquest_list[client].crate_total -= 100;
-				PrintToChat(client," \x05[活动系统]\x01消耗100个\x07*贺岁红包*\x01兑换了\x07*M249-草神* 180天");
+				PrintToChat(client," \x05[活动系统]\x01消耗100个\x07*贺岁红包*\x01兑换了\x07[快]字");
 			}
 		}
 		UpdatePlayerQuestInfo(client);
@@ -1086,11 +1042,11 @@ void FestivalInstructMenuBuild(int client)
 	Menu menu = CreateMenu(FestivalInstructMenuHandler);
 	menu.SetTitle("活动指南");
 	menu.AddItem("","----获得字---",ITEMDRAW_DISABLED);
-	menu.AddItem("","[2]:登录,完成每日任务各一张",ITEMDRAW_DISABLED);
-	menu.AddItem("","[0]:通关任意地图50%概率掉落(每日最多3张)",ITEMDRAW_DISABLED);
-	menu.AddItem("","[3]:通关任意[活动]地图50%概率掉落(每日最多3张)",ITEMDRAW_DISABLED);
-	menu.AddItem("","[新]:通关任意[困难]地图50%概率掉落(每日最多3张)",ITEMDRAW_DISABLED);
-	menu.AddItem("","[春]:使用3个庆典碎片兑换，庆典碎片通过完成指定地图/关卡可获得(每日仅1次):",ITEMDRAW_DISABLED);
+	menu.AddItem("","[2]:无法获得",ITEMDRAW_DISABLED);
+	menu.AddItem("","[0]:无法获得",ITEMDRAW_DISABLED);
+	menu.AddItem("","[3]:无法获得",ITEMDRAW_DISABLED);
+	menu.AddItem("","[新]:无法获得",ITEMDRAW_DISABLED);
+	menu.AddItem("","[春]:无法获得:",ITEMDRAW_DISABLED);
 	menu.AddItem("","[快]:在节日箱子内抽取(概率2%)",ITEMDRAW_DISABLED);
 	menu.AddItem("","[乐]:6组[2023]兑换",ITEMDRAW_DISABLED);
 	menu.AddItem("","----新春箱子------",ITEMDRAW_DISABLED);

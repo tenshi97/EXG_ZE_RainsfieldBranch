@@ -180,3 +180,10 @@ forward void EXGZE_OnLevelSet(any level[sizeof(LEVEL_LOG)]);
 native void EXGZE_GetLevelDiffName(int diff,char[] diffname);
 native void EXGZE_GetCurrentLevel(any level[sizeof(LEVEL_LOG)]);
 native void EXGZE_ToggleSprite(int leader);
+
+/////////////////////////
+//  EXG USERS ZE      //
+////////////////////////
+native bool EXGUSERS_ZE_INVREGISTERED(int uid);
+native bool EXGUSERS_ZE_HAS_NOM_HALFCOST(int uid);
+native bool EXGUSERS_ZE_HAS_EXP_BUFF(int uid);

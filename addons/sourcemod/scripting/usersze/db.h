@@ -8,9 +8,6 @@ void Db_Connect_Callback(Handle owner, Handle hndl, const char[] error, any data
 	if (owner == INVALID_HANDLE || hndl == INVALID_HANDLE) PrintToServer("Database Error: %s", error);
 	SQL_SetCharset(hndl, "utf8");
 	Db_Connection = hndl;
-	DbOnDbConnected_MapStartPost();
-	CheckValidMission();
-	ReloadAllPlayerMissionInfo();
 }
 bool isDbConnected()
 {
@@ -23,7 +20,7 @@ void DbTQuery(SQLTCallback callback, const char[] query, any data = 0, DBPriorit
 
 void DbOnDbConnected_MapStartPost()
 {
-	MapAdmOnDbConnected_MapStartPost();
+
 }
 
 void Db_Close()

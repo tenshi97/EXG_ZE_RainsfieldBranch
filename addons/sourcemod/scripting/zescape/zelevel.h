@@ -114,7 +114,7 @@ void LevelOnRoundEnd()
 }
 void LevelOnEntityCreated(int entity, const char[] classname)
 {
-	if(strcmp(classname,"logic_case")==0||strcmp(classname,"trigger_once")==0||strcmp(classname,"trigger_multiple")==0||strcmp(classname,"logic_relay")==0)
+	if(strcmp(classname,"logic_case")==0||strcmp(classname,"trigger_once")==0||strcmp(classname,"trigger_multiple")==0||strcmp(classname,"logic_relay")==0||strcmp(classname,"trigger_teleport")==0||strcmp(classname,"point_template")==0||strcmp(classname,"math_counter")==0)
 	{
     	SDKHook(entity, SDKHook_SpawnPost, LevelOnEntitySpawned);
     }

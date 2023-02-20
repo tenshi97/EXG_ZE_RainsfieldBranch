@@ -97,3 +97,22 @@ void CheckSQLInjectString(char[] text,int maxlen)
 		ReplaceString(text,maxlen,SQL_Inject_List[i]," ",false);
 	}
 }
+
+void IPNumToIPV4(int ipnum,char[] ipadr,int maxlen)
+{
+	int w = (ipnum/16777216) % 256;
+	int x = (ipnum/65536)% 256;
+	int y = (ipnum/256) % 256;
+	int z = ipnum% 256;
+	Format(ipadr,maxlen,"%d.%d.%d.%d",w,x,y,z);
+}
+int IPV4ToIPNum(char[] ipadr,int maxlen)
+{
+	char ipsection_buffer[4][10];
+	ExplodeString(ipadr,".",ipsection_buffer,4,10);
+	int w = StringToInt(ipsection_buffer[0]);
+	int x = StringToInt(ipsection_buffer[1]);
+	int y = StringToInt(ipsection_buffer[2]);
+	int z = StringToInt(ipsection_buffer[3]);
+	int ret = 16777216*w+65536*x+256*y+z;
+}

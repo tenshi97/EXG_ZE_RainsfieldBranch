@@ -17,7 +17,7 @@ void ServerOnDbConnected()
 	ServerList = CreateArray(sizeof(SERVER_LOG));
 	DbTQuery(ServerQueryCallback,query);
 	EXGUSERS_serverconnected = true;
-
+	LoadCurrentServer();
 }
 Action ReloadServerListCommand(int client,int args)
 {
@@ -88,8 +88,15 @@ void ServerQueryCallback(Handle owner, Handle hndl, char[] error, any data)
 		server_temp.ze_fatigue = DbFetchInt(hndl,"SVZEFATI");
 		ServerList.PushArray(server_temp,sizeof(server_temp));
 	}
-	int port = FindConVar("hostport").IntValue;
-	GetServerByPort(port,current_server);
+	LoadCurrentServer();
+}
+void LoadCurrentServer()
+{
+	int hostip_int = FindConVar("hostip").IntValue;
+	int hostport = FindConVar("hostport").IntValue;
+	char hostip[32];
+	IPNumToIPV4();
+
 }
 public int Native_EXGUSERS_GetServerByPort(Handle plugin, int numParams)
 {

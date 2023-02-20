@@ -125,7 +125,6 @@ int LoadUserInfoCallBack(Handle owner, Handle hndl, char[] error, DataPack dp)
 		g_Users[client].loaded=1;
 		MonitorOnClientConnect(client);
 		Call_OnUserLoaded(client);
-		return;
 	}
 
 	DbTQuery(LoadUpdateUserInfoCallback, query, new_client);

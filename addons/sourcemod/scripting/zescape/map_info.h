@@ -42,6 +42,10 @@ Action ActionMapHistoryList(int client,int args)
 void MapHistoryListMake(int client)
 {
 	char query[512];
+	int ip_test = FindConVar("hostip").IntValue;
+	char ip_adr[64];
+	IPNumToIPV4(ip_test,ip_adr,sizeof(ip_adr));
+	PrintToChat(client,"%d\n%s",ip_test,ip_adr);
 	Format(query,sizeof(query),"SELECT * FROM exgze_maphistory LIMIT 300");
 	DbTQuery(MapHistoryListMakeCallback,query,client);
 }
