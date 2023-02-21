@@ -62,7 +62,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 	MarkNativeAsOptional("Store_GetClientCredits");
 	MarkNativeAsOptional("Store_SetClientCredits");
-	MarkNativeAsOptional("Store_GetItemIdbyUniqueId");
+	MarkNativeAsOptional("Store_GetItemId");
 	MarkNativeAsOptional("Store_GiveItem");
 	MarkNativeAsOptional("Store_HasClientItem");
 

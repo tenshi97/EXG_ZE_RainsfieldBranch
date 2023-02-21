@@ -54,7 +54,7 @@ void ZEItems_LoadPlayerInventory(int client)
 }
 void ZEItems_LoadPlayerInventory_Callback(Handle owner, Handle hndl, char[] error, any data)
 {
-
+delete hndl;
 }
 void ZEItems_MenuBuild(int client)
 {

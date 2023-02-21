@@ -42,6 +42,7 @@ void DailyTimerCheckCallBack(Handle owner, Handle hndl, char[] error, any data)
 		//PrintToChatAll(" \x05[调试：每日正午时刻检测]\x01上一次检测设定时间戳:%d",daily_timestamp);
 		daily_timercheck(daily_timestamp);
 	}
+	delete hndl;
 }
 void daily_timercheck(int start_time)
 {

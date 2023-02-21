@@ -89,6 +89,7 @@ void ServerQueryCallback(Handle owner, Handle hndl, char[] error, any data)
 		ServerList.PushArray(server_temp,sizeof(server_temp));
 	}
 	LoadCurrentServer();
+	delete hndl;
 }
 void LoadCurrentServer()
 {

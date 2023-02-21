@@ -128,6 +128,7 @@ int LoadUserInfoCallBack(Handle owner, Handle hndl, char[] error, DataPack dp)
 	}
 
 	DbTQuery(LoadUpdateUserInfoCallback, query, new_client);
+	delete hndl;
 }
 
 void LoadUpdateUserInfoCallback(Handle owner, Handle hndl, char[] error, any data)
@@ -142,6 +143,7 @@ void LoadUpdateUserInfoCallback(Handle owner, Handle hndl, char[] error, any dat
 		PrintToConsoleAll(query);
 		DbTQuery(ReloadNewUserInfoCallback,query,client);
 	}
+	delete hndl;
 }
 void ReloadNewUserInfoCallback(Handle owner, Handle hndl, char[] error, any data)
 {
@@ -160,6 +162,7 @@ void ReloadNewUserInfoCallback(Handle owner, Handle hndl, char[] error, any data
 	{
 		g_Users[client].loaded = 0;
 	}
+	delete hndl;
 }
 
 /*void UserAdminMenu(int client)

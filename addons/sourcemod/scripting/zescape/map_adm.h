@@ -203,6 +203,7 @@ void MapAdminHistoryViewCallback(Handle owner, Handle hndl, char[] error, any da
 	if(!SQL_FetchRow(hndl))
 	{
 		PrintToChat(client," \x05[地图管理]\x01该地图没有管理日志!")
+		delete hndl;
 		return;
 	}
 	else
@@ -283,6 +284,7 @@ void MapAdminHistoryViewCallback(Handle owner, Handle hndl, char[] error, any da
 			}
 		}
 		menu.Display(client,MENU_TIME_FOREVER);
+		delete hndl;
 		return;
 	}
 }
@@ -484,6 +486,7 @@ void MapDataLoadCallback(Handle owner, Handle hndl, char[] error, any data)
 		//PrintToServer("%d %s",map.id,map.name);
 	}
 	MapFileReload();
+	delete hndl;
 }
 void MapFileReload()
 {

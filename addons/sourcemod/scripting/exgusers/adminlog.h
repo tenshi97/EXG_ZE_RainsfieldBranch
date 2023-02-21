@@ -55,5 +55,6 @@ int DbQueryAdmLogCallback(Handle owner, Handle hndl, char[] error, DataPack dp)
 		Format(query,sizeof(query),"UPDATE exgusers_mapadmlog SET UID = %d, NAME = '%s', TIMESTAMP = %d, TYPE = %d, VALUE = %d, VALUESTR = '%s', TARGET = %d, TARGETSTR = '%s' WHERE UID = %d AND TARGETSTR = '%s' AND type = %d AND TIMESTAMP >= %d AND TIMESTAMP <= %d",admlog_add.uid,admlog_add.name,admlog_add.timestamp,admlog_add.type,admlog_add.value,admlog_add.valuestr,admlog_add.target,admlog_add.targetstr,admlog_add.uid,admlog_add.targetstr,admlog_add.type,tlower,tupper);
 		DbTQuery(DbQueryErrorCallback,query);
 	}
+	delete hndl;
 	return 0;
 }

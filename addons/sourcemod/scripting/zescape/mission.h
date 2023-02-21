@@ -335,6 +335,7 @@ void LoadPlayerMissionInfoCallBack(Handle owner, Handle hndl, char[] error, Data
 	PrintToConsoleAll(query);
 	DbTQuery(DbQueryErrorCallback,query);
 	playermission_list[client].loaded = 1;
+	delete hndl;
 }
 
 void ReloadAllPlayerMissionInfo()
@@ -366,6 +367,7 @@ void ClearPlayerMissionInfo(int weekly=0)
 void DbClearPlayerMissionInfoCallback(Handle owner, Handle hndl, char[] error, any data)
 {
 	ReloadAllPlayerMissionInfo();
+	delete hndl;
 }
 
 void UpdatePlayerMissionInfo(int client,int force=0)
@@ -619,6 +621,7 @@ void CheckValidMissionCallBack(Handle owner, Handle hndl, char[] error, any data
 			break;
 		}
 	}
+	delete hndl;
 }
 
 void TEMP_OpHR_TasklistSet()
@@ -835,7 +838,7 @@ int MissionMenuHandler(Menu menu, MenuAction action, int client, int param)
 				return 0;
 			}
 			char title_name[64] = "uid_nametag_s3max";
-			int item_id = Store_GetItemIdbyUniqueId(title_name);
+			int item_id = Store_GetItemId(title_name);
 			if(!Store_HasClientItem(client,item_id))
 			{
 				if(playermission_list[client].lvl>=400)
@@ -1129,7 +1132,7 @@ int AwardMenuHandle(Menu menu, MenuAction action, int client, int param)
 			AwardMenu(client);
 			return 0;
 		}
-		item_id = Store_GetItemIdbyUniqueId(item);
+		item_id = Store_GetItemId(item);
 		if(item_id!=-1)
 		{
 			if(StrContains(item,"uid_wepskin",false)!=-1)
@@ -1312,7 +1315,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 			}
 			case 3:
 			{
-				item_id = Store_GetItemIdbyUniqueId(item);
+				item_id = Store_GetItemId(item);
 				if(!Store_HasClientItem(client,item_id))
 				{
 					Store_GiveItem(client,item_id,0,0,0);
@@ -1327,7 +1330,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 			}
 			case 4:
 			{
-				item_id = Store_GetItemIdbyUniqueId(item);
+				item_id = Store_GetItemId(item);
 				if(!Store_HasClientItem(client,item_id))
 				{
 					expdate = current_time+360*86400;
@@ -1343,7 +1346,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 			}
 			case 5:
 			{
-				item_id = Store_GetItemIdbyUniqueId(item);
+				item_id = Store_GetItemId(item);
 				if(!Store_HasClientItem(client,item_id))
 				{
 					expdate = current_time+360*86400;
@@ -1359,7 +1362,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 			}
 			case 6:
 			{
-				item_id = Store_GetItemIdbyUniqueId(item);
+				item_id = Store_GetItemId(item);
 				if(!Store_HasClientItem(client,item_id))
 				{
 					expdate = current_time+360*86400;
@@ -1375,7 +1378,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 			}
 			case 7:
 			{
-				item_id = Store_GetItemIdbyUniqueId(item);
+				item_id = Store_GetItemId(item);
 				if(!Store_HasClientItem(client,item_id))
 				{
 					Store_GiveItem(client,item_id,0,0,0);

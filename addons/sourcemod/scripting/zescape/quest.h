@@ -136,7 +136,7 @@ void OpenCrate(int client)
 	if(result<52)
 	{
 		strcopy(unid,sizeof(unid),festcrate_awardlist[3]);
-		item_id = Store_GetItemIdbyUniqueId(unid);
+		item_id = Store_GetItemId(unid);
 		if(Store_HasClientItem(client,item_id))
 		{
 			Store_SetClientCredits(client,credits+300);
@@ -152,7 +152,7 @@ void OpenCrate(int client)
 	if(result<55)
 	{
 		strcopy(unid,sizeof(unid),festcrate_awardlist[4]);
-		item_id = Store_GetItemIdbyUniqueId(unid);
+		item_id = Store_GetItemId(unid);
 		if(Store_HasClientItem(client,item_id))
 		{
 			Store_SetClientCredits(client,credits+300);
@@ -168,7 +168,7 @@ void OpenCrate(int client)
 	if(result<65)
 	{
 		strcopy(unid,sizeof(unid),festcrate_awardlist[5]);
-		item_id = Store_GetItemIdbyUniqueId(unid);
+		item_id = Store_GetItemId(unid);
 		if(Store_HasClientItem(client,item_id))
 		{
 			Store_SetClientCredits(client,credits+100);
@@ -184,7 +184,7 @@ void OpenCrate(int client)
 	if(result<75)
 	{
 		strcopy(unid,sizeof(unid),festcrate_awardlist[6]);
-		item_id = Store_GetItemIdbyUniqueId(unid);
+		item_id = Store_GetItemId(unid);
 		if(Store_HasClientItem(client,item_id))
 		{
 			Store_SetClientCredits(client,credits+100);
@@ -200,7 +200,7 @@ void OpenCrate(int client)
 	if(result<85)
 	{
 		strcopy(unid,sizeof(unid),festcrate_awardlist[7]);
-		item_id = Store_GetItemIdbyUniqueId(unid);
+		item_id = Store_GetItemId(unid);
 		if(Store_HasClientItem(client,item_id))
 		{
 			Store_SetClientCredits(client,credits+100);
@@ -216,7 +216,7 @@ void OpenCrate(int client)
 	if(result<95)
 	{
 		strcopy(unid,sizeof(unid),festcrate_awardlist[8]);
-		item_id = Store_GetItemIdbyUniqueId(unid);
+		item_id = Store_GetItemId(unid);
 		if(Store_HasClientItem(client,item_id))
 		{
 			Store_SetClientCredits(client,credits+100);
@@ -230,7 +230,7 @@ void OpenCrate(int client)
 		return;
 	}
 	strcopy(unid,sizeof(unid),festcrate_awardlist[8]);
-	item_id = Store_GetItemIdbyUniqueId(unid);
+	item_id = Store_GetItemId(unid);
 	if(Store_HasClientItem(client,item_id))
 	{
 		Store_SetClientCredits(client,credits+300);
@@ -472,6 +472,7 @@ void LoadPlayerQuestInfoCallBack(Handle owner, Handle hndl, char[] error, any da
 	PrintToServer(query);
 	DbTQuery(DbQueryErrorCallback,query);
 	playerquest_list[client].loaded = 1;
+	delete hndl;
 }
 
 void ReloadAllPlayerQuestInfo()
@@ -509,6 +510,7 @@ void ClearAllPlayerQuestInfo()
 void DbClearPlayerQuestInfoCallback(Handle owner, Handle hndl, char[] error, any data)
 {
 	ReloadAllPlayerQuestInfo();
+	delete hndl;
 }
 
 void UpdatePlayerQuestInfo(int client)
@@ -851,7 +853,7 @@ int FestivalAwardMenuHandler(Menu menu, MenuAction action, int client, int param
 			}
 			if(playerquest_list[client].letter[0]>=2&&playerquest_list[client].letter[1]>=1&&playerquest_list[client].letter[2]>=1)
 			{
-				item_id = Store_GetItemIdbyUniqueId("uid_mvp_sound_haoyunlai");
+				item_id = Store_GetItemId("uid_mvp_sound_haoyunlai");
 				if(Store_HasClientItem(client,item_id))
 				{
 					PrintToChat(client," \x05[活动系统]\x01你已经拥有该物品!");
@@ -879,7 +881,7 @@ int FestivalAwardMenuHandler(Menu menu, MenuAction action, int client, int param
 			}
 			if(playerquest_list[client].letter[3]>=2&&playerquest_list[client].letter[4]>=1&&playerquest_list[client].letter[5]>=1&&playerquest_list[client].letter[6]>=1)
 			{
-				item_id = Store_GetItemIdbyUniqueId("uid_model_Padoru");
+				item_id = Store_GetItemId("uid_model_Padoru");
 				if(Store_HasClientItem(client,item_id))
 				{
 					PrintToChat(client," \x05[活动系统]\x01你已经拥有该物品!");
@@ -1004,7 +1006,7 @@ int FestivalShopMenuHandler(Menu menu, MenuAction action, int client, int param)
 				PrintToChat(client," \x05[活动系统]\x01商店插件未载入!");
 				return 0;
 			}
-			int item_id = Store_GetItemIdbyUniqueId("uid_wepskin_naxitan");
+			int item_id = Store_GetItemId("uid_wepskin_naxitan");
 			if(Store_HasClientItem(client,item_id))
 			{
 				PrintToChat(client," \x05[活动系统]\x01您已拥有该道具，请勿重复兑换!");
