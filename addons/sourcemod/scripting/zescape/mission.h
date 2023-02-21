@@ -1071,7 +1071,7 @@ void GrantExp(int client,int exp)
 			PrintToChat(client," \x05[任务系统] \x01您在\x09%s\x01的等级提升到了\x09%d\x01,并获得%d积分奖励(若购买等级无奖励)",Current_Mission.name,playermission_list[client].lvl,250*uplevel);
 			if(g_pStore)
 			{
-				Store_SetClientCredits(client,credits+250*uplevel);
+				Store_SetClientCredits(client,credits+250*uplevel,"地图活动");
 			}
 			else
 			{
@@ -1162,7 +1162,7 @@ int AwardMenuHandle(Menu menu, MenuAction action, int client, int param)
 					{
 						if(!Store_HasClientItem(client,item_id))
 						{
-							Store_SetClientCredits(client,client_credits+5000);
+							Store_SetClientCredits(client,client_credits+5000,"活动");
 							Store_GiveItem(client,item_id,0,expdate,0);
 							playermission_list[client].sp=playermission_list[client].sp|(1<<(param));
 							UpdatePlayerMissionInfo(client);
@@ -1287,7 +1287,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 				if(credits>=3000&&playermission_list[client].lvl<Current_Mission.max_level)
 				{
 					GrantExp(client,Current_Mission.level_exp);
-					Store_SetClientCredits(client,credits-3000);
+					Store_SetClientCredits(client,credits-3000,"活动");
 					PrintToChat(client," \x05[任务系统]消费积分购买了1大行动等级");
 				}
 				else
@@ -1300,7 +1300,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 				if(credits>=25000&&playermission_list[client].lvl<Current_Mission.max_level)
 				{
 					GrantExp(client,10*(Current_Mission.level_exp));
-					Store_SetClientCredits(client,credits-25000);
+					Store_SetClientCredits(client,credits-25000,"活动");
 					PrintToChat(client," \x05[任务系统]消费积分购买了10大行动等级");
 				}
 				else
@@ -1310,7 +1310,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 			}
 			case 2:
 			{
-				Store_SetClientCredits(client,credits+300);
+				Store_SetClientCredits(client,credits+300,"活动");
 				playermission_list[client].emoney-=100;
 			}
 			case 3:

@@ -318,7 +318,7 @@ void HdOnRoundEnd(int winner)
 							if(IsPlayerAlive(i))
 							{
 								client_credits = Store_GetClientCredits(i);
-								Store_SetClientCredits(i,client_credits+passbonus_extracredits);
+								Store_SetClientCredits(i,client_credits+passbonus_extracredits,"地图活动");
 								PrintToChat(i," \x05[活动系统]\x01完成地图活动，获得了\x07%d\x01积分",passbonus_extracredits);
 								if(!Store_HasClientItem(i,item_id))
 								{
@@ -343,7 +343,7 @@ void HdOnRoundEnd(int winner)
 							if(IsPlayerAlive(i))
 							{
 								client_credits = Store_GetClientCredits(i);
-								Store_SetClientCredits(i,client_credits+passbonus_extracredits);
+								Store_SetClientCredits(i,client_credits+passbonus_extracredits,"地图活动");
 								PrintToChat(i," \x05[活动系统]\x01完成地图活动，获得了\x07%d\x01积分",passbonus_extracredits);
 								if(!Store_HasClientItem(i,item_id))
 								{

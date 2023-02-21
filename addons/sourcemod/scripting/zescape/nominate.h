@@ -336,7 +336,7 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 
 			if (g_pStore)
 			{
-				Store_SetClientCredits(client,credits-nommap.nom_cost+credits_temp);
+				Store_SetClientCredits(client,credits-nommap.nom_cost+credits_temp,"活动");
 				Format(buffer,sizeof(buffer),"[EMC]消费积分%d",nommap.nom_cost);
 				PrintCenterText(client,buffer);
 			}
@@ -458,7 +458,7 @@ void CancelNom(int index,int opt)
 		if (g_pStore)
 		{
 			nominator_credits = Store_GetClientCredits(opt);
-			Store_SetClientCredits(opt,nominator_credits+nom_log.nom_cost);
+			Store_SetClientCredits(opt,nominator_credits+nom_log.nom_cost,"活动");
 		}
 	}
 	else
@@ -480,7 +480,7 @@ void CancelNom(int index,int opt)
 				if (g_pStore)
 				{
 					nominator_credits = Store_GetClientCredits(nominator_index);
-					Store_SetClientCredits(nominator_index,nominator_credits+nom_log.nom_cost);
+					Store_SetClientCredits(nominator_index,nominator_credits+nom_log.nom_cost,"活动");
 					PrintToChatAll("[EMC]费用已归还本人");
 				}
 			}

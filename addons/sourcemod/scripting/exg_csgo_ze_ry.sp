@@ -18,6 +18,7 @@ bool g_pStore;
 #include <weddings>
 #pragma semicolon 1
 #pragma newdecls required
+#pragma dynamic 131072 
 #include "zescape/basic_func.h"
 #include "zescape/event.h"
 #include "zescape/db.h"
