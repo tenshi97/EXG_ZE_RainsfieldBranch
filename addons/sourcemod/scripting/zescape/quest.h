@@ -123,23 +123,23 @@ void OpenCrate(int client)
 	}
 	if(result<32)
 	{
-		Store_SetClientCredits(client,credits+100);
+		Store_SetClientCredits(client,credits+100,"活动");
 		PrintToChat(client," \x05[活动系统]\x01你抽中了铜奖-100积分");
 		return;
 	}
 	if(result<47)
 	{
-		Store_SetClientCredits(client,credits+500);
+		Store_SetClientCredits(client,credits+500,"活动");
 		PrintToChat(client," \x05[活动系统]\x01你抽中了铜奖-500积分");
 		return;
 	}
 	if(result<52)
 	{
 		strcopy(unid,sizeof(unid),festcrate_awardlist[3]);
-		item_id = Store_GetItemIdbyUniqueId(unid);
+		item_id = Store_GetItemId(unid);
 		if(Store_HasClientItem(client,item_id))
 		{
-			Store_SetClientCredits(client,credits+300);
+			Store_SetClientCredits(client,credits+300,"活动");
 			PrintToChat(client," \x05[活动系统]\x01你抽中了银奖草神M249，但你已经有该道具了，返还300积分");
 		}
 		else
@@ -152,10 +152,10 @@ void OpenCrate(int client)
 	if(result<55)
 	{
 		strcopy(unid,sizeof(unid),festcrate_awardlist[4]);
-		item_id = Store_GetItemIdbyUniqueId(unid);
+		item_id = Store_GetItemId(unid);
 		if(Store_HasClientItem(client,item_id))
 		{
-			Store_SetClientCredits(client,credits+300);
+			Store_SetClientCredits(client,credits+300,"活动");
 			PrintToChat(client," \x05[活动系统]\x01你抽中了银奖托马斯小火车，但你已经有该道具了，返还300积分");
 		}
 		else
@@ -168,10 +168,10 @@ void OpenCrate(int client)
 	if(result<65)
 	{
 		strcopy(unid,sizeof(unid),festcrate_awardlist[5]);
-		item_id = Store_GetItemIdbyUniqueId(unid);
+		item_id = Store_GetItemId(unid);
 		if(Store_HasClientItem(client,item_id))
 		{
-			Store_SetClientCredits(client,credits+100);
+			Store_SetClientCredits(client,credits+100,"活动");
 			PrintToChat(client," \x05[活动系统]\x01你抽中了铜奖巴雷特毁灭，但你已经有该道具了，返还100积分");
 		}
 		else
@@ -184,10 +184,10 @@ void OpenCrate(int client)
 	if(result<75)
 	{
 		strcopy(unid,sizeof(unid),festcrate_awardlist[6]);
-		item_id = Store_GetItemIdbyUniqueId(unid);
+		item_id = Store_GetItemId(unid);
 		if(Store_HasClientItem(client,item_id))
 		{
-			Store_SetClientCredits(client,credits+100);
+			Store_SetClientCredits(client,credits+100,"活动");
 			PrintToChat(client," \x05[活动系统]\x01你抽中了铜奖星际重炮，但你已经有该道具了，返还100积分");
 		}
 		else
@@ -200,10 +200,10 @@ void OpenCrate(int client)
 	if(result<85)
 	{
 		strcopy(unid,sizeof(unid),festcrate_awardlist[7]);
-		item_id = Store_GetItemIdbyUniqueId(unid);
+		item_id = Store_GetItemId(unid);
 		if(Store_HasClientItem(client,item_id))
 		{
-			Store_SetClientCredits(client,credits+100);
+			Store_SetClientCredits(client,credits+100,"活动");
 			PrintToChat(client," \x05[活动系统]\x01你抽中了铜奖末日审判，但你已经有该道具了，返还100积分");
 		}
 		else
@@ -216,10 +216,10 @@ void OpenCrate(int client)
 	if(result<95)
 	{
 		strcopy(unid,sizeof(unid),festcrate_awardlist[8]);
-		item_id = Store_GetItemIdbyUniqueId(unid);
+		item_id = Store_GetItemId(unid);
 		if(Store_HasClientItem(client,item_id))
 		{
-			Store_SetClientCredits(client,credits+100);
+			Store_SetClientCredits(client,credits+100,"活动");
 			PrintToChat(client," \x05[活动系统]\x01你抽中了铜奖星标汤姆逊，但你已经有该道具了，返还100积分");
 		}
 		else
@@ -230,10 +230,10 @@ void OpenCrate(int client)
 		return;
 	}
 	strcopy(unid,sizeof(unid),festcrate_awardlist[8]);
-	item_id = Store_GetItemIdbyUniqueId(unid);
+	item_id = Store_GetItemId(unid);
 	if(Store_HasClientItem(client,item_id))
 	{
-		Store_SetClientCredits(client,credits+300);
+		Store_SetClientCredits(client,credits+300,"活动");
 		PrintToChat(client," \x05[活动系统]\x01你抽中了银奖恭喜发财，但你已经有该道具了，返还300积分");
 	}
 	else
@@ -368,7 +368,7 @@ int DailyQuestMenuHandler(Menu menu, MenuAction action, int client, int param)
 			if(playerquest_list[client].taskdata[questid]>=quest.num)
 			{
 				playerquest_list[client].taskcomplete[questid]=1;
-				Store_SetClientCredits(client,credits+quest.award);
+				Store_SetClientCredits(client,credits+quest.award,"活动");
 
 			}
 			else
@@ -472,6 +472,7 @@ void LoadPlayerQuestInfoCallBack(Handle owner, Handle hndl, char[] error, any da
 	PrintToServer(query);
 	DbTQuery(DbQueryErrorCallback,query);
 	playerquest_list[client].loaded = 1;
+	delete hndl;
 }
 
 void ReloadAllPlayerQuestInfo()
@@ -509,6 +510,7 @@ void ClearAllPlayerQuestInfo()
 void DbClearPlayerQuestInfoCallback(Handle owner, Handle hndl, char[] error, any data)
 {
 	ReloadAllPlayerQuestInfo();
+	delete hndl;
 }
 
 void UpdatePlayerQuestInfo(int client)
@@ -851,7 +853,7 @@ int FestivalAwardMenuHandler(Menu menu, MenuAction action, int client, int param
 			}
 			if(playerquest_list[client].letter[0]>=2&&playerquest_list[client].letter[1]>=1&&playerquest_list[client].letter[2]>=1)
 			{
-				item_id = Store_GetItemIdbyUniqueId("uid_mvp_sound_haoyunlai");
+				item_id = Store_GetItemId("uid_mvp_sound_haoyunlai");
 				if(Store_HasClientItem(client,item_id))
 				{
 					PrintToChat(client," \x05[活动系统]\x01你已经拥有该物品!");
@@ -879,7 +881,7 @@ int FestivalAwardMenuHandler(Menu menu, MenuAction action, int client, int param
 			}
 			if(playerquest_list[client].letter[3]>=2&&playerquest_list[client].letter[4]>=1&&playerquest_list[client].letter[5]>=1&&playerquest_list[client].letter[6]>=1)
 			{
-				item_id = Store_GetItemIdbyUniqueId("uid_model_Padoru");
+				item_id = Store_GetItemId("uid_model_Padoru");
 				if(Store_HasClientItem(client,item_id))
 				{
 					PrintToChat(client," \x05[活动系统]\x01你已经拥有该物品!");
@@ -972,7 +974,7 @@ int FestivalShopMenuHandler(Menu menu, MenuAction action, int client, int param)
 			int credits = Store_GetClientCredits(client);
 			if(credits>=2000&&playerquest_list[client].crate<=99)
 			{
-				Store_SetClientCredits(client,credits-2000);
+				Store_SetClientCredits(client,credits-2000,"活动");
 				playerquest_list[client].crate++;
 				PrintToChat(client," \x05[活动系统]\x01购买了一个新春箱子")
 			}
@@ -1004,7 +1006,7 @@ int FestivalShopMenuHandler(Menu menu, MenuAction action, int client, int param)
 				PrintToChat(client," \x05[活动系统]\x01商店插件未载入!");
 				return 0;
 			}
-			int item_id = Store_GetItemIdbyUniqueId("uid_wepskin_naxitan");
+			int item_id = Store_GetItemId("uid_wepskin_naxitan");
 			if(Store_HasClientItem(client,item_id))
 			{
 				PrintToChat(client," \x05[活动系统]\x01您已拥有该道具，请勿重复兑换!");

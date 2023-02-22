@@ -335,6 +335,7 @@ void LoadPlayerMissionInfoCallBack(Handle owner, Handle hndl, char[] error, Data
 	PrintToConsoleAll(query);
 	DbTQuery(DbQueryErrorCallback,query);
 	playermission_list[client].loaded = 1;
+	delete hndl;
 }
 
 void ReloadAllPlayerMissionInfo()
@@ -366,6 +367,7 @@ void ClearPlayerMissionInfo(int weekly=0)
 void DbClearPlayerMissionInfoCallback(Handle owner, Handle hndl, char[] error, any data)
 {
 	ReloadAllPlayerMissionInfo();
+	delete hndl;
 }
 
 void UpdatePlayerMissionInfo(int client,int force=0)
@@ -619,6 +621,7 @@ void CheckValidMissionCallBack(Handle owner, Handle hndl, char[] error, any data
 			break;
 		}
 	}
+	delete hndl;
 }
 
 void TEMP_OpHR_TasklistSet()
@@ -835,7 +838,7 @@ int MissionMenuHandler(Menu menu, MenuAction action, int client, int param)
 				return 0;
 			}
 			char title_name[64] = "uid_nametag_s3max";
-			int item_id = Store_GetItemIdbyUniqueId(title_name);
+			int item_id = Store_GetItemId(title_name);
 			if(!Store_HasClientItem(client,item_id))
 			{
 				if(playermission_list[client].lvl>=400)
@@ -1068,7 +1071,7 @@ void GrantExp(int client,int exp)
 			PrintToChat(client," \x05[任务系统] \x01您在\x09%s\x01的等级提升到了\x09%d\x01,并获得%d积分奖励(若购买等级无奖励)",Current_Mission.name,playermission_list[client].lvl,250*uplevel);
 			if(g_pStore)
 			{
-				Store_SetClientCredits(client,credits+250*uplevel);
+				Store_SetClientCredits(client,credits+250*uplevel,"地图活动");
 			}
 			else
 			{
@@ -1129,7 +1132,7 @@ int AwardMenuHandle(Menu menu, MenuAction action, int client, int param)
 			AwardMenu(client);
 			return 0;
 		}
-		item_id = Store_GetItemIdbyUniqueId(item);
+		item_id = Store_GetItemId(item);
 		if(item_id!=-1)
 		{
 			if(StrContains(item,"uid_wepskin",false)!=-1)
@@ -1159,7 +1162,7 @@ int AwardMenuHandle(Menu menu, MenuAction action, int client, int param)
 					{
 						if(!Store_HasClientItem(client,item_id))
 						{
-							Store_SetClientCredits(client,client_credits+5000);
+							Store_SetClientCredits(client,client_credits+5000,"活动");
 							Store_GiveItem(client,item_id,0,expdate,0);
 							playermission_list[client].sp=playermission_list[client].sp|(1<<(param));
 							UpdatePlayerMissionInfo(client);
@@ -1284,7 +1287,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 				if(credits>=3000&&playermission_list[client].lvl<Current_Mission.max_level)
 				{
 					GrantExp(client,Current_Mission.level_exp);
-					Store_SetClientCredits(client,credits-3000);
+					Store_SetClientCredits(client,credits-3000,"活动");
 					PrintToChat(client," \x05[任务系统]消费积分购买了1大行动等级");
 				}
 				else
@@ -1297,7 +1300,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 				if(credits>=25000&&playermission_list[client].lvl<Current_Mission.max_level)
 				{
 					GrantExp(client,10*(Current_Mission.level_exp));
-					Store_SetClientCredits(client,credits-25000);
+					Store_SetClientCredits(client,credits-25000,"活动");
 					PrintToChat(client," \x05[任务系统]消费积分购买了10大行动等级");
 				}
 				else
@@ -1307,12 +1310,12 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 			}
 			case 2:
 			{
-				Store_SetClientCredits(client,credits+300);
+				Store_SetClientCredits(client,credits+300,"活动");
 				playermission_list[client].emoney-=100;
 			}
 			case 3:
 			{
-				item_id = Store_GetItemIdbyUniqueId(item);
+				item_id = Store_GetItemId(item);
 				if(!Store_HasClientItem(client,item_id))
 				{
 					Store_GiveItem(client,item_id,0,0,0);
@@ -1327,7 +1330,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 			}
 			case 4:
 			{
-				item_id = Store_GetItemIdbyUniqueId(item);
+				item_id = Store_GetItemId(item);
 				if(!Store_HasClientItem(client,item_id))
 				{
 					expdate = current_time+360*86400;
@@ -1343,7 +1346,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 			}
 			case 5:
 			{
-				item_id = Store_GetItemIdbyUniqueId(item);
+				item_id = Store_GetItemId(item);
 				if(!Store_HasClientItem(client,item_id))
 				{
 					expdate = current_time+360*86400;
@@ -1359,7 +1362,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 			}
 			case 6:
 			{
-				item_id = Store_GetItemIdbyUniqueId(item);
+				item_id = Store_GetItemId(item);
 				if(!Store_HasClientItem(client,item_id))
 				{
 					expdate = current_time+360*86400;
@@ -1375,7 +1378,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 			}
 			case 7:
 			{
-				item_id = Store_GetItemIdbyUniqueId(item);
+				item_id = Store_GetItemId(item);
 				if(!Store_HasClientItem(client,item_id))
 				{
 					Store_GiveItem(client,item_id,0,0,0);

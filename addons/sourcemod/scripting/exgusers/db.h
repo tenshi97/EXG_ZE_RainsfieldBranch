@@ -49,8 +49,10 @@ int DbFetchString(Handle hndl, const char[] field, char[] data, int size) {
 
 void DbQueryErrorCallback(Handle owner, Handle hndl, char[] error, any data) {
 	if (owner == INVALID_HANDLE || hndl == INVALID_HANDLE) PrintToServer("数据库错误: %s", error);
+	delete hndl;
 }
 
 void DbQueryFatalCallback(Handle owner, Handle hndl, char[] error, any data) {
 	if (owner == INVALID_HANDLE || hndl == INVALID_HANDLE) SetFailState("数据库错误: %s", error);
+	delete hndl;
 }

@@ -39,6 +39,7 @@ void ProfitBanLoadCallback(Handle owner, Handle hndl, char[] error, any data)
         }
     }
     SetNomBanState(client,nban,nban_expire);
+	delete hndl;
 }
 void SetNomBanState(int client,int nban,int nban_expire)
 {
@@ -166,4 +167,5 @@ void NomBanLogTimerCheckCallback(Handle owner, Handle hndl, char[] error, any da
             }
         }
     }
+	delete hndl;
 }

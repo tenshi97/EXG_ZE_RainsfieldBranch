@@ -80,6 +80,7 @@ int MapHistoryListMakeCallback(Handle owner, Handle hndl, char[] error, any data
 		menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 	}
 	menu.Display(client,MENU_TIME_FOREVER);
+	delete hndl;
 	return 0;
 }
 

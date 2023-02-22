@@ -716,7 +716,7 @@ int NextMapVoteHandler(Menu menu, MenuAction action, int param1, int param2)
 							{
 								nominator_credits = Store_GetClientCredits(j);
 								credits_return = RoundToFloor(mapv.nominate_cost * 0.5);
-								Store_SetClientCredits(j,nominator_credits+credits_return);
+								Store_SetClientCredits(j,nominator_credits+credits_return,"预定地图");
 							}
 
 							PrintToChatAll(" \x05[EMC] \x09%s \x01预定的 \x07%s \x01未选上，\x07%d \x01积分已退还",mapv.nominator_name,mapv.name,credits_return);
@@ -763,7 +763,7 @@ void ClearNomMapList()
 				{
 					int nominator_credits = Store_GetClientCredits(j);
 					int credits_return = RoundToFloor(mapv.nom_cost * 0.75);
-					Store_SetClientCredits(j,nominator_credits+credits_return);
+					Store_SetClientCredits(j,nominator_credits+credits_return,"预定地图");
 					PrintToChatAll(" \x05[EMC] \x09%s \x01预定的 \x07%s \x01未选上，\x07%d \x01积分已退还",mapv.nominator_name,mapv.name,credits_return);
 				}
 				else
@@ -849,7 +849,7 @@ public void MapVoteHandler(Menu menu, int num_votes, int num_clients, const int[
 						{
 							nominator_credits = Store_GetClientCredits(j);
 							credits_return = RoundToFloor(mapv.nominate_cost * 0.5);
-							Store_SetClientCredits(j,nominator_credits+credits_return);
+							Store_SetClientCredits(j,nominator_credits+credits_return,"预定地图");
 						}
 						PrintToChatAll(" \x05[EMC] \x09%s \x01预定的 \x07%s \x01未选上，\x07%d \x01积分已退还",mapv.nominator_name,mapv.name,credits_return);
 		 			}

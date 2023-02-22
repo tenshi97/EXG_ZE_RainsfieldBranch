@@ -19,6 +19,7 @@ Action g_Timer_SuperChat_Check_Hndl(Handle timer)
 	if(!isDbConnected())	return Plugin_Handled;
 	Format(query,sizeof(query),"SELECT * FROM announcement WHERE TIMESTAMP >= %d",current_time);
 	DbTQuery(SuperChatCheckQueryCallBack,query);
+	
 	return Plugin_Handled;
 }
 int SuperChatCheckQueryCallBack(Handle owner, Handle hndl, char[] error, any data)
@@ -58,6 +59,7 @@ int SuperChatCheckQueryCallBack(Handle owner, Handle hndl, char[] error, any dat
 			DbTQuery(DbQueryErrorCallback,query);
 		}
 	}
+	delete hndl;
 }
 Action SuperChatCommand(int client,int args)
 {

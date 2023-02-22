@@ -85,7 +85,7 @@ int SendCrateHandler(Menu menu, MenuAction action, int client, int param)
 		{
 			return 0;
 		}
-		int item_id = Store_GetItemIdbyUniqueId("uid_lootbox_freecase1");
+		int item_id = Store_GetItemId("uid_lootbox_freecase1");
 		if(param == 0)
 		{
 			PrintToChatAll(" \x05[活动系统]\x01善良的狗管理给全体玩家发放了一个\x9 活动箱子");
@@ -155,7 +155,7 @@ int SendCrateToPlayerMenuHandler(Menu menu, MenuAction action, int client, int p
 	{
 		char index[4];
 		char buffer[256];
-		int item_id = Store_GetItemIdbyUniqueId("uid_lootbox_freecase1");
+		int item_id = Store_GetItemId("uid_lootbox_freecase1");
 		menu.GetItem(param, index, sizeof(index));
 		int target = StringToInt(index);
 		PrintToChatAll(buffer);
@@ -297,7 +297,7 @@ void HdOnRoundEnd(int winner)
 	{
 		return;
 	}
-	int item_id = Store_GetItemIdbyUniqueId("uid_lootbox_freecase1");
+	int item_id = Store_GetItemId("uid_lootbox_freecase1");
 	if(winner==3)
 	{
 		if(passbonus_status)
@@ -318,7 +318,7 @@ void HdOnRoundEnd(int winner)
 							if(IsPlayerAlive(i))
 							{
 								client_credits = Store_GetClientCredits(i);
-								Store_SetClientCredits(i,client_credits+passbonus_extracredits);
+								Store_SetClientCredits(i,client_credits+passbonus_extracredits,"地图活动");
 								PrintToChat(i," \x05[活动系统]\x01完成地图活动，获得了\x07%d\x01积分",passbonus_extracredits);
 								if(!Store_HasClientItem(i,item_id))
 								{
@@ -343,7 +343,7 @@ void HdOnRoundEnd(int winner)
 							if(IsPlayerAlive(i))
 							{
 								client_credits = Store_GetClientCredits(i);
-								Store_SetClientCredits(i,client_credits+passbonus_extracredits);
+								Store_SetClientCredits(i,client_credits+passbonus_extracredits,"地图活动");
 								PrintToChat(i," \x05[活动系统]\x01完成地图活动，获得了\x07%d\x01积分",passbonus_extracredits);
 								if(!Store_HasClientItem(i,item_id))
 								{
