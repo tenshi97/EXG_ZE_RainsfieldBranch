@@ -1,8 +1,19 @@
 Handle Db_Connection;
+Handle DbM_Connection;
 void DbOnPluginStart()
 {
-	if (!SQL_CheckConfig("exg_csgo_ry")) PrintToServer("Database Error:Config Not Exsit");
+	if (!SQL_CheckConfig("exg_csgo_ry"))
+	{
+		PrintToServer("Database Error:Config Not Exsit");
+		return;
+	}
 	SQL_TConnect(Db_Connect_Callback, "exg_csgo_ry");
+	if(!SQL_CheckConfig("exg_csgo_zemaps"))
+	{
+		PrintToServer("Datanase Error:Map Database Config Not Exist");
+		return;
+	}
+	SQL_TConnect(DbM_Connect_Callback, "exg_csgo_zemaps");
 }
 void Db_Connect_Callback(Handle owner, Handle hndl, const char[] error, any data) {
 	if (owner == INVALID_HANDLE || hndl == INVALID_HANDLE) PrintToServer("Database Error: %s", error);
@@ -12,6 +23,13 @@ void Db_Connect_Callback(Handle owner, Handle hndl, const char[] error, any data
 	CheckValidMission();
 	ReloadAllPlayerMissionInfo();
 }
+void DbM_Connect_Callback(Handle owner, Handle hndl, const char[] error, any data) {
+	if (owner == INVALID_HANDLE || hndl == INVALID_HANDLE) PrintToServer("Database Error: %s", error);
+	SQL_SetCharset(hndl, "utf8");
+	DbM_Connection = hndl;
+	DbOnDbConnected_MapStartPost();
+}
+
 bool isDbConnected()
 {
 	return	(Db_Connection!=INVALID_HANDLE);
@@ -20,7 +38,9 @@ bool isDbConnected()
 void DbTQuery(SQLTCallback callback, const char[] query, any data = 0, DBPriority prio = DBPrio_Normal) {
 	SQL_TQuery(Db_Connection, callback, query, data, prio);
 }
-
+void DbMQuery(SQLTCallback callback, const char[] query, any data = 0, DBPriority prio = DBPrio_Normal) {
+	SQL_TQuery(DbM_Connection, callback, query, data, prio)
+}
 void DbOnDbConnected_MapStartPost()
 {
 	MapAdmOnDbConnected_MapStartPost();
@@ -29,6 +49,7 @@ void DbOnDbConnected_MapStartPost()
 void Db_Close()
 {
 	if (Db_Connection != INVALID_HANDLE) Db_Connection.Close();
+	if(DbM_Connection != INVALID_HANDLE) DbM_Connection.Close();
 }
 
 int DbField(Handle hndl, const char[] field) {

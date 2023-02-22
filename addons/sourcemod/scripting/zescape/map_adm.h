@@ -189,7 +189,7 @@ void MapAdminHistoryView(int client,Map_Info map)
 {
 	char query[512];
 	Format(query,sizeof(query),"SELECT * FROM exgusers_mapadmlog WHERE TARGETSTR = '%s' LIMIT 300",map.name);
-	DbTQuery(MapAdminHistoryViewCallback,query,client);
+	DbMQuery(MapAdminHistoryViewCallback,query,client);
 }
 void MapAdminHistoryViewCallback(Handle owner, Handle hndl, char[] error, any data)
 {
@@ -418,7 +418,7 @@ void MapDataReload()
 	Map_Id_Max = 0;
 	char query[512];
 	Format(query,sizeof(query),"SELECT * FROM zemaps ORDER BY name ASC");
-	DbTQuery(MapDataLoadCallback,query);
+	DbMQuery(MapDataLoadCallback,query);
 }
 
 void MapDataLoadCallback(Handle owner, Handle hndl, char[] error, any data)
@@ -535,7 +535,7 @@ void NewMapFileUpdate(Map_Info map)
 {
 	char query[512];
 	Format(query,sizeof(query),"INSERT INTO zemaps (ID,NAME) VALUES(%d,'%s')",map.id,map.name);
-	DbTQuery(DbQueryErrorCallback,query);
+	DbMQuery(DbQueryErrorCallback,query);
 }
 
 void ResetFileExist()
@@ -549,7 +549,7 @@ void ResetFileExist()
 		Maps.GetArray(map.name, map, sizeof(map));
 
 		Format(query,sizeof(query),"UPDATE zemaps SET EXIST = %d where ID = %d",map.exist,map.id);
-		DbTQuery(DbQueryErrorCallback,query);
+		DbMQuery(DbQueryErrorCallback,query);
 	}
 	snap.Close();
 }
@@ -1037,7 +1037,7 @@ void MapCfgUpdate(Map_Info map)
 	char query[2048];
 	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d, WINS = %d, FATIGUE = %d, INFECTTIME = %f,EGO = %d,VIS = %d, TAG = %d, DMGSCALE = %f, TAGSCALE = %d, KNOCKBACK = %f, ZMCLASS = %d, ZMHPSCALE = %f, MR = %d, MRX = %f, MRY = %f, MRZ = %f, PLUPPER = %d, PLLOWER = %d WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.wins,map.interval,map.infecttime,map.ego,map.vis,map.tag,map.dmgscale,map.tagscale,map.knockback,map.zmclass,map.zmhpscale,map.mr,map.mrx,map.mry,map.mrz,map.plupper,map.pllower,map.id,map.name);
 	PrintToServer(query);
-	DbTQuery(DbQueryErrorCallback,query);
+	DbMQuery(DbQueryErrorCallback,query);
 	Map_Log mapl;
 	Maps.SetArray(map.name,map,sizeof(map),true);
 	for(int i = 0 ; i < Map_List.Length ; i++)
