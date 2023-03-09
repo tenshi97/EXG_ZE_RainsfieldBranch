@@ -16,3 +16,7 @@ public void OnMapStart()
 {
 
 }
+public void OnEntitySpawned()
+{
+    
+}

@@ -189,7 +189,7 @@ void MapAdminHistoryView(int client,Map_Info map)
 {
 	char query[512];
 	Format(query,sizeof(query),"SELECT * FROM exgusers_mapadmlog WHERE TARGETSTR = '%s' LIMIT 300",map.name);
-	DbMQuery(MapAdminHistoryViewCallback,query,client);
+	DbTQuery(MapAdminHistoryViewCallback,query,client);
 }
 void MapAdminHistoryViewCallback(Handle owner, Handle hndl, char[] error, any data)
 {
@@ -420,7 +420,7 @@ void MapDataReload()
 	Map_Id_Max = 0;
 	char query[512];
 	Format(query,sizeof(query),"SELECT * FROM zemaps ORDER BY name ASC");
-	DbMQuery(MapDataLoadCallback,query);
+	DbTQuery(MapDataLoadCallback,query);
 }
 
 void MapDataLoadCallback(Handle owner, Handle hndl, char[] error, any data)
@@ -538,7 +538,7 @@ void NewMapFileUpdate(Map_Info map)
 {
 	char query[512];
 	Format(query,sizeof(query),"INSERT INTO zemaps (ID,NAME) VALUES(%d,'%s')",map.id,map.name);
-	DbMQuery(DbQueryErrorCallback,query);
+	DbTQuery(DbQueryErrorCallback,query);
 }
 
 void ResetFileExist()
@@ -552,7 +552,7 @@ void ResetFileExist()
 		Maps.GetArray(map.name, map, sizeof(map));
 
 		Format(query,sizeof(query),"UPDATE zemaps SET EXIST = %d where ID = %d",map.exist,map.id);
-		DbMQuery(DbQueryErrorCallback,query);
+		DbTQuery(DbQueryErrorCallback,query);
 	}
 	snap.Close();
 }
@@ -642,46 +642,46 @@ void MapAdminConfigMenu(int client,Map_Info map)
 	Format(buffer,sizeof(buffer),"地图管理:\n地图名:%s\n上次运行时间%s",map.name,ctime);
 	menu.SetTitle(buffer);
 	Format(buffer,sizeof(buffer),"地图译名:%s",map.name_cn);
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);	//0
 	Format(buffer,sizeof(buffer),"地图CD(分钟):%d",map.cooldown);
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);	//1
 	Format(buffer,sizeof(buffer),"地图订价(积分):%d",map.cost);
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);	//2
 	Format(buffer,sizeof(buffer),"难度:%s",difficulty_name[map.difficulty]);
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);	//3
 	Format(buffer,sizeof(buffer),"开放订阅:%s",map.available?"是":"否");
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);	//4
 	Format(buffer,sizeof(buffer),"已添加下载:%s",map.download?"是":"否");
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);	//5
 	Format(buffer,sizeof(buffer),"能否野生出现:%s",map.random?"是":"否");
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);	//6
 	Format(buffer,sizeof(buffer),"延长次数:%d",map.extend);
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);	//7
 	Format(buffer,sizeof(buffer),"地图时长:%d分钟",map.timelimit);
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);	//8
 	Format(buffer,sizeof(buffer),"人类技能:%s",map.nohmskill?"关闭":"开启");
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);	//9
 	Format(buffer,sizeof(buffer),"僵尸技能:%s",map.nozmskill?"关闭":"开启");
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);	//10
 	Format(buffer,sizeof(buffer),"解卡功能:%s",map.nojk?"关闭":"开启");
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);	//11
 	Format(buffer,sizeof(buffer),"连跳限速:%s",map.nobhoplimit?"关闭":"开启");
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);	//12
 	if(map.difficulty<=1)
 	{
-		menu.AddItem(map.name,"疲劳回合:无效(难度低于困难)",ITEMDRAW_DISABLED);
+		menu.AddItem(map.name,"疲劳回合:无效(难度低于困难)",ITEMDRAW_DISABLED);	//13
 	}
 	else
 	{
 		Format(buffer,sizeof(buffer),"疲劳回合:%d",map.interval);
-		menu.AddItem(map.name,buffer);
+		menu.AddItem(map.name,buffer);	//13
 	}
 	Format(buffer,sizeof(buffer),"开局传送:%s",map.ego?"开启":"关闭");
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);	//14
 	Format(buffer,sizeof(buffer),"尸变时间:%f秒",map.infecttime);
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);	//15
 	Format(buffer,sizeof(buffer),"预订显示:%s",map.vis?"显示":"隐藏");
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);	//16
 	Format(buffer,sizeof(buffer),"标签配置:");
 	for(int i=0;i<=9;i++)
 	{
@@ -690,21 +690,27 @@ void MapAdminConfigMenu(int client,Map_Info map)
 			Format(buffer,sizeof(buffer),"%s|%s|",buffer,label_name[i]);
 		}
 	}
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);//17
 	Format(buffer,sizeof(buffer),"伤害系数:%f",map.dmgscale);
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);//18
 	Format(buffer,sizeof(buffer),"定身系数:%d",map.tagscale);
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);//19
 	Format(buffer,sizeof(buffer),"击退系数:%f",map.knockback);
-	menu.AddItem(map.name,buffer);
-	Format(buffer,sizeof(buffer),"允许特殊僵尸:%s",map.zmclass?"是":"否");
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);//20
 	Format(buffer,sizeof(buffer),"血量系数:%f",map.zmhpscale);
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);//21
 	Format(buffer,sizeof(buffer),"人数下限:%d",map.pllower);
-	menu.AddItem(map.name,buffer);
+	menu.AddItem(map.name,buffer);//22
 	Format(buffer,sizeof(buffer),"人数上限:%d",map.plupper);
-	menu.AddItem(map.name,buffer)
+	menu.AddItem(map.name,buffer)//23
+	Format(buffer,sizeof(buffer),"僵尸职业:%s",map.zmclass?"开放":"禁止");
+	menu.AddItem(map.name,buffer);//24
+	Format(buffer,sizeof(buffer),"人类职业:%s",map.hmclass?"开放":"禁止");
+	menu.AddItem(map.name,buffer);//25
+	Format(buffer,sizeof(buffer),"人类英雄:%s",map.hmclass?"开放":"禁止");
+	menu.AddItem(map.name,buffer);//26
+	Format(buffer,sizeof(buffer),"僵尸英雄:%s",map.hmclass?"开放":"禁止");
+	menu.AddItem(map.name,buffer);//27
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
@@ -865,22 +871,43 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 		}
 		if(param == 21)
 		{
+			MapZMHpScaleConfigMenu(client,map);
+		}
+		if(param == 22)
+		{
+			MapLowerLimitMenu(client,map);
+		}
+		if(param == 23)
+		{
+			MapUpperLimitMenu(client,map);
+		}
+		if(param == 24)
+		{
 			if(map.zmclass != 0) map.zmclass = 0;
 			else map.zmclass = 1;
 			MapCfgUpdate(map);
 			MapAdminConfigMenu(client,map);
 		}
-		if(param == 22)
+		if(param == 25)
 		{
-			MapZMHpScaleConfigMenu(client,map);
+			if(map.hmclass != 0) map.hmclass = 0;
+			else map.hmclass = 1;
+			MapCfgUpdate(map);
+			MapAdminConfigMenu(client,map);
 		}
-		if(param == 23)
+		if(param == 26)
 		{
-			MapLowerLimitMenu(client,map);
+			if(map.zmhero != 0) map.zmhero = 0;
+			else map.zmhero = 1;
+			MapCfgUpdate(map);
+			MapAdminConfigMenu(client,map);
 		}
-		if(param == 24)
+		if(param == 27)
 		{
-			MapUpperLimitMenu(client,map);
+			if(map.hmhero != 0) map.hmhero = 0;
+			else map.hmhero = 1;
+			MapCfgUpdate(map);
+			MapAdminConfigMenu(client,map);
 		}
 	}
 	return 0;
@@ -954,6 +981,8 @@ int MapUpperLimitMenuHandler(Menu menu, MenuAction action, int client, int param
 		{
 			if (param == MenuCancel_ExitBack)
 			{
+				menu.GetItem(0,map_name,sizeof(map_name));
+				Maps.GetArray(map_name,map,sizeof(map));
 				MapAdminConfigMenu(client,map);
 			}
 		}
@@ -1029,6 +1058,8 @@ int MapLowerLimitMenuHandler(Menu menu, MenuAction action, int client, int param
 		{
 			if (param == MenuCancel_ExitBack)
 			{
+				menu.GetItem(0,map_name,sizeof(map_name));
+				Maps.GetArray(map_name,map,sizeof(map));
 				MapAdminConfigMenu(client,map);
 			}
 		}
@@ -1038,9 +1069,9 @@ int MapLowerLimitMenuHandler(Menu menu, MenuAction action, int client, int param
 void MapCfgUpdate(Map_Info map)
 {
 	char query[2048];
-	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d, WINS = %d, FATIGUE = %d, INFECTTIME = %f,EGO = %d,VIS = %d, TAG = %d, DMGSCALE = %f, TAGSCALE = %d, KNOCKBACK = %f, ZMCLASS = %d, ZMHPSCALE = %f, MR = %d, MRX = %f, MRY = %f, MRZ = %f, PLUPPER = %d, PLLOWER = %d WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.wins,map.interval,map.infecttime,map.ego,map.vis,map.tag,map.dmgscale,map.tagscale,map.knockback,map.zmclass,map.zmhpscale,map.mr,map.mrx,map.mry,map.mrz,map.plupper,map.pllower,map.id,map.name);
+	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d, WINS = %d, FATIGUE = %d, INFECTTIME = %f,EGO = %d,VIS = %d, TAG = %d, DMGSCALE = %f, TAGSCALE = %d, KNOCKBACK = %f, ZMHPSCALE = %f, MR = %d, MRX = %f, MRY = %f, MRZ = %f, PLUPPER = %d, PLLOWER = %d ZMCLASS =%d, HMCLASS = %d, ZMHERO = %d, HMHERO = %d, ZMHPRECOVER = %f WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.wins,map.interval,map.infecttime,map.ego,map.vis,map.tag,map.dmgscale,map.tagscale,map.knockback,map.zmhpscale,map.mr,map.mrx,map.mry,map.mrz,map.plupper,map.pllower,map.zmclass,map.hmclass,map.zmhero,map.hmhero,map.zmhprecover,map.id,map.name);
 	PrintToServer(query);
-	DbMQuery(DbQueryErrorCallback,query);
+	DbTQuery(DbQueryErrorCallback,query);
 	Map_Log mapl;
 	Maps.SetArray(map.name,map,sizeof(map),true);
 	for(int i = 0 ; i < Map_List.Length ; i++)

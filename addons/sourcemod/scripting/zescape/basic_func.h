@@ -1,6 +1,6 @@
 const int g_const_midnight_timestamp=1654185600;
-const int SQL_Inject_Str_Num = 14;
-char SQL_Inject_List[SQL_Inject_Str_Num][64]={"\'","=",",",";","%","insert","select","update","create","exec","delete","declare","master","truncate"};
+const int SQL_Inject_Str_Num = 16;
+char SQL_Inject_List[SQL_Inject_Str_Num][64]={"`","/","\'","=",",",";","%","insert","select","update","create","exec","delete","declare","master","truncate"};
 bool IsValidHuman(int client)
 {
 	if(IsClientInGame(client))

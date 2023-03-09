@@ -64,7 +64,6 @@ enum struct Map_Info
     int tagscale;
     float dmgscale;
     float knockback;
-    int zmclass;
     float zmhpscale;
     int mr;
     float mrx;
@@ -72,6 +71,11 @@ enum struct Map_Info
     float mrz;
     int plupper;
     int pllower;
+    int hmclass;
+    int zmclass;
+    int hmhero;
+    int zmhero;
+    float zmhprecover;
 }
 enum struct ADMIN_LOG
 {

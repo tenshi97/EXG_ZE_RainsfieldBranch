@@ -48,13 +48,14 @@ void ZEItems_LoadPlayerInventory(int client)
             return;
         }
         Format(query,sizeof(query),"SELECT * FROM EXGUSERS_ZE WHERE UID = %d");
-        DbTQuery();
+        DbTQuery(ZEItems_LoadPlayerInventory_Callback,query,client);
     }
 
 }
 void ZEItems_LoadPlayerInventory_Callback(Handle owner, Handle hndl, char[] error, any data)
 {
-delete hndl;
+    int client = data;
+
 }
 void ZEItems_MenuBuild(int client)
 {

@@ -47,7 +47,7 @@ void MapHistoryListMake(int client)
 	IPNumToIPV4(ip_test,ip_adr,sizeof(ip_adr));
 	PrintToChat(client,"%d\n%s",ip_test,ip_adr);
 	Format(query,sizeof(query),"SELECT * FROM exgze_maphistory LIMIT 300");
-	DbMQuery(MapHistoryListMakeCallback,query,client);
+	DbTQuery(MapHistoryListMakeCallback,query,client);
 }
 int MapHistoryListMakeCallback(Handle owner, Handle hndl, char[] error, any data)
 {
