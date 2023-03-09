@@ -469,7 +469,6 @@ void MapDataLoadCallback(Handle owner, Handle hndl, char[] error, any data)
 		map.dmgscale = DbFetchFloat(hndl,"DMGSCALE");
 		map.tagscale = DbFetchInt(hndl,"TAGSCALE");
 		map.knockback = DbFetchFloat(hndl,"KNOCKBACK");
-		map.zmclass = DbFetchInt(hndl,"ZMCLASS");
 		map.zmhpscale = DbFetchFloat(hndl,"ZMHPSCALE");
 		map.mr = DbFetchInt(hndl,"MR");
 		map.mrx = DbFetchFloat(hndl,"MRX");
@@ -477,6 +476,11 @@ void MapDataLoadCallback(Handle owner, Handle hndl, char[] error, any data)
 		map.mrz = DbFetchFloat(hndl,"MRZ");
 		map.pllower = DbFetchInt(hndl,"PLLOWER");
 		map.plupper = DbFetchInt(hndl,"PLUPPER");
+		map.zmclass = DbFetchInt(hndl,"ZMCLASS");
+		map.hmclass = DbFetchInt(hndl,"HMCLASS");
+		map.zmhero = DbFetchInt(hndl,"ZMHERO");
+		map.hmhero = DbFetchInt(hndl,"HMHERO");
+		map.zmhprecover = DbFetchFloat(hndl,"ZMHPRECOVER");
 		Maps.SetArray(map.name, map, sizeof(map), true);
 //		Format(buffer,sizeof(buffer),"[MapDataLoad]Added Map List:%s",mapl.name);
 //		PrintToServer(buffer);
