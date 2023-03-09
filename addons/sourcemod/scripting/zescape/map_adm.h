@@ -711,9 +711,9 @@ void MapAdminConfigMenu(int client,Map_Info map)
 	menu.AddItem(map.name,buffer);//24
 	Format(buffer,sizeof(buffer),"人类职业:%s",map.hmclass?"开放":"禁止");
 	menu.AddItem(map.name,buffer);//25
-	Format(buffer,sizeof(buffer),"人类英雄:%s",map.hmclass?"开放":"禁止");
+	Format(buffer,sizeof(buffer),"僵尸英雄:%s",map.zmhero?"开放":"禁止");
 	menu.AddItem(map.name,buffer);//26
-	Format(buffer,sizeof(buffer),"僵尸英雄:%s",map.hmclass?"开放":"禁止");
+	Format(buffer,sizeof(buffer),"人类英雄:%s",map.hmhero?"开放":"禁止");
 	menu.AddItem(map.name,buffer);//27
 	menu.Display(client, MENU_TIME_FOREVER);
 }
@@ -1073,7 +1073,7 @@ int MapLowerLimitMenuHandler(Menu menu, MenuAction action, int client, int param
 void MapCfgUpdate(Map_Info map)
 {
 	char query[2048];
-	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d, WINS = %d, FATIGUE = %d, INFECTTIME = %f,EGO = %d,VIS = %d, TAG = %d, DMGSCALE = %f, TAGSCALE = %d, KNOCKBACK = %f, ZMHPSCALE = %f, MR = %d, MRX = %f, MRY = %f, MRZ = %f, PLUPPER = %d, PLLOWER = %d ZMCLASS =%d, HMCLASS = %d, ZMHERO = %d, HMHERO = %d, ZMHPRECOVER = %f WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.wins,map.interval,map.infecttime,map.ego,map.vis,map.tag,map.dmgscale,map.tagscale,map.knockback,map.zmhpscale,map.mr,map.mrx,map.mry,map.mrz,map.plupper,map.pllower,map.zmclass,map.hmclass,map.zmhero,map.hmhero,map.zmhprecover,map.id,map.name);
+	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d, WINS = %d, FATIGUE = %d, INFECTTIME = %f,EGO = %d,VIS = %d, TAG = %d, DMGSCALE = %f, TAGSCALE = %d, KNOCKBACK = %f, ZMHPSCALE = %f, MR = %d, MRX = %f, MRY = %f, MRZ = %f, PLUPPER = %d, PLLOWER = %d, ZMCLASS =%d, HMCLASS = %d, ZMHERO = %d, HMHERO = %d, ZMHPRECOVER = %f WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.wins,map.interval,map.infecttime,map.ego,map.vis,map.tag,map.dmgscale,map.tagscale,map.knockback,map.zmhpscale,map.mr,map.mrx,map.mry,map.mrz,map.plupper,map.pllower,map.zmclass,map.hmclass,map.zmhero,map.hmhero,map.zmhprecover,map.id,map.name);
 	PrintToServer(query);
 	DbTQuery(DbQueryErrorCallback,query);
 	Map_Log mapl;

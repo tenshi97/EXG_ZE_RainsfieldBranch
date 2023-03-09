@@ -98,7 +98,7 @@ char CrateRewardList[][]=
 	"uid_mvp_sound_sephi_trombone",
 	"uid_mvp_sound_cancan",
 	"uid_mvp_sound_gimme",
-	"uid_s4mvp9_requiem.mp3",
+	"uid_s4mvp9_requiem",
 	"uid_wepskin_wushibb",
 	"uid_wepskin_waterbutte",
 	"uid_wepskin_apexbs",
@@ -494,7 +494,7 @@ void UpdatePlayerMissionInfo(int client,int force=0)
 	Format(query,sizeof(query),"UPDATE %s SET LVL = %d, EXP = %d, DEXP = %d,\
 	DINFECT = %d,DKILLZM = %d,DDMGTAKE = %d,DDMGMAKE = %d,DHIT = %d, DNADE = %d, \
 	WINFECT = %d, WKILLZM = %d, WDMGTAKE = %d, WDMGMAKE = %d, WNADE = %d, \
-	DT1ST = %d, DT2ST = %d, DT3ST = %d, DT4ST = %d, DT5ST =%d, DT6ST =%d \
+	DT1ST = %d, DT2ST = %d, DT3ST = %d, DT4ST = %d, DT5ST =%d, DT6ST =%d, \
 	WT1ST = %d, WT2ST = %d, WT3ST = %d, WT4ST = %d, WT5ST = %d, \
 	TIMESTAMP = %d, SP = %d, VIP = %d, CRATE = %d, CSAVE = %d, CH1 = %d, CH2 = %d, CH3 = %d, CH4 = %d, CH = %d WHERE UID = %d",
 	Current_Mission.playerdbname,lvl,exp,dexp,
@@ -938,8 +938,8 @@ void MissionMenuBuild(int client)
 	}
 	Format(buffer,sizeof(buffer),"赛季活动\n%s\n%s\nLV.%d/%d\nEXP:%d/%d 今日通关经验:%d/%d",Current_Mission.cnname,Current_Mission.name,playermission_list[client].lvl,Current_Mission.max_level,playermission_list[client].exp,Current_Mission.level_exp,playermission_list[client].dexp,dexp_max);
 	menu.SetTitle(buffer);
-	menu.AddItem("","日常任务[5月18日24点作战结束]",ITEMDRAW_DISABLED);
-	menu.AddItem("","周常任务[5月18日24点作战结束]",ITEMDRAW_DISABLED);
+	menu.AddItem("","日常任务[5月19日24点作战结束]");
+	menu.AddItem("","周常任务[5月19日24点作战结束]");
 	menu.AddItem("","奖励兑换[5月22日兑换截止]");
 	menu.AddItem("","神秘商店[5月22日兑换截止]");
 	menu.AddItem("","悬赏任务[暂未开放]",ITEMDRAW_DISABLED);
@@ -1449,7 +1449,7 @@ void MissionOpenCrate(int client)
 	int item_id;
 	char player_name[64];
 	GetClientName(client,player_name,64);
-	PrintToChat(client," \x05[赛季活动]\x01开启赛季箱子获得一个音符碎片");
+	PrintToChat(client," \x05[赛季活动]\x01开启赛季箱子获得一个音符碎片,抽奖结果为");
 	playermission_list[client].csave++;
 	for(int i=0;i<=19;i++)
 	{
@@ -1482,18 +1482,18 @@ void MissionOpenCrate(int client)
 				{
 					Store_SetClientCredits(client,credits+CrateRewardNum[i],"赛季开箱");
 				}
-			}
-			if(result<=5)
-			{
-				PrintToChatAll(" \x05[赛季活动]\x01恭喜玩家%s开启赛季箱子获得了金勋奖>%s<，让我们恭喜这个B!",player_name,CrateRewardInfo[i]);
-			}
-			if(result<=35&&result>5)
-			{
-				PrintToChat(client," \x05[赛季活动]\x01恭喜您开启赛季箱子获得了银勋奖>%s<",CrateRewardInfo[i]);
-			}
-			if(result>35)
-			{
-				PrintToChat(client," \x05[赛季活动]\x01恭喜您开启赛季箱子获得了铜勋奖>%s<",CrateRewardInfo[i]);
+				if(result<=5)
+				{
+					PrintToChatAll(" \x05[赛季活动]\x01恭喜玩家%s开启赛季箱子获得了金勋奖>%s<，让我们恭喜这个B!",player_name,CrateRewardInfo[i]);
+				}
+				if(result<=35&&result>5)
+				{
+					PrintToChat(client," \x05[赛季活动]\x01恭喜您开启赛季箱子获得了银勋奖>%s<",CrateRewardInfo[i]);
+				}
+				if(result>35)
+				{
+					PrintToChat(client," \x05[赛季活动]\x01恭喜您开启赛季箱子获得了铜勋奖>%s<",CrateRewardInfo[i]);
+				}
 			}
 		}
 	}
