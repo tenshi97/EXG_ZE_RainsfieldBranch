@@ -461,4 +461,3 @@ int RandomDropMenuHandler(Menu menu, MenuAction action, int client, int param)
 	}
 	else if (param == MenuCancel_ExitBack) 	CreateHdConfigMenu(client);
 }
-

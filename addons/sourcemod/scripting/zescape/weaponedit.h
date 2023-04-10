@@ -220,11 +220,12 @@ bool WeaponIsClientModifying(int client,const char[] sArgs)
 	{
 		int itemnum = g_client_weaponedit[client].weapon_num;
 		WeaponPurchase_Log weapon_temp;
+		ADMIN_LOG admlog_add;
 		GetArrayArray(g_WP_List,itemnum,weapon_temp,sizeof(weapon_temp));
 		if(g_client_weaponedit[client].hook_say == 1)
 		{
 			weapon_temp.price = StringToInt(sArgs);
-
+			
 		}
 		else
 		{

@@ -1,6 +1,7 @@
 
 
 bool g_pStore = false;
+SERVER_LOG g_current_server;
 #include <clientprefs>
 #include <cstrike>
 #include <sdktools>

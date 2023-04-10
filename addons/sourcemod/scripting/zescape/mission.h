@@ -88,7 +88,7 @@ char CrateRewardInfo[][]=
 }
 int CrateRewardPoint[] = 
 {
-	2,4,5,8,11,14,17,20,22,24,26,28,30,35,60,75,80,85,90,95,100
+	2,4,5,8,11,14,17,20,22,24,26,28,30,35,60,75,80,85,90,95,101
 };
 char CrateRewardList[][]=
 {
@@ -98,7 +98,7 @@ char CrateRewardList[][]=
 	"uid_mvp_sound_sephi_trombone",
 	"uid_mvp_sound_cancan",
 	"uid_mvp_sound_gimme",
-	"uid_s4mvp9_requiem",
+	"uid_mvp_requiem",
 	"uid_wepskin_wushibb",
 	"uid_wepskin_waterbutte",
 	"uid_wepskin_apexbs",
@@ -203,15 +203,16 @@ PlayerMissionInfo playermission_list[65];
 PlayerMissionInfo nullpmi;
 Missions Current_Mission;
 LEVEL_LOG Mission_Current_Level;
-int g_Daily_Task_Exp_Factor = 2;
-int g_Weekly_Task_Exp_Factor = 2;
+int g_Daily_Task_Exp_Factor = 1;
+int g_Weekly_Task_Exp_Factor = 1;
 int round_starttime;
 int round_endtime;
-const int mission_lowest_playernum = 30;
+const int mission_lowest_playernum = 20;
 void MissionOnPluginStart()
 {
 	round_starttime = GetTime();
 	Mission_Current_Level.id=-1;
+	Mission_Current_Level.diff = 0;
 	g_ValidMission_Exist = false;
 	Current_Mission.id = 0;
 	nullrounddata.bosshits = 0;
@@ -333,6 +334,7 @@ void LoadPlayerMissionInfo(int client)
 	int uid;
 	if(client<=0||client>=65)	return;
 	if(Current_Mission.id<=0)	return;
+	if(!IsClientInGame(client))	return;
 	if(IsFakeClient(client))	return;
 	if(!isDbConnected())
 	{
@@ -465,6 +467,10 @@ void DbClearPlayerMissionInfoCallback(Handle owner, Handle hndl, char[] error, a
 
 void UpdatePlayerMissionInfo(int client,int force=0)
 {
+	if(!g_ValidMission_Exist)
+	{
+		return;
+	}
 	if((!force)&&(playermission_list[client].loaded==0||playermission_list[client].uid==0))
 	{
 		PrintToServer("[任务系统]重载因数据库出错而未载入的玩家%d的任务数据",client);
@@ -563,6 +569,10 @@ void MissionOnRoundStart()
 }
 void MissionOnRoundEnd(int winner)
 {
+	if(!g_ValidMission_Exist)
+	{
+		return;
+	}
 	char map_name[64];
 	int player_pass = 0;
 	GetCurrentMap(map_name,sizeof(map_name));
@@ -588,6 +598,53 @@ void MissionOnRoundEnd(int winner)
 			}
 		}
 	}
+	switch(Pmap.difficulty)
+	{
+		case 0:
+		{
+			exp_bonus = 30;
+		}
+		case 1:
+		{
+			exp_bonus = 50;
+		}
+		case 2:
+		{
+			exp_bonus = 70;
+		}
+		case 3:
+		{
+			exp_bonus = 100;
+		}
+		case 4:
+		{
+			exp_bonus = 100;
+		}
+		default:
+		{
+			exp_bonus = 50;
+		}
+	}
+	if(Pmap.tag&label_code[8])
+	{
+		exp_bonus += 50;
+	}
+	if(Pmap.tag&label_code[10])
+	{
+		exp_bonus += 10;
+	}
+	if(Pmap.tag&label_code[9])
+	{
+		exp_bonus/=2;
+	}
+	if(player_pass>=30)
+	{
+		exp_bonus +=20;
+	}
+	if(Mission_Current_Level.diff>0&&Mission_Current_Level.id!=-1)
+	{
+		exp_bonus +=10*Mission_Current_Level.diff;
+	}
 	for(int i=1;i<=64;i++)
 	{
 		if(IsClientInGame(i))
@@ -596,51 +653,8 @@ void MissionOnRoundEnd(int winner)
 			{
 				if(winner==3&&IsPlayerAlive(i)&&ZR_IsClientHuman(i))
 				{
-					switch(Pmap.difficulty)
-					{
-						case 0:
-						{
-							exp_bonus = 30;
-						}
-						case 1:
-						{
-							exp_bonus = 50;
-						}
-						case 2:
-						{
-							exp_bonus = 70;
-						}
-						case 3:
-						{
-							exp_bonus = 100;
-						}
-						case 4:
-						{
-							exp_bonus = 100;
-						}
-
-					}
-					if(Pmap.tag&label_code[8])
-					{
-						exp_bonus += 50;
-					}
-					if(Pmap.tag&label_code[10])
-					{
-						exp_bonus += 10;
-					}
-					if(Pmap.tag&label_code[9])
-					{
-						exp_bonus*=0.5
-					}
-					if(player_pass>=30)
-					{
-						exp_bonus +=20;
-					}
-					if(Mission_Current_Level.diff>0)
-					{
-						exp_bonus +=10*Mission_Current_Level.diff;
-					}
-					PrintToChatAll(" \x05[赛季活动]\x01计算地图通关经验为:%d",exp_bonus);
+				
+					PrintToChat(i," \x05[赛季活动]\x01计算地图通关经验为:%d",exp_bonus);
 					int dexp_max = 1500;
 					if(IsClientVIP(i))
 					{
@@ -734,6 +748,7 @@ void MissionOnMapEnd()
 {
 	Mission_Current_Level.id=-1;
 	Mission_Current_Level.bounty = 0;
+	Mission_Current_Level.diff = 0;
 	for(int i=1;i<=64;i++)
 	{
 		playermission_rounddata[i]=nullrounddata;
@@ -750,13 +765,6 @@ void MissionOnMapEnd()
 void CheckValidMission()
 {
 	char query[512];
-	int hostip_int = FindConVar("hostip").IntValue;
-	char hostip[32];
-	IPNumToIPV4(hostip_int,hostip,sizeof(hostip));
-	if(StrContains(hostip,"110",false)==-1)
-	{
-		return;
-	}
 	Format(query,sizeof(query),"SELECT * FROM ZEMISSION");
 	DbTQuery(CheckValidMissionCallBack,query);
 }
@@ -804,7 +812,6 @@ void TEMP_OpHR_TasklistSet()
 {
 	delete Current_Mission_Tasklist;
 	Current_Mission_Tasklist = CreateArray(sizeof(TASK));
-	char buffer[256];
 	TASK task;
 	task.stage = 3;
 	task.num[0] = 2;task.num[1] = 4;task.num[2] = 6;
@@ -871,8 +878,8 @@ void TEMP_OpHR_TasklistSet()
 	Current_Mission_Tasklist.PushArray(task);
 
 	task.stage = 1;
-	task.num[0] = 250;
-	task.exp_base = 50;
+	task.num[0] = 120;
+	task.exp_base = 1000;
 	task.period = 7;
 	task.type = ZM_DMGTAKE;
 	task.name = "[僵尸]承受伤害:";
@@ -940,8 +947,8 @@ void MissionMenuBuild(int client)
 	menu.SetTitle(buffer);
 	menu.AddItem("","日常任务[5月19日24点作战结束]");
 	menu.AddItem("","周常任务[5月19日24点作战结束]");
-	menu.AddItem("","奖励兑换[5月22日兑换截止]");
-	menu.AddItem("","神秘商店[5月22日兑换截止]");
+	menu.AddItem("","奖励兑换[测试期间暂停兑换]",ITEMDRAW_DISABLED);
+	menu.AddItem("","神秘商店[测试期间暂停兑换]",ITEMDRAW_DISABLED);
 	menu.AddItem("","悬赏任务[暂未开放]",ITEMDRAW_DISABLED);
 	menu.Display(client, MENU_TIME_FOREVER);
 }
@@ -1026,7 +1033,7 @@ int DailyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 	TASK task;
 	if (action == MenuAction_End||client<=0||client>=65)
 	{
-		menu.Close();
+		delete menu;
 		return 0;
 	}
 	else if(action == MenuAction_Select)
@@ -1116,7 +1123,7 @@ int WeeklyTaskMenuHandler(Menu menu, MenuAction action, int client, int param)
 	TASK task;
 	if (action == MenuAction_End||client<=0||client>=65)
 	{
-		menu.Close();
+		delete menu;
 		return 0;
 	}
 	else if(action == MenuAction_Select)
@@ -1186,6 +1193,11 @@ void GrantExp(int client,int exp)
 
 void AwardMenu(int client)
 {
+	if(!Store_IsClientLoaded(client))
+	{
+		PrintToChat(client," \x05[赛季活动]\x01您的商店数据还未载入!");
+		return;
+	}
 	Menu menu = CreateMenu(AwardMenuHandle);
 	int iStyle = (g_pStore) ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED;
 	menu.SetTitle("特典奖励领取\n%s", (g_pStore) ? "点击对应选项领取奖励" : "商店插件未加载, 请稍后再试");
@@ -1201,18 +1213,21 @@ void AwardMenu(int client)
 
 int AwardMenuHandle(Menu menu, MenuAction action, int client, int param)
 {
-	int current_time=GetTime();
-	int expdate;
 	if (action == MenuAction_End||client<=0||client>=65)
 	{
-		menu.Close();
+		delete menu;
 		return 0;
 	}
 	else if(action == MenuAction_Select)
 	{
-		if(!g_pStore)
+		if(!g_pStore||!Store_IsClientLoaded(client))
 		{
+			PrintToChat(client," \x05[赛季活动]\x01您的商店数据还未载入!");
 			return 0;
+		}
+		if(GetTime()<=Store_GetClientDataProtect(client))
+		{
+			PrintToChat(client," \x05[赛季活动]\x01数据保护中，无法操作!");			
 		}
 		if(playermission_list[client].loaded==0)
 		{
@@ -1257,11 +1272,15 @@ int AwardMenuHandle(Menu menu, MenuAction action, int client, int param)
 
 void SecretShopMenu(int client)
 {
-	char buffer[256];
 	if(client<=0||client>=65)	return;
 	if(!g_pStore)
 	{
 		PrintToChat(client," \x05[任务系统]\x01商店插件未载入或维护中");
+		return;
+	}
+	if(!Store_IsClientLoaded(client))
+	{
+		PrintToChat(client," \x05[赛季活动]\x01您的商店数据还未载入!");
 		return;
 	}
 	Menu menu = CreateMenu(SecretShopHandler);
@@ -1284,31 +1303,36 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 {
 	if(client<=0||client>=65)
 	{
-		menu.Close();
+		delete menu;
 		return 0;
 	}
-	int credits = Store_GetClientCredits(client);
-	int crate = playermission_list[client].crate;
-	int csave = playermission_list[client].csave;
 	int current_time = GetTime();
 	if(!playermission_list[client].loaded)
 	{
 		PrintToChat(client," \x05[任务系统]数据未载入，无法购买(请等待下一回合或输入!msr)");
-		menu.Close();
+		delete menu;
 	}
 	if (action == MenuAction_End||client<=0||client>=65)
 	{
-		menu.Close();
+		delete menu;
 	}
 	else if(action == MenuAction_Select)
 	{
-		if(!g_pStore)
+		if(!g_pStore||!Store_IsClientLoaded(client))
 		{
-			PrintToChat(client," \x05[任务系统]\x01商店插件未载入或维护中");
+			PrintToChat(client," \x05[赛季活动]\x01您的商店数据还未载入!");
 			return 0;
+		}
+		int credits = Store_GetClientCredits(client);
+		int crate = playermission_list[client].crate;
+		int csave = playermission_list[client].csave;
+		if(GetTime()<=Store_GetClientDataProtect(client))
+		{
+			PrintToChat(client," \x05[赛季活动]\x01数据保护中，无法操作!");			
 		}
 		switch(param)
 		{
+
 			case 0:
 			{
 				if(!g_pStore)
@@ -1444,12 +1468,16 @@ void MissionOpenCrate(int client)
 	{
 		return;
 	}
+	if(GetTime()<=Store_GetClientDataProtect(client))
+	{
+		PrintToChat(client," \x05[赛季活动]\x01数据保护中，无法操作!");			
+	}
 	int credits = Store_GetClientCredits(client);
 	int result = GetURandomInt()%100+1;
 	int item_id;
 	char player_name[64];
 	GetClientName(client,player_name,64);
-	PrintToChat(client," \x05[赛季活动]\x01开启赛季箱子获得一个音符碎片,抽奖结果为");
+	PrintToChat(client," \x05[赛季活动]\x01开启赛季箱子获得一个音符碎片");
 	playermission_list[client].csave++;
 	for(int i=0;i<=19;i++)
 	{
@@ -1459,6 +1487,7 @@ void MissionOpenCrate(int client)
 			{
 				item_id = Store_GetItemId(CrateRewardList[i]);
 				PrintToChatAll(" \x05[赛季活动]\x01恭喜玩家%s开启赛季箱子获得了金勋奖>%s<，让我们恭喜这个B!",player_name,CrateRewardInfo[i]);
+				Store_GiveItem(client,item_id,0,0,0);
 			}
 		}
 		else

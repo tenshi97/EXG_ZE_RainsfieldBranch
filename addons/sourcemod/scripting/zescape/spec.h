@@ -36,7 +36,7 @@ Action SpecCommand(int client,int args)
 		GetCmdArgString(target_name,sizeof(target_name));
 		ReplaceString(target_name, sizeof(target_name), "\"", "");
 
-		int target = FindTarget(client, target_name);
+		int target = FindTarget(client, target_name,false,true);
 
 		if(target<=0 || target>=65)
 		{
@@ -105,6 +105,7 @@ public void RFC_SetObsTarget(DataPack dp)
 	dp.Reset();
 	int client = dp.ReadCell();
 	int target = dp.ReadCell();
+	ForcePlayerSuicide(client);
 	SetEntPropEnt(client, Prop_Send, "m_hObserverTarget", target); 
 	delete dp;
 }

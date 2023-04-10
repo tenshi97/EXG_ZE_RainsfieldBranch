@@ -1,7 +1,7 @@
 void uAdminOnPluginStart()
 {
-    RegConsoleCmd("sm_nban",NomBanCommand);
-    RegConsoleCmd("sm_nunban",NomUnbanCommand);
+    RegAdminCmd("sm_nban",NomBanCommand,ADMFLAG_GENERIC);
+    RegAdminCmd("sm_nunban",NomUnbanCommand,ADMFLAG_GENERIC);
 }
 Action NomBanCommand(int client, int args)
 {

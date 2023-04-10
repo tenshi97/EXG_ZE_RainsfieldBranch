@@ -39,6 +39,9 @@ bool g_pStore;
 //#include "zescape/entwatchedit.h"
 Handle g_Warmup_Timer;
 ConVar g_Cvar_Mp_Warmup_Time;
+SERVER_LOG g_current_server;
+int g_server_ip;
+int g_server_port;
 public Plugin myinfo = {
 	name = " EXG_Zombie_Escape_RY",
 	author = "Rainsfield&WackoD&EXGNullable",

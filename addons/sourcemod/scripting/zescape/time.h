@@ -16,9 +16,10 @@ void TimeOnPluginStart()
 Action DailyTimerCheckerHndl(Handle timer)
 {
 	char query[512];
-	if(!isDbConnected())	return;
+	if(!isDbConnected())	return Plugin_Handled;
 	Format(query,sizeof(query),"SELECT * FROM ZETIMER");
 	DbTQuery(DailyTimerCheckCallBack,query);
+	return Plugin_Handled;
 }
 
 void DailyTimerCheckCallBack(Handle owner, Handle hndl, char[] error, any data)

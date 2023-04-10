@@ -1,8 +1,11 @@
 bool EXGUSERS_serverconnected = false;
 ArrayList ServerList;
-SERVER_LOG current_server;
+static int server_ip;
+static int server_port;
 void ServerOnPluginStart()
 {
+	server_ip = FindConVar("hostip").IntValue;
+	server_port = FindConVar("hostport").IntValue;
 	RegAdminCmd("sm_svreload",ReloadServerListCommand,ADMFLAG_GENERIC);
 	RegAdminCmd("sm_sa",ServerAdminCommand,ADMFLAG_GENERIC);
 	RegAdminCmd("sm_serveradmin",ServerAdminCommand,ADMFLAG_GENERIC);
@@ -33,13 +36,13 @@ void ServerAdminMenu(int client)
 {
 	Menu menu = CreateMenu(ServerAdminMenuHandler);
 	char buffer[256];
-	Format(buffer,sizeof(buffer),"服务器设置:%s",current_server.name);
+	Format(buffer,sizeof(buffer),"服务器设置:%s",g_current_server.name);
 	menu.SetTitle(buffer);
-	Format(buffer,sizeof(buffer),"端口号:%d",current_server.port);
+	Format(buffer,sizeof(buffer),"端口号:%d",g_current_server.port);
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-	Format(buffer,sizeof(buffer),"[ZE]疲劳设置:%s",current_server.mode==0?(current_server.ze_fatigue?"开启":"关闭"):"不适用");
-	menu.AddItem("",buffer,current_server.mode==0?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
-	Format(buffer,sizeof(buffer),"跳转信息:[缩写]%s,[IP]%s:%d",current_server.shortname,current_server.ip,current_server.port);
+	Format(buffer,sizeof(buffer),"[ZE]疲劳设置:%s",g_current_server.mode==0?(g_current_server.ze_fatigue?"开启":"关闭"):"不适用");
+	menu.AddItem("",buffer,g_current_server.mode==0?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"跳转信息:[缩写]%s,[IP]%s:%d",g_current_server.shortname,g_current_server.ip,g_current_server.port);
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 	menu.Display(client,MENU_TIME_FOREVER);
 }
@@ -53,9 +56,9 @@ int ServerAdminMenuHandler(Menu menu, MenuAction action, int client, int param)
 	{
 		if(param == 1)
 		{
-			if(current_server.ze_fatigue==0)	current_server.ze_fatigue =1;
-			else current_server.ze_fatigue = 0;
-			ServerModify(current_server);
+			if(g_current_server.ze_fatigue==0)	g_current_server.ze_fatigue =1;
+			else g_current_server.ze_fatigue = 0;
+			ServerModify(g_current_server);
 			ServerAdminMenu(client);
 		}
 		return 0;
@@ -94,20 +97,51 @@ void LoadCurrentServer()
 {
 	int hostip_int = FindConVar("hostip").IntValue;
 	int hostport = FindConVar("hostport").IntValue;
-	char hostip[32];
+	char hostip[64];
 	IPNumToIPV4(hostip_int,hostip,sizeof(hostip));
-
-
+	SERVER_LOG server_temp;
+	for(int i=0;i<ServerList.Length;i++)
+	{
+		GetArrayArray(ServerList,i,server_temp,sizeof(server_temp));
+		if(server_temp.port==hostport&&strcmp(hostip,server_temp.ip,false)==0)
+		{
+			g_current_server = server_temp;
+			break;
+		}
+	}
 }
+void GetServerBySID(int sid,SERVER_LOG server)
+{
+	SERVER_LOG server_temp;
+	for(int i=0;i<ServerList.Length;i++)
+	{
+		GetArrayArray(ServerList,i,server_temp,sizeof(server_temp));
+		if(server_temp.sid==sid)
+		{
+			server = server_temp;
+			return;
+		}
+	}	
+	server.sid = 0;
+	server.port = 0;
+	server.name = "未知服务器";
+	server.mode = 0;
+	server.ze_fatigue = 0;
+	return;
+}
+
 public int Native_EXGUSERS_GetServerByPort(Handle plugin, int numParams)
 {
-	int port = GetNativeCell(1);
+	int ip_int = GetNativeCell(1);
+	int port = GetNativeCell(2);
+	char ip[64];
+	IPNumToIPV4(ip_int,ip,sizeof(ip));
 	bool port_found=false;
 	SERVER_LOG server_ret;
 	for(int i=0;i<ServerList.Length;i++)
 	{
 		GetArrayArray(ServerList,i,server_ret,sizeof(server_ret));
-		if(server_ret.port==port)
+		if(server_ret.port==port&&strcmp(ip,server_ret.ip,false)==0)
 		{
 			port_found=true;
 			break;
@@ -121,7 +155,7 @@ public int Native_EXGUSERS_GetServerByPort(Handle plugin, int numParams)
 		server_ret.mode = 0;
 		server_ret.ze_fatigue = 0;
 	}
-	SetNativeArray(2,view_as<int>(server_ret),sizeof(SERVER_LOG));
+	SetNativeArray(3,view_as<int>(server_ret),sizeof(SERVER_LOG));
 
 }
 
@@ -140,7 +174,7 @@ void ServerModify(SERVER_LOG server)
 		DbTQuery(ServerQueryCallback,query);
 	}
 }
-void GetServerByPort(int port,SERVER_LOG server)
+void GetServerByPort(int ip,int port,SERVER_LOG server)
 {
 	SERVER_LOG server_ret;
 	for(int i=0;i<ServerList.Length;i++)

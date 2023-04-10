@@ -14,10 +14,13 @@ bool g_current_nominated;
 int g_Map_Interval_Count;
 int g_Map_Round=0;
 bool g_Map_RuntimeUpdate_Checked;
-
-
+static int server_ip;
+static int server_port;
+static SERVER_LOG current_server;
 void MapInfoOnPluginStart()
 {
+	server_ip = FindConVar("hostip").IntValue;
+	server_port = FindConVar("hostport").IntValue;
 	g_Map_Interval_Count = 0;
 	RegConsoleCmd("sm_mi", ActionMapInfoMenu);
 	RegConsoleCmd("sm_mapinfo", ActionMapInfoMenu);
@@ -94,6 +97,8 @@ int MapHistoryListHandler(Menu menu, MenuAction action, int client, int param)
 }
 void MapInfoOnMapStart()
 {
+	server_ip = FindConVar("hostip").IntValue;
+	server_port = FindConVar("hostport").IntValue;
 	g_Map_Round = 0;
 	g_Map_RuntimeUpdate_Checked = false;
 	Current_Map_Loaded = false;
@@ -107,9 +112,7 @@ void MapInfoOnDbConnected_MapStartPost()
 	if(Current_Map_Loaded)	return;
 	Current_Map_Fatigue = false;
 	GetCurrentMap(map_name,sizeof(map_name));
-	int server_port = FindConVar("hostport").IntValue;
-	SERVER_LOG current_server;
-	EXGUSERS_GetServerByPort(server_port,current_server);
+	EXGUSERS_GetServerByPort(server_ip,server_port,current_server);
 	if(Maps.GetArray(map_name,Pmap,sizeof(Pmap)))
 	{
 		PrintToServer("[当前地图信息读取完毕]");
@@ -226,12 +229,13 @@ Action ActionMapInfoMenu(int client,int args)
 
 void MakeMapInfoMenu(int client){
 	char title[256];
-	Format(title,sizeof(title),"当前地图:%s\n\
+	Format(title,sizeof(title),"当前服务器:%s\n\
+		当前地图:%s\n\
 		地图译名:%s\n\
 		地图难度:%s\n\
 		地图胜负:%d胜%d负\n\
 		地图热度:%d\n\
-		地图订价:%d",Pmap.name,Pmap.name_cn,difficulty_name[Pmap.difficulty],Pmap.wins,Pmap.round-Pmap.wins,Pmap.heat,Pmap.cost);
+		地图订价:%d",current_server.name,Pmap.name,Pmap.name_cn,difficulty_name[Pmap.difficulty],Pmap.wins,Pmap.round-Pmap.wins,Pmap.heat,Pmap.cost);
 	Menu menu = CreateMenu(MapInfoMenuHandler);
 	menu.SetTitle(title);
 	Format(title,sizeof(title),"回合时长:%d",Pmap.roundtime);
@@ -260,11 +264,11 @@ int MapInfoMenuHandler(Menu menu, MenuAction action, int client, int param) {
 }
 void MapInfoOnRoundStart()
 {
+	server_ip = FindConVar("hostip").IntValue;
+	server_port = FindConVar("hostport").IntValue;
+	EXGUSERS_GetServerByPort(server_ip,server_port,current_server);
 	if(!Current_Map_Fatigue)
 	{
-		int server_port = FindConVar("hostport").IntValue;
-		SERVER_LOG current_server;
-		EXGUSERS_GetServerByPort(server_port,current_server);
 		if(current_server.sid!=0)
 		{
 			Current_Map_Fatigue = true;

@@ -16,9 +16,14 @@ Map_Info g_Nextmap;
 bool g_MapVote_Initiated;
 bool g_MapVote_Proceeding;
 char g_sPlayerSearchFilter[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
-
+int map_start_time = 0;
+static int server_ip;
+static int server_port;
+static SERVER_LOG current_server;
 void NominateOnPluginStart()
 {
+	server_ip = FindConVar("hostip").IntValue;
+	server_port = FindConVar("hostport").IntValue;
 	RegConsoleCmd("sm_nominate",NominateCommand);
 	RegConsoleCmd("sm_nom",NominateCommand);
 	RegConsoleCmd("sm_yd",NominateCommand);
@@ -29,6 +34,8 @@ void NominateOnPluginStart()
 }
 void NominateOnMapStart()
 {
+	server_ip = FindConVar("hostip").IntValue;
+	server_port = FindConVar("hostport").IntValue;
 	Nom_Map_List.Clear();
 	Nominate_ALLOW = true;
 }
@@ -166,7 +173,6 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 		Format(cooldown_state,sizeof(cooldown_state),"冷却完成");
 		cooldown_over = true;
 	}
-	int server_port = FindConVar("hostport").IntValue;
 
 	Format(buffer,sizeof(buffer),"地图预定:%s\n\
 		最后运行时间:%s\n\
@@ -176,8 +182,7 @@ void NomMapInfoMenu(int client,Map_Info Tmap)
 	menu.SetTitle(buffer);
 
 	bool g_Interval_Allow = true;
-	SERVER_LOG current_server;
-	EXGUSERS_GetServerByPort(server_port,current_server);
+	EXGUSERS_GetServerByPort(server_ip,server_port,current_server);
 	if(current_server.ze_fatigue)
 	{
 		if(Tmap.difficulty>=2)
@@ -275,6 +280,13 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 	GetClientAuthId(client,AuthId_Steam2,nommap.nominator_steamauth,sizeof(nommap.nominator_steamauth),true);
 	GetClientName(client,nommap.nominator_name,sizeof(nommap.nominator_name));
 	int credits = 0;
+	int timeleft = 1;
+	GetMapTimeLeft(timeleft);
+	if(timeleft<0)
+	{
+		PrintToChat(client," \x05[地图系统}\x01当前地图剩余时间不足，无法预定");
+		return;
+	}
 	if (g_pStore)
 		credits = Store_GetClientCredits(client);
 	if(forcenom==0)

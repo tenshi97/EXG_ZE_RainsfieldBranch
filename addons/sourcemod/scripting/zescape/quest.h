@@ -369,7 +369,7 @@ int DailyQuestMenuHandler(Menu menu, MenuAction action, int client, int param)
 			{
 				playerquest_list[client].taskcomplete[questid]=1;
 				Store_SetClientCredits(client,credits+quest.award,"活动");
-
+				PrintToChat(client," \x05[任务系统]\x01恭喜您完成每日任务[%s]，获得150积分奖励",quest.name);			
 			}
 			else
 			{
@@ -560,6 +560,7 @@ void ClearPlayerDailyQuestInfo(int client)
 }
 void QuestOnLevelSet(any level[sizeof(LEVEL_LOG)])
 {
+
 	Quest_Current_Level = level;
 }
 void QuestOnRoundStart()
@@ -601,7 +602,7 @@ void QuestSet()
 	quest.id = 0;
 	quest.type = ZM_INFECT;
 	quest.num = 4;
-	quest.award = 50;
+	quest.award = 150;
 	quest.period = 1;
 	quest.name = "[僵尸]感染人类";
 	QuestList.PushArray(quest);
@@ -609,7 +610,7 @@ void QuestSet()
 	quest.id =1;
 	quest.type = HM_KILLZM;
 	quest.num = 2;
-	quest.award = 50;
+	quest.award = 150;
 	quest.period = 1;
 	quest.name = "[人类]击杀僵尸";
 	QuestList.PushArray(quest);
@@ -617,7 +618,7 @@ void QuestSet()
 	quest.id=2;
 	quest.type = ZM_DMGTAKE;
 	quest.num = 80000;
-	quest.award= 50;
+	quest.award= 150;
 	quest.period = 1;
 	quest.name = "[僵尸]承受伤害";
 	QuestList.PushArray(quest);
@@ -625,7 +626,7 @@ void QuestSet()
 	quest.id = 3;
 	quest.type = HM_DMGMAKE;
 	quest.num = 40000;
-	quest.award = 50;
+	quest.award = 150;
 	quest.period = 1;
 	quest.name = "[人类]造成伤害";
 	QuestList.PushArray(quest);
@@ -633,7 +634,7 @@ void QuestSet()
 	quest.id = 4;
 	quest.type = HM_PASS;
 	quest.num = 2;
-	quest.award = 50;
+	quest.award = 150;
 	quest.period = 1;
 	quest.name = "[人类]通关回合";
 	QuestList.PushArray(quest);
@@ -641,7 +642,7 @@ void QuestSet()
 	quest.id = 5;
 	quest.type = HM_NADE;
 	quest.num = 10;
-	quest.award = 50;
+	quest.award = 150;
 	quest.period = 1;
 	quest.name = "[人类]投掷手雷";
 	QuestList.PushArray(quest);

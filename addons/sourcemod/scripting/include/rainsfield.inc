@@ -173,7 +173,7 @@ forward void EMC_Forward_MapConfigLoaded();
 native void EXGUSERS_AddAdminLog(any admlog[sizeof(ADMIN_LOG)]);
 native int EXGUSERS_GetUserInfo(int client, any userinfo[sizeof(USER_LOG)]);
 native int EXGUSERS_GetUserUID(int client);
-native void EXGUSERS_GetServerByPort(int port, any server[sizeof(SERVER_LOG)]);
+native void EXGUSERS_GetServerByPort(int ip,int port, any server[sizeof(SERVER_LOG)]);
 forward void EXGUSERS_OnUserLoaded(int client);
 
 

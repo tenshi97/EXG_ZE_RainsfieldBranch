@@ -54,8 +54,14 @@ ArrayList MapVote_List;
 ArrayList RandomMap_Candidate;
 Maps_VoteInfo g_Nextmap_Result,g_LastRound_MapVoteSave;
 int rtv_totalvotes;
+static int server_ip;
+static int server_port;
+static SERVER_LOG current_server;
 void RTVOnPluginStart()
 {
+	server_ip = FindConVar("hostip").IntValue;
+	server_port = FindConVar("hostport").IntValue;
+	EXGUSERS_GetServerByPort(server_ip,server_port,current_server);
 	g_MapVote_Initiated = false;
 	g_MapVote_Proceeding = false;
 	g_WTimer_BeforeVote = INVALID_HANDLE;
@@ -163,6 +169,9 @@ Action ForceRTVCommand(int client,int args)
 }
 void RTVOnMapStart()
 {
+	server_ip = FindConVar("hostip").IntValue;
+	server_port = FindConVar("hostport").IntValue;
+	EXGUSERS_GetServerByPort(server_ip,server_port,current_server);
 	g_WTimer_BeforeVote = INVALID_HANDLE;
 	g_WTimer_BeforeMapChange = INVALID_HANDLE;
 	g_Timer_Timeleft = INVALID_HANDLE;
@@ -253,11 +262,8 @@ void RTVOnRoundStart()
 		PrintToServer(buffer);
 	}
 	char query[512];
-	int server_port = FindConVar("hostport").IntValue;
 	if(!current_map_logged)
 	{
-		SERVER_LOG current_server;
-		EXGUSERS_GetServerByPort(server_port,current_server);
 		if(isDbConnected())
 		{
 			Format(query,sizeof(query),"INSERT INTO sourcemod.exgze_maphistory (SVNAME,NOM,NOMNAME,NOMUID,TIMESTAMP,MAPNAME) VALUES('%s',%d,'%s',%d,%d,'%s')",current_server.name,g_LastRound_MapVoteSave.nominated,g_LastRound_MapVoteSave.nominator_name,g_LastRound_MapVoteSave.nominator_uid,GetTime(),map_name);
@@ -271,6 +277,18 @@ void RTVOnRoundEnd()
 	{
 		KillTimerSafe(g_WTimer_BeforeMapChange);
 		g_WTimer_BeforeMapChange = CreateTimer(8.0,ChangeMap_RoundEnd_Hndl, _,TIMER_FLAG_NO_MAPCHANGE);
+	}
+	else
+	{	
+		if(!g_Nextmap_Selected)
+		{
+			int timeleft = 0;
+			GetMapTimeLeft(timeleft);
+			if(timeleft<0)
+			{
+				RandomMapChange(1);
+			}
+		}
 	}
 }
 Action ChangeMap_RoundEnd_Hndl(Handle timer)
@@ -290,19 +308,15 @@ public void OnClientSayCommand_Post(int client, const char[] command, const char
 		AttemptRTV(client);
 	}
 }
-void RandomMapChange()
+void RandomMapChange(int instant = 0)
 {
 	g_RTV_VotesNum = 0;
 	for(int i = 1; i <= 64; i++)
 	{
 		g_RTV_PlyVoted[i] = false;
 	}
-	char buffer[256];
 	Map_Info map;
 	StringMapSnapshot snap=Maps.Snapshot();
-	int server_port = FindConVar("hostport").IntValue;
-	SERVER_LOG current_server;
-	EXGUSERS_GetServerByPort(server_port,current_server);
 	int player_num = GetClientCount(true);
 	ArrayList RandomMapChange_List = CreateArray(sizeof(Map_Info));
 	char current_mapname[64];
@@ -344,8 +358,13 @@ void RandomMapChange()
 	g_Nextmap_Result.nominated = 0;
 	g_Nextmap_Result.nominator_name = "";
 	Cvar_SM_NEXTMAP.SetString(g_Nextmap_Result.name,true,false);
+	delete RandomMapChange_List;
 	PrintToChatAll(" \x05[地图系统]\x01由于管理员设置或者地图系统出现问题，随机选择并更换地图为%s",g_Nextmap_Result.name);
-	CreateTimer(15.0,Timer_RandomChangeMap_Hndl,_,TIMER_FLAG_NO_MAPCHANGE);
+	if(instant==0)
+	{
+		return;
+	}
+	CreateTimer(5.0,Timer_RandomChangeMap_Hndl,_,TIMER_FLAG_NO_MAPCHANGE);
 }
 Action Timer_RandomChangeMap_Hndl(Handle timer)
 {
@@ -562,9 +581,6 @@ void CreateNextMapVote()
 	StringMapSnapshot snap=Maps.Snapshot();
 	int RandomMap_Picked,RandomMap_Order;
 	RandomMap_Picked = 0;
-	int server_port = FindConVar("hostport").IntValue;
-	SERVER_LOG current_server;
-	EXGUSERS_GetServerByPort(server_port,current_server);
 	if(Random_Num>0)
 	{
 		for(int i =0;i < snap.Length ; i++)
