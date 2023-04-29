@@ -18,7 +18,6 @@
 #include "zescape/weaponedit.h"
 #include "zescape/zelevel.h"
 #include "zescape/leaderspr.h"
-#include "zescape/storeplus.h"
 #include "zescape/basic_func.h"
 bool g_pStore;
 public Plugin myinfo = {
@@ -70,7 +69,6 @@ public void OnPluginStart()
 	WeaponEditOnPluginStart();
 	LevelOnPluginStart();
 	LeaderSpriteOnPluginStart();
-	StorePlusOnPluginStart();
 }
 
 public void OnMapStart()

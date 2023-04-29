@@ -16,6 +16,7 @@ SERVER_LOG g_current_server;
 #include <leader>
 #include <mostactive>
 #include <outputinfo>
+#include <weddings>
 #pragma semicolon 1
 #pragma newdecls required
 #include "exgusers/timer.h"
@@ -29,6 +30,7 @@ SERVER_LOG g_current_server;
 #include "exgusers/monitor.h"
 #include "exgusers/nomban.h"
 #include "exgusers/uadmin.h"
+#include "exgusers/storeplus.h"
 const int TIME_PERMANENT = 2000000000;
 public Plugin myinfo = {
 	name = " EXG_CSGO_Users",
@@ -62,6 +64,7 @@ public void OnPluginStart()
 	ServerOnPluginStart();
 	TimerOnPluginStart();
 	uAdminOnPluginStart();
+	StorePlusOnPluginStart();
 }
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {

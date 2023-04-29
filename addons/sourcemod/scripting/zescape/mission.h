@@ -65,43 +65,43 @@ enum struct PlayerMissionRoundBuffer
 char CrateRewardInfo[][]=
 {
 	"人物模型-莱莎[永久]",//金勋 2%
-	"武器模型-FAMAS 无时辩解[永久]",//金勋 2%
+	"人物模型-Padoru[永久]",//金勋 2%
  	"人物模型-心海[永久]",//金勋 1%
 	"MVP音效-萨菲罗斯长号[永久]",
 	"MVP音效-康康舞曲[永久]",
 	"MVP音效-Gimme Da Blood[永久]",
 	"MVP音效-莫扎特D小调安魂曲 继抒咏 神怒之日[永久]",
-	"武器模型-FAMAS 无时辩解[90天]",
-	"武器模型-蝴蝶刀 波光潋滟[90天]",
-	"武器模型-R8 小帮手[90天]",
+	"人物模型-普罗旺斯[30天]",
+	"人物模型-狐九里露露[30天]",
+	"人物模型-八重樱-旗袍[30天]",
 	"MVP音效-88[永久]",
-	"人物模型-心海[90天]",
+	"人物模型-心海[30天]",
 	"MVP音效-没有名字的怪物[永久]",
 	"3000积分",
 	"100积分",
 	"500积分",
 	"MVP音效-[88][30天]",
-	"武器模型-内格夫-加特林 炼狱[30天]",
-	"武器模型-MAG7-撼宇碎星[30天]",
-	"武器模型-AK47-熔岩[30天]",
-	"武器模型-FAMAS-暮光[30天]"
+	"人物模型-普罗旺斯[1天]",
+	"人物模型-狐九里露露[1天]",
+	"人物模型-八重樱-旗袍[1天]",
+	"人物模型-心海[1天]"
 }
-int CrateRewardPoint[] = 
+int CrateRewardPoint[] =
 {
 	2,4,5,8,11,14,17,20,22,24,26,28,30,35,60,75,80,85,90,95,101
 };
 char CrateRewardList[][]=
 {
 	"uid_model_reisalin",
-	"uid_wepskin_wushibb",
+	"uid_model_Padoru",
 	"uid_model_xinhai",
 	"uid_mvp_sound_sephi_trombone",
 	"uid_mvp_sound_cancan",
 	"uid_mvp_sound_gimme",
 	"uid_mvp_requiem",
-	"uid_wepskin_wushibb",
-	"uid_wepskin_waterbutte",
-	"uid_wepskin_apexbs",
+	"uid_model_provence",
+	"uid_model_kokuriruru",
+	"uid_model_qpbcy",
 	"uid_mvp_sound_bababa",
 	"uid_model_xinhai",
 	"uid_mvp_sound_namae_kaibutsu",
@@ -109,10 +109,10 @@ char CrateRewardList[][]=
 	"credits",
 	"credits",
 	"uid_mvp_sound_bababa",
-	"uid_wepskin_jtlly",
-	"uid_wepskin_sgmaimfx",
-	"uid_wepskin_aklava",
-	"uid_wepskin_famasrgb"
+	"uid_model_provence",
+	"uid_model_kokuriruru",
+	"uid_model_qpbcy",
+	"uid_model_xinhai"
 }
 int CrateRewardNum[]=
 {
@@ -123,20 +123,20 @@ int CrateRewardNum[]=
 	0,
 	0,
 	0,
-	90,
-	90,
-	90,
+	30,
+	30,
+	30,
 	0,
-	90,
+	30,
 	0,
 	3000,
 	100,
 	500,
 	30,
-	30,
-	30,
-	30,
-	30
+	1,
+	1,
+	1,
+	1
 }
 int MissionRewardLevels[] =
 {
@@ -203,8 +203,8 @@ PlayerMissionInfo playermission_list[65];
 PlayerMissionInfo nullpmi;
 Missions Current_Mission;
 LEVEL_LOG Mission_Current_Level;
-int g_Daily_Task_Exp_Factor = 1;
-int g_Weekly_Task_Exp_Factor = 1;
+int g_Daily_Task_Exp_Factor = 2;
+int g_Weekly_Task_Exp_Factor = 2;
 int round_starttime;
 int round_endtime;
 const int mission_lowest_playernum = 20;
@@ -453,7 +453,7 @@ void ClearPlayerMissionInfo(int weekly=0)
 
 	if(weekly)
 	{
-		Format(query,sizeof(query),"UPDATE %s SET DINFECT = 0, DKILLZM = 0, DDMGTAKE=0, DDMGMAKE=0, DHIT=0, DNADE=0, DT1ST=0, DT2ST=0, DT3ST=0, DT4ST=0, DT5ST=0, DT6ST=0, WT1ST=0, WT2ST=0, WT3ST=0, WT4ST=0,WT5ST =0, DEXP =0",Current_Mission.playerdbname)
+		Format(query,sizeof(query),"UPDATE %s SET DINFECT = 0, DKILLZM = 0, DDMGTAKE=0, DDMGMAKE=0, DHIT=0, DNADE=0, WINFECT = 0, WKILLZM = 0, WDMGTAKE = 0, WDMGMAKE = 0,WNADE = 0, DT1ST=0, DT2ST=0, DT3ST=0, DT4ST=0, DT5ST=0, DT6ST=0, WT1ST=0, WT2ST=0, WT3ST=0, WT4ST=0,WT5ST =0, DEXP =0",Current_Mission.playerdbname)
 	}
 	PrintToChatAll(" \x05[任务系统]清空大行动任务数据....");
 	DbTQuery(DbClearPlayerMissionInfoCallback,query);
@@ -645,6 +645,7 @@ void MissionOnRoundEnd(int winner)
 	{
 		exp_bonus +=10*Mission_Current_Level.diff;
 	}
+	exp_bonus *= g_Daily_Task_Exp_Factor
 	for(int i=1;i<=64;i++)
 	{
 		if(IsClientInGame(i))
@@ -653,12 +654,12 @@ void MissionOnRoundEnd(int winner)
 			{
 				if(winner==3&&IsPlayerAlive(i)&&ZR_IsClientHuman(i))
 				{
-				
-					PrintToChat(i," \x05[赛季活动]\x01计算地图通关经验为:%d",exp_bonus);
-					int dexp_max = 1500;
+
+					PrintToChat(i," \x05[赛季活动]\x01计算地图通关经验为:%d[+100%]");
+					int dexp_max = 2000;
 					if(IsClientVIP(i))
 					{
-						dexp_max = 2000;
+						dexp_max = 3000;
 					}
 					if(playermission_list[i].dexp+exp_bonus<=dexp_max)
 					{
@@ -938,17 +939,17 @@ void MissionMenuBuild(int client)
 	}
 	Menu menu = CreateMenu(MissionMenuHandler);
 	char buffer[512];
-	int dexp_max = 1500;
+	int dexp_max = 2000;
 	if(IsClientVIP(client))
 	{
-		dexp_max = 2000;
+		dexp_max = 3000;
 	}
 	Format(buffer,sizeof(buffer),"赛季活动\n%s\n%s\nLV.%d/%d\nEXP:%d/%d 今日通关经验:%d/%d",Current_Mission.cnname,Current_Mission.name,playermission_list[client].lvl,Current_Mission.max_level,playermission_list[client].exp,Current_Mission.level_exp,playermission_list[client].dexp,dexp_max);
 	menu.SetTitle(buffer);
 	menu.AddItem("","日常任务[5月19日24点作战结束]");
 	menu.AddItem("","周常任务[5月19日24点作战结束]");
-	menu.AddItem("","奖励兑换[测试期间暂停兑换]",ITEMDRAW_DISABLED);
-	menu.AddItem("","神秘商店[测试期间暂停兑换]",ITEMDRAW_DISABLED);
+	menu.AddItem("","奖励兑换");
+	menu.AddItem("","神秘商店");
 	menu.AddItem("","悬赏任务[暂未开放]",ITEMDRAW_DISABLED);
 	menu.Display(client, MENU_TIME_FOREVER);
 }
@@ -1227,7 +1228,7 @@ int AwardMenuHandle(Menu menu, MenuAction action, int client, int param)
 		}
 		if(GetTime()<=Store_GetClientDataProtect(client))
 		{
-			PrintToChat(client," \x05[赛季活动]\x01数据保护中，无法操作!");			
+			PrintToChat(client," \x05[赛季活动]\x01数据保护中，无法操作!");
 		}
 		if(playermission_list[client].loaded==0)
 		{
@@ -1328,7 +1329,8 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 		int csave = playermission_list[client].csave;
 		if(GetTime()<=Store_GetClientDataProtect(client))
 		{
-			PrintToChat(client," \x05[赛季活动]\x01数据保护中，无法操作!");			
+			PrintToChat(client," \x05[赛季活动]\x01数据保护中，无法操作!");
+			return 0;
 		}
 		switch(param)
 		{
@@ -1433,7 +1435,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 				}
 				else
 				{
-					PrintToChat(client," \x05[赛季活动]\x01音符碎片不足!");					
+					PrintToChat(client," \x05[赛季活动]\x01音符碎片不足!");
 				}
 			}
 			case 6:
@@ -1451,7 +1453,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 				}
 				else
 				{
-					PrintToChat(client," \x05[赛季活动]\x01音符碎片不足!");					
+					PrintToChat(client," \x05[赛季活动]\x01音符碎片不足!");
 				}
 			}
 		}
@@ -1470,7 +1472,7 @@ void MissionOpenCrate(int client)
 	}
 	if(GetTime()<=Store_GetClientDataProtect(client))
 	{
-		PrintToChat(client," \x05[赛季活动]\x01数据保护中，无法操作!");			
+		PrintToChat(client," \x05[赛季活动]\x01数据保护中，无法操作!");
 	}
 	int credits = Store_GetClientCredits(client);
 	int result = GetURandomInt()%100+1;
@@ -1504,7 +1506,7 @@ void MissionOpenCrate(int client)
 					}
 					else
 					{
-						Store_GiveItem(client,item_id,0,0,0);						
+						Store_GiveItem(client,item_id,0,0,0);
 					}
 				}
 				else
