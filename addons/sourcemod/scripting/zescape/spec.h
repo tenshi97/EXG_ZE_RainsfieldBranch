@@ -1,6 +1,7 @@
 void SpecOnPluginStart()
 {
-	RegConsoleCmd("sm_gc",SpecCommand);
+	int flag = view_as<int>(Admin_Ban);
+	RegAdminCmd("sm_gc",SpecCommand , flag );
 }
 Action SpecCommand(int client,int args)
 {
