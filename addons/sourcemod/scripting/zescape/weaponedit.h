@@ -220,12 +220,25 @@ bool WeaponIsClientModifying(int client,const char[] sArgs)
 	{
 		int itemnum = g_client_weaponedit[client].weapon_num;
 		WeaponPurchase_Log weapon_temp;
+		int current_time = GetTime();
+		USER_LOG userinfo_admin;
+		EXGUSERS_GetUserInfo(client,userinfo_admin);
 		ADMIN_LOG admlog_add;
+		admlog_add.uid = userinfo_admin.uid;
+		strcopy(admlog_add.name,sizeof(admlog_add.name),userinfo_admin.name);
 		GetArrayArray(g_WP_List,itemnum,weapon_temp,sizeof(weapon_temp));
+		char map_name[64];
+		
 		if(g_client_weaponedit[client].hook_say == 1)
 		{
+			admlog_add.type=4;
+			admlog_add.value=map.available;
+			admlog_add.valuestr="";
+			admlog_add.target=0;
+			admlog_add.targetstr=map.name;
+			admlog_add.timestamp = current_time;
 			weapon_temp.price = StringToInt(sArgs);
-			
+
 		}
 		else
 		{

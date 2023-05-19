@@ -20,7 +20,6 @@ void ServerOnDbConnected()
 	ServerList = CreateArray(sizeof(SERVER_LOG));
 	DbTQuery(ServerQueryCallback,query);
 	EXGUSERS_serverconnected = true;
-	LoadCurrentServer();
 }
 Action ReloadServerListCommand(int client,int args)
 {
@@ -105,6 +104,7 @@ void LoadCurrentServer()
 		GetArrayArray(ServerList,i,server_temp,sizeof(server_temp));
 		if(server_temp.port==hostport&&strcmp(hostip,server_temp.ip,false)==0)
 		{
+
 			g_current_server = server_temp;
 			break;
 		}
@@ -121,7 +121,7 @@ void GetServerBySID(int sid,SERVER_LOG server)
 			server = server_temp;
 			return;
 		}
-	}	
+	}
 	server.sid = 0;
 	server.port = 0;
 	server.name = "未知服务器";
@@ -152,6 +152,7 @@ public int Native_EXGUSERS_GetServerByPort(Handle plugin, int numParams)
 		server_ret.sid = 0;
 		server_ret.port = 0;
 		server_ret.name = "未知服务器";
+		server_ret.shortname = "unknown"
 		server_ret.mode = 0;
 		server_ret.ze_fatigue = 0;
 	}

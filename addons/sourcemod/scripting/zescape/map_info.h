@@ -39,17 +39,45 @@ Action ActionMapHistoryList(int client,int args)
 {
 	if(client<=0||client>=65)	return Plugin_Handled;
 	if(!IsClientInGame(client))	return Plugin_Handled;
-	MapHistoryListMake(client);
+	MapHistoryServerMenu(client);
 	return Plugin_Handled;
 }
-void MapHistoryListMake(int client)
+void MapHistoryServerMenu(int client)
+{
+	Menu menu = CreateMenu(MapHistoryServerMenuHandler);
+	menu.SetTitle("地图历史-服务器选择");
+	menu.AddItem("1f","1f");
+	menu.AddItem("2f","2f");
+	menu.AddItem("3f","3f");
+	menu.AddItem("4f","4f");
+	menu.AddItem("5f","5f");
+	menu.AddItem("6f","6f");
+	menu.Display(client,MENU_TIME_FOREVER);
+}
+
+int MapHistoryServerMenuHandler(Menu menu, MenuAction action, int client, int param)
+{
+	if (action == MenuAction_End||client<=0||client>=65)
+	{
+		delete menu;
+		return 0;
+	}
+	else if(action == MenuAction_Select)
+	{
+		char buffer[PLATFORM_MAX_PATH];
+		menu.GetItem(param,buffer,sizeof(buffer));
+		MapHistoryListMake(client,buffer);
+	}
+}
+
+void MapHistoryListMake(int client,const char[] svname)
 {
 	char query[512];
 	int ip_test = FindConVar("hostip").IntValue;
 	char ip_adr[64];
 	IPNumToIPV4(ip_test,ip_adr,sizeof(ip_adr));
-	PrintToChat(client,"%d\n%s",ip_test,ip_adr);
-	Format(query,sizeof(query),"SELECT * FROM exgze_maphistory LIMIT 300");
+	Format(query,sizeof(query),"SELECT * FROM exgze_maphistory WHERE SVNAME = '%s' ORDER BY TIMESTAMP DESC LIMIT 300",svname);
+	PrintToConsole(client,query);
 	DbTQuery(MapHistoryListMakeCallback,query,client);
 }
 int MapHistoryListMakeCallback(Handle owner, Handle hndl, char[] error, any data)
@@ -79,9 +107,10 @@ int MapHistoryListMakeCallback(Handle owner, Handle hndl, char[] error, any data
 		timestamp = DbFetchInt(hndl,"TIMESTAMP");
 		nom = DbFetchInt(hndl,"NOM");
 		FormatTime(ctime,sizeof(ctime),NULL_STRING,timestamp);
-		Format(buffer,sizeof(buffer),"%s[%s]\n[%s]%s[UID:%d]",mapname,svname,ctime,nom?nomname:"野生",nom?uid:-1);
+		Format(buffer,sizeof(buffer),"%s\n运行时间:[%s] 预定者/野生:%s[UID:%d]",mapname,ctime,nom?nomname:"野生",nom?uid:-1);
 		menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 	}
+	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 	delete hndl;
 	return 0;
@@ -92,6 +121,10 @@ int MapHistoryListHandler(Menu menu, MenuAction action, int client, int param)
 	if(action == MenuAction_End)
 	{
 		delete menu;
+	}
+	else if (param == MenuCancel_ExitBack)
+	{
+		MapHistoryServerMenu(client);
 	}
 	return 0;
 }

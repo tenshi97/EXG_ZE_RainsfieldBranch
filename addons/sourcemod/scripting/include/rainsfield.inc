@@ -138,7 +138,7 @@ native bool RY_MapProperty_BanZombieSkills();
 
 /**
  * Return Current Map's Property of Banning JK Function
- * @return	True if Current Map Banned JK Functiom
+ * @return	True if Current Map Banned JK wFunctiom
  */
 native bool RY_MapProperty_BanJK();
 

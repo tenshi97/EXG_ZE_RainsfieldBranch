@@ -266,9 +266,10 @@ void RTVOnRoundStart()
 	{
 		if(isDbConnected())
 		{
-			Format(query,sizeof(query),"INSERT INTO sourcemod.exgze_maphistory (SVNAME,NOM,NOMNAME,NOMUID,TIMESTAMP,MAPNAME) VALUES('%s',%d,'%s',%d,%d,'%s')",current_server.name,g_LastRound_MapVoteSave.nominated,g_LastRound_MapVoteSave.nominator_name,g_LastRound_MapVoteSave.nominator_uid,GetTime(),map_name);
+			Format(query,sizeof(query),"INSERT INTO sourcemod.exgze_maphistory (SVNAME,NOM,NOMNAME,NOMUID,TIMESTAMP,MAPNAME) VALUES('%s',%d,'%s',%d,%d,'%s')",current_server.shortname,g_LastRound_MapVoteSave.nominated,g_LastRound_MapVoteSave.nominator_name,g_LastRound_MapVoteSave.nominator_uid,GetTime(),map_name);
 			DbTQuery(DbQueryErrorCallback,query);
 		}
+		current_map_logged = true;
 	}
 }
 void RTVOnRoundEnd()

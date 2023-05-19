@@ -655,7 +655,7 @@ void MissionOnRoundEnd(int winner)
 				if(winner==3&&IsPlayerAlive(i)&&ZR_IsClientHuman(i))
 				{
 
-					PrintToChat(i," \x05[赛季活动]\x01计算地图通关经验为:%d[+100%]");
+					PrintToChat(i," \x05[赛季活动]\x01计算地图通关经验为:%d[双倍]",exp_bonus);
 					int dexp_max = 2000;
 					if(IsClientVIP(i))
 					{
@@ -1229,22 +1229,23 @@ int AwardMenuHandle(Menu menu, MenuAction action, int client, int param)
 		if(GetTime()<=Store_GetClientDataProtect(client))
 		{
 			PrintToChat(client," \x05[赛季活动]\x01数据保护中，无法操作!");
+			return 0;
 		}
 		if(playermission_list[client].loaded==0)
 		{
-			PrintToChat(client," \x05[任务系统]数据未载入，无法购买(请等待下一回合或输入!msr)");
+			PrintToChat(client," \x05[赛季活动]数据未载入，无法购买(请等待下一回合或输入!msr)");
 			return 0;
 		}
 		int client_credits = Store_GetClientCredits(client);
 		if(playermission_list[client].sp&(1<<(param)))
 		{
-			PrintToChat(client," \x05[任务系统]\x01已经领取过该奖励！");
+			PrintToChat(client," \x05[赛季活动]\x01已经领取过该奖励！");
 			AwardMenu(client);
 			return 0;
 		}
 		if(playermission_list[client].lvl<MissionRewardLevels[param])
 		{
-			PrintToChat(client," \x05[任务系统]\x01领取所需等级不足!需要赛季等级\x09%d\x01级，而你只有\x09%d\x01级",MissionRewardLevels[param],playermission_list[client].lvl);
+			PrintToChat(client," \x05[赛季活动]\x01领取所需等级不足!需要赛季等级\x09%d\x01级，而你只有\x09%d\x01级",MissionRewardLevels[param],playermission_list[client].lvl);
 			AwardMenu(client);
 			return 0;
 		}

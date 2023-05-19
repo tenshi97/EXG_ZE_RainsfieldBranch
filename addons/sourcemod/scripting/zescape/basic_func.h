@@ -137,6 +137,10 @@ void IPNumToIPV4(int ipnum,char[] ipadr,int maxlen)
 	int x = (ipnum/65536)% 256;
 	int y = (ipnum/256) % 256;
 	int z = ipnum% 256;
+	if(w<0)	w+=255;
+	if(x<0) x+=255;
+	if(y<0) y+=255;
+	if(z<0) z+=256;
 	Format(ipadr,maxlen,"%d.%d.%d.%d",w,x,y,z);
 }
 int IPV4ToIPNum(char[] ipadr,int maxlen)

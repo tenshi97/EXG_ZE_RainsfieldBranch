@@ -2,6 +2,7 @@ void StorePlusOnPluginStart()
 {
     RegAdminCmd("sm_gift",Command_Gift,ADMFLAG_GENERIC);
     RegConsoleCmd("sm_zz",Command_Pay);
+//    RegConsoleCmd("sm_cj",Command_CJ);
 }
 Action Command_Gift(int client,int args)
 {
@@ -37,7 +38,7 @@ Action Command_Gift(int client,int args)
         }
         if(credits<target_count*credits_give)
         {
-            PrintToChat(client," \x05[商店系统]\x01你的积分不够发放!");           
+            PrintToChat(client," \x05[商店系统]\x01你的积分不够发放!");
             return Plugin_Handled;
         }
         int receiver_credits;
