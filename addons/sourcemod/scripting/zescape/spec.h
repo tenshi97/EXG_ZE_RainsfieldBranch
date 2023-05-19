@@ -1,7 +1,6 @@
 void SpecOnPluginStart()
 {
-	int flag = view_as<int>(Admin_Ban);
-	RegAdminCmd("sm_gc",SpecCommand , flag );
+	RegConsoleCmd("sm_gc",SpecCommand);
 }
 Action SpecCommand(int client,int args)
 {
@@ -19,13 +18,10 @@ Action SpecCommand(int client,int args)
 		{
 			if(IsClientInGame(i))
 			{
-				if(!IsFakeClient(i))
-				{
-					char index[4];
-					IntToString(i, index, sizeof(index));
-					GetClientName(i, target_name, sizeof(target_name));
-					menu.AddItem(index,target_name);
-				}
+				char index[4];
+				IntToString(i, index, sizeof(index));
+				GetClientName(i, target_name, sizeof(target_name));
+				menu.AddItem(index,target_name);
 			}
 		}
 		menu.Display(client, MENU_TIME_FOREVER);
