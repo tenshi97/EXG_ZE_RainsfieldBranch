@@ -280,7 +280,7 @@ void RTVOnRoundEnd()
 		g_WTimer_BeforeMapChange = CreateTimer(8.0,ChangeMap_RoundEnd_Hndl, _,TIMER_FLAG_NO_MAPCHANGE);
 	}
 	else
-	{	
+	{
 		if(!g_Nextmap_Selected)
 		{
 			int timeleft = 0;

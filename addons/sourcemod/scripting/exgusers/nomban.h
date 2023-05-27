@@ -2,7 +2,7 @@ void NomBanOnUserLoadCheck(int client)
 {
     char query[512];
     int uid=g_Users[client].uid;
-    Format(query,sizeof(query),"SELECT * FROM exgusers_nombanlog WHERE UID = %d",uid);
+    Format(query,sizeof(query),"SELECT * FROM exgusers_nombanlog WHERE UID = %d AND EFFECT = 1",uid);
     if(!IsClientInGame(client)) return;
     if(client<=0||client>64)    return;
     DbTQuery(NomBanLoadCallback,query,client);
@@ -88,7 +88,7 @@ void AddNomBanLog(int client,int duration,char[] reason="",int adminclient)
         PrintToChatAll(" \x05[NBAN]\x01玩家\x07%s\x01被管理员\x07%s\x01封禁订图权限\x07%d分钟",pName,adminName,duration);
     }
     SetNomBanState(client,1,expire);
-    Format(query,sizeof(query),"INSERT INTO exgusers_nombanlog (UID,EXPIRE,REASON,ADMIN_UID) VALUES(%d,%d,'%s',%d)",uid,expire,reason,adminuid);
+    Format(query,sizeof(query),"INSERT INTO exgusers_nombanlog (UID,EXPIRE,REASON,ADMIN_UID,EFFECT) VALUES(%d,%d,'%s',%d,1)",uid,expire,reason,adminuid);
     DbTQuery(DbQueryErrorCallback,query);
 }
 
@@ -118,20 +118,19 @@ void RemoveNomBanLog(int client,int adminclient)
 void DeleteNomBanLog(int bid)
 {
     char query[512];
-    Format(query,sizeof(query),"DELETE FROM exgusers_nombanlog WHERE BID = %d",bid);
+    Format(query,sizeof(query),"UPDATE exgusers_nombanlog SET EFFECT = 0 WHERE BID = %d",bid);
     DbTQuery(DbQueryErrorCallback,query);
 }
 void DeleteNomBanLogByUID(int uid)
 {
     char query[512];
-    Format(query,sizeof(query),"DELETE FROM exgusers_nombanlog WHERE UID = %d",uid);
+    Format(query,sizeof(query),"UPDATE exgusers_nombanlog SET EFFECT = 0 WHERE UID = %d",uid);
     DbTQuery(DbQueryErrorCallback,query);
 }
 void NomBanLogTimerCheck()
 {
     char query[512];
-    Format(query,sizeof(query),"SELECT * FROM exgusers_nombanlog");
-    PrintToServer(" [EXGUSERS TIMER]%d",GetTime());
+    Format(query,sizeof(query),"SELECT * FROM exgusers_nombanlog WHERE EFFECT = 1");
     DbTQuery(NomBanLogTimerCheckCallback,query);
 }
 void NomBanLogTimerCheckCallback(Handle owner, Handle hndl, char[] error, any data)

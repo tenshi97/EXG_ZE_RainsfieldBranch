@@ -32,6 +32,7 @@ SERVER_LOG g_current_server;
 #include "exgusers/uadmin.h"
 #include "exgusers/storeplus.h"
 const int TIME_PERMANENT = 2000000000;
+int pay_limit[65]={0};
 public Plugin myinfo = {
 	name = " EXG_CSGO_Users",
 	author = "Rainsfield&WackoD&ExgNullable",
@@ -58,6 +59,7 @@ public void OnLibraryRemoved(const char[] name)
 }
 public void OnPluginStart()
 {
+	LoadTranslations("common.phrases");
 	DbOnPluginStart();
 	AnnouncementOnPluginStart();
 	UsersAdmOnPluginStart();
@@ -84,6 +86,7 @@ public void OnMapStart()
 {
 	if(!isDbConnected())	return;
 	AnnouncementOnMapStart();
+	StorePlusOnMapStart();
 }
 
 public void OnClientPostAdminCheck(int client)
@@ -94,4 +97,8 @@ public void OnClientDisconnect(int client)
 {
 	MonitorOnClientDisconnect(client);
 	UsersOnClientDisconnect(client);
+}
+public void RY_Daily_TimerCheck_Update(int start_time, int new_time, int days_delta)
+{
+	ClearPayLimit();
 }

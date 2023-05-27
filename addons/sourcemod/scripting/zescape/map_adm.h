@@ -42,7 +42,14 @@ enum AdmLog_Type
 	DEFAULT = 0,
 	CHANGE_COOLDOWN = 1,
 	CHANGE_COST = 2,
-	TOGGLE_AVAILABLE = 3
+	TOGGLE_AVAILABLE = 3,
+	CHANGE_WEAPON_AVAILABLE = 4,
+	CHANGE_WEAPON_NUM = 5,
+	CHANGE_WEAPON_PRICE = 6,
+	TOGGLE_ZMCLASS = 7,
+	TOGGLE_HMCLASS = 8,
+	TOGGLE_ZMHERO = 9,
+	TOGGLE_HMHERO = 10
 };
 int tag_num=11;
 char difficulty_name[5][10]={"简单","普通","困难","高难","傻逼"};
@@ -188,7 +195,7 @@ int MapAdminHistoryMenuHandler(Menu menu, MenuAction action, int client, int par
 void MapAdminHistoryView(int client,Map_Info map)
 {
 	char query[512];
-	Format(query,sizeof(query),"SELECT * FROM exgusers_mapadmlog WHERE TARGETSTR = '%s' LIMIT 300",map.name);
+	Format(query,sizeof(query),"SELECT * FROM exgusers_mapadmlog WHERE TARGETSTR = '%s' ORDER BY TIMESTAMP DESC LIMIT 300",map.name);
 	DbMQuery(MapAdminHistoryViewCallback,query,client);
 }
 void MapAdminHistoryViewCallback(Handle owner, Handle hndl, char[] error, any data)
@@ -244,6 +251,41 @@ void MapAdminHistoryViewCallback(Handle owner, Handle hndl, char[] error, any da
 				Format(buffer,sizeof(buffer),"开放订阅:%s[%s]\n操作人:[%d]%s",value?"开":"关",ctime,admin_uid,admin_name);
 				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 			}
+			case CHANGE_WEAPON_AVAILABLE:
+			{
+				Format(buffer,sizeof(buffer),"%s开放购买:%s[%s]\n操作人:%s[UID:%d]",valuestr,value?"开":"关",ctime,admin_name,admin_uid);
+				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+			}
+			case CHANGE_WEAPON_NUM:
+			{
+				Format(buffer,sizeof(buffer),"%s购买数量:%d[%s]\n操作人:%s[UID:%d]",valuestr,value,ctime,admin_name,admin_uid);
+				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+			}
+			case CHANGE_WEAPON_PRICE:
+			{
+				Format(buffer,sizeof(buffer),"%s购买价格:%d[%s]\n操作人:%s[UID:%d]",valuestr,value,ctime,admin_name,admin_uid);
+				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+			}
+			case TOGGLE_ZMCLASS:
+			{
+				Format(buffer,sizeof(buffer),"僵尸类型:%s[%s]\n操作人:%s[UID:%d]",value?"开":"关",ctime,admin_name,admin_uid);
+				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+			}
+			case TOGGLE_HMCLASS:
+			{
+				Format(buffer,sizeof(buffer),"人类类型:%s[%s]\n操作人:%s[UID:%d]",value?"开":"关",ctime,admin_name,admin_uid);
+				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+			}
+			case TOGGLE_ZMHERO:
+			{
+				Format(buffer,sizeof(buffer),"僵尸英雄:%s[%s]\n操作人:%s[UID:%d]",value?"开":"关",ctime,admin_name,admin_uid);
+				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+			}
+			case TOGGLE_HMHERO:
+			{
+				Format(buffer,sizeof(buffer),"人类英雄:%s[%s]\n操作人:%s[UID:%d]",value?"开":"关",ctime,admin_name,admin_uid);
+				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+			}
 			default:
 			{
 				Format(buffer,sizeof(buffer),"未知操作[%s]\n操作人:[%d]%s",ctime,admin_uid,admin_name);
@@ -274,6 +316,41 @@ void MapAdminHistoryViewCallback(Handle owner, Handle hndl, char[] error, any da
 				case TOGGLE_AVAILABLE:
 				{
 					Format(buffer,sizeof(buffer),"开放订阅:%s[%s]\n操作人:[%d]%s",value?"开":"关",ctime,admin_uid,admin_name);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case CHANGE_WEAPON_AVAILABLE:
+				{
+					Format(buffer,sizeof(buffer),"%s开放购买:%s[%s]\n操作人:%s[UID:%d]",valuestr,value?"开":"关",ctime,admin_name,admin_uid);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case CHANGE_WEAPON_NUM:
+				{
+					Format(buffer,sizeof(buffer),"%s购买数量:%d[%s]\n操作人:%s[UID:%d]",valuestr,value,ctime,admin_name,admin_uid);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case CHANGE_WEAPON_PRICE:
+				{
+					Format(buffer,sizeof(buffer),"%s购买价格:%d[%s]\n操作人:%s[UID:%d]",valuestr,value,ctime,admin_name,admin_uid);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case TOGGLE_ZMCLASS:
+				{
+					Format(buffer,sizeof(buffer),"僵尸类型:%d[%s]\n操作人:%s[UID:%d]",value?"开":"关",ctime,admin_name,admin_uid);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case TOGGLE_HMCLASS:
+				{
+					Format(buffer,sizeof(buffer),"人类类型:%d[%s]\n操作人:%s[UID:%d]",value?"开":"关",ctime,admin_name,admin_uid);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case TOGGLE_ZMHERO:
+				{
+					Format(buffer,sizeof(buffer),"僵尸英雄:%d[%s]\n操作人:%s[UID:%d]",value?"开":"关",ctime,admin_name,admin_uid);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case TOGGLE_HMHERO:
+				{
+					Format(buffer,sizeof(buffer),"人类英雄:%d[%s]\n操作人:%s[UID:%d]",value?"开":"关",ctime,admin_name,admin_uid);
 					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 				}
 				default:
@@ -481,12 +558,20 @@ void MapDataLoadCallback(Handle owner, Handle hndl, char[] error, any data)
 		map.zmhero = DbFetchInt(hndl,"ZMHERO");
 		map.hmhero = DbFetchInt(hndl,"HMHERO");
 		map.zmhprecover = DbFetchFloat(hndl,"ZMHPRECOVER");
+		int tempcd = DbFetchInt(hndl,"TEMPCD");
+		if(tempcd)
+		{
+			map.temp_cooldown = true;
+		}
+		else
+		{
+			map.temp_cooldown = false;
+		}
 		Maps.SetArray(map.name, map, sizeof(map), true);
 //		Format(buffer,sizeof(buffer),"[MapDataLoad]Added Map List:%s",mapl.name);
 //		PrintToServer(buffer);
 		Map_List.PushArray(mapl,sizeof(mapl));
 		if(map.id>Map_Id_Max)	Map_Id_Max = map.id;
-		map.temp_cooldown = false;
 		//PrintToServer("%d %s",map.id,map.name);
 	}
 	MapFileReload();
@@ -536,6 +621,7 @@ void MapFileReload()
 	PrintToServer("[test]4 MFE END");
 	g_Map_Loaded = true;
 	MapInfoOnDbConnected_MapStartPost();
+	delete dl;
 }
 
 void NewMapFileUpdate(Map_Info map)
@@ -890,6 +976,22 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 			else map.zmclass = 1;
 			MapCfgUpdate(map);
 			MapAdminConfigMenu(client,map);
+
+			int current_time = GetTime();
+			USER_LOG userinfo_admin;
+			EXGUSERS_GetUserInfo(client,userinfo_admin);
+			ADMIN_LOG admlog_add;
+			admlog_add.uid = userinfo_admin.uid;
+			strcopy(admlog_add.name,sizeof(admlog_add.name),userinfo_admin.name);
+			admlog_add.type=7;
+			admlog_add.value=map.zmclass;
+			admlog_add.valuestr="";
+			admlog_add.target=0;
+			admlog_add.targetstr=map.name;
+			admlog_add.timestamp = current_time;
+			EXGUSERS_AddAdminLog(admlog_add);
+
+
 		}
 		if(param == 25)
 		{
@@ -897,6 +999,20 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 			else map.hmclass = 1;
 			MapCfgUpdate(map);
 			MapAdminConfigMenu(client,map);
+
+			int current_time = GetTime();
+			USER_LOG userinfo_admin;
+			EXGUSERS_GetUserInfo(client,userinfo_admin);
+			ADMIN_LOG admlog_add;
+			admlog_add.uid = userinfo_admin.uid;
+			strcopy(admlog_add.name,sizeof(admlog_add.name),userinfo_admin.name);
+			admlog_add.type=8;
+			admlog_add.value=map.hmclass;
+			admlog_add.valuestr="";
+			admlog_add.target=0;
+			admlog_add.targetstr=map.name;
+			admlog_add.timestamp = current_time;
+			EXGUSERS_AddAdminLog(admlog_add);
 		}
 		if(param == 26)
 		{
@@ -904,6 +1020,20 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 			else map.zmhero = 1;
 			MapCfgUpdate(map);
 			MapAdminConfigMenu(client,map);
+
+			int current_time = GetTime();
+			USER_LOG userinfo_admin;
+			EXGUSERS_GetUserInfo(client,userinfo_admin);
+			ADMIN_LOG admlog_add;
+			admlog_add.uid = userinfo_admin.uid;
+			strcopy(admlog_add.name,sizeof(admlog_add.name),userinfo_admin.name);
+			admlog_add.type=9;
+			admlog_add.value=map.zmhero;
+			admlog_add.valuestr="";
+			admlog_add.target=0;
+			admlog_add.targetstr=map.name;
+			admlog_add.timestamp = current_time;
+			EXGUSERS_AddAdminLog(admlog_add);
 		}
 		if(param == 27)
 		{
@@ -911,6 +1041,20 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 			else map.hmhero = 1;
 			MapCfgUpdate(map);
 			MapAdminConfigMenu(client,map);
+
+			int current_time = GetTime();
+			USER_LOG userinfo_admin;
+			EXGUSERS_GetUserInfo(client,userinfo_admin);
+			ADMIN_LOG admlog_add;
+			admlog_add.uid = userinfo_admin.uid;
+			strcopy(admlog_add.name,sizeof(admlog_add.name),userinfo_admin.name);
+			admlog_add.type=10;
+			admlog_add.value=map.hmhero;
+			admlog_add.valuestr="";
+			admlog_add.target=0;
+			admlog_add.targetstr=map.name;
+			admlog_add.timestamp = current_time;
+			EXGUSERS_AddAdminLog(admlog_add);
 		}
 	}
 	return 0;
@@ -1079,7 +1223,7 @@ void MapCfgUpdate(Map_Info map)
 	File mapadm_update_output = OpenFile(path,"a",false);
 	mapadm_update_output.WriteLine("%s",map.name);
 	char query[2048];
-	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d, WINS = %d, FATIGUE = %d, INFECTTIME = %f,EGO = %d,VIS = %d, TAG = %d, DMGSCALE = %f, TAGSCALE = %d, KNOCKBACK = %f, ZMHPSCALE = %f, MR = %d, MRX = %f, MRY = %f, MRZ = %f, PLUPPER = %d, PLLOWER = %d, ZMCLASS =%d, HMCLASS = %d, ZMHERO = %d, HMHERO = %d, ZMHPRECOVER = %f WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.wins,map.interval,map.infecttime,map.ego,map.vis,map.tag,map.dmgscale,map.tagscale,map.knockback,map.zmhpscale,map.mr,map.mrx,map.mry,map.mrz,map.plupper,map.pllower,map.zmclass,map.hmclass,map.zmhero,map.hmhero,map.zmhprecover,map.id,map.name);
+	Format(query,sizeof(query),"UPDATE zemaps SET CN_NAME = '%s', COOLDOWN = %d, COST = %d, LAST_RUN_TIME = %d, ROUND = %d,AVAILABLE = %d,DOWNLOAD = %d,DIFFICULTY = %d, RANDOM = %d, EXTEND = %d, TIMELIMIT = %d, NOHMSKILL = %d, NOZMSKILL = %d, NOJK = %d, NOBHOPLIMIT = %d, WINS = %d, FATIGUE = %d, INFECTTIME = %f,EGO = %d,VIS = %d, TAG = %d, DMGSCALE = %f, TAGSCALE = %d, KNOCKBACK = %f, ZMHPSCALE = %f, MR = %d, MRX = %f, MRY = %f, MRZ = %f, PLUPPER = %d, PLLOWER = %d, ZMCLASS =%d, HMCLASS = %d, ZMHERO = %d, HMHERO = %d, ZMHPRECOVER = %f, TEMPCD = %d WHERE ID = %d and NAME = '%s'",map.name_cn,map.cooldown,map.cost,map.last_run_time,map.round,map.available,map.download,map.difficulty,map.random,map.extend,map.timelimit,map.nohmskill,map.nozmskill,map.nojk,map.nobhoplimit,map.wins,map.interval,map.infecttime,map.ego,map.vis,map.tag,map.dmgscale,map.tagscale,map.knockback,map.zmhpscale,map.mr,map.mrx,map.mry,map.mrz,map.plupper,map.pllower,map.zmclass,map.hmclass,map.zmhero,map.hmhero,map.zmhprecover,map.temp_cooldown?1:0,map.id,map.name);
 	PrintToServer(query);
 	DbMQuery(DbQueryErrorCallback,query);
 	Map_Log mapl;

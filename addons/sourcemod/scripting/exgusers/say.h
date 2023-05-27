@@ -10,5 +10,9 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 		SuperChat(client,message);
 		return Plugin_Handled;
 	}
+	if(SayJudgeOnHB(client,command,sArgs))
+	{
+		return Plugin_Handled;
+	}
 	return Plugin_Continue;
 }

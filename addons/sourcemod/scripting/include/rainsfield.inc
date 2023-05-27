@@ -99,6 +99,15 @@ enum struct USER_LOG
     int last_login;
     int regtime;
 }
+enum struct USER_STOREPLUS_LOG
+{
+    int loaded;
+    int uid;
+    int pay_daily;
+    int qd;
+    int qd_time;
+    int qd_start;
+}
 enum struct SERVER_LOG
 {
     int sid;

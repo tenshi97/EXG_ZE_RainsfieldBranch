@@ -247,6 +247,7 @@ int NomMapInfoMenuHandler(Menu menu, MenuAction action, int client, int param)
 			map.temp_cooldown = true;
 			Maps.SetArray(map.name,map,sizeof(map),true);
 			Format(buffer,sizeof(buffer)," \x05[EMC] \x09%s \x01重置了地图 \x07%s \x01的冷却",client_name,map.name);
+			MapCfgUpdate(map);
 			PrintToChatAll(buffer);
 		}
 		else if (param == 2)

@@ -1,4 +1,5 @@
 USER_LOG g_Users[65];
+USER_STOREPLUS_LOG g_Users_sp[65];
 char player_title_name[6][64]={"狗管理","服主","MAPPER","MODDER","大爷","糕手"};
 
 GlobalForward g_fwOnUserLoaded;
@@ -30,6 +31,11 @@ void UsersOnClientInServer(int client)
 {
 	g_Users[client].uid=0;
 	g_Users[client].loaded=0;
+	g_Users_sp[client].uid = 0;
+	g_Users_sp[client].loaded = 0;
+	g_Users_sp[client].pay_daily = 0;
+	g_Users_sp[client].qd_time = 0;
+	g_Users_sp[client].qd = 0;
 	LoadUserInfo(client);
 }
 
@@ -48,6 +54,11 @@ void UsersOnClientDisconnect(int client)
 {
 	g_Users[client].uid=0;
 	g_Users[client].loaded=0;
+	g_Users_sp[client].uid = 0;
+	g_Users_sp[client].loaded = 0;
+	g_Users_sp[client].pay_daily = 0;
+	g_Users_sp[client].qd_time = 0;
+	g_Users_sp[client].qd = 0;
 }
 
 void LoadUserInfo(int client)
@@ -119,6 +130,12 @@ int LoadUserInfoCallBack(Handle owner, Handle hndl, char[] error, DataPack dp)
 		g_Users[client].uid = DbFetchInt(hndl,"UID");
 		g_Users[client].regtime = DbFetchInt(hndl,"REGTIME");
 		g_Users[client].last_login = current_time;
+		g_Users_sp[client].loaded = 1;
+		g_Users_sp[client].uid = g_Users[client].uid;
+		g_Users_sp[client].pay_daily = DbFetchInt(hndl,"PAYDAILY");
+		g_Users_sp[client].qd = DbFetchInt(hndl,"QD");
+		g_Users_sp[client].qd_time = DbFetchInt(hndl,"QDTIME");
+		g_Users_sp[client].qd_start = DbFetchInt(hndl,"QDSTART");
 		strcopy(g_Users[client].name,sizeof(client_name),client_name);
 		Format(query,sizeof(query),"UPDATE exgusers SET NAME = '%s', LAST_LOGIN = %d WHERE AUTHID = '%s'",client_name,current_time,auth_id);
 		PrintToServer(query);
@@ -155,16 +172,49 @@ void ReloadNewUserInfoCallback(Handle owner, Handle hndl, char[] error, any data
 		g_Users[client].uid = DbFetchInt(hndl,"UID");
 		g_Users[client].loaded=1;
 		MonitorOnClientConnect(client);
-
+		g_Users_sp[client].uid = g_Users[client].uid;
+		g_Users_sp[client].pay_daily = DbFetchInt(hndl,"PAYDAILY");
+		g_Users_sp[client].qd = DbFetchInt(hndl,"QD");
+		g_Users_sp[client].qd_time = DbFetchInt(hndl,"QDTIME");
+		g_Users_sp[client].qd_start = DbFetchInt(hndl,"QDSTART");
+		g_Users_sp[client].loaded = 1;
 		Call_OnUserLoaded(client);
 	}
 	else
 	{
 		g_Users[client].loaded = 0;
+		g_Users_sp[client].loaded = 0;
 	}
 	delete hndl;
 }
+void QDCheck(int client)
+{
+	if(GetTime()/86400-g_Users_sp[client].qd_start/86400>=7)
+	{
+		g_Users_sp[client].qd = 0;
+		g_Users_sp[client].qd_time = 0;
+		g_Users_sp[client].qd_start = 0;
+	}
+}
 
+void ClearPayLimit()
+{
+	for(int i=1;i<=64;i++)
+	{
+		if(IsClientInGame(i))
+		{
+			if(!IsFakeClient(i))
+			{
+				g_Users_sp[i].pay_daily = 0;
+				UpdateUserInfo(i)
+			}
+		}
+	}
+	char query[512];
+	Format(query,sizeof(query),"UPDATE exgusers SET PAYDAILY = 0");
+	DbTQuery(DbQueryErrorCallback,query);
+
+}
 /*void UserAdminMenu(int client)
 {
 	Menu menu = CreateMenu(UserAdminMenuHandler);
@@ -180,7 +230,11 @@ void UserInfoMenu(int client)
 {
 	Menu menu = CreateMenu(UserInfoMenuHandler);
 	char buffer[512];
-	menu.SetTitle("用户信息\nUID:%d",g_Users[client].uid);
+	int steam64 = GetSteamAccountID(client);
+	char auth_id[64];
+	GetClientAuthId(client, AuthId_Steam2, auth_id, sizeof(auth_id), true)
+	int sid = Store_GetClientID(client);
+	menu.SetTitle("用户信息\nUID:%d\n商店ID:%d\nSTEAMAUTH:%s\nSTEAM64:%d",g_Users[client].uid,sid,auth_id,steam64);
 	menu.AddItem("","帐号状态");
 	menu.AddItem("","偏好设置",ITEMDRAW_DISABLED);
 	menu.Display(client,MENU_TIME_FOREVER);
@@ -234,6 +288,8 @@ void UserStatusMenu(int client)
 	}
 	Format(buffer,sizeof(buffer),"提名封禁:%s%s%s", g_Users[client].nomban?"封禁":"正常", g_Users[client].nomban?"\n":"", g_Users[client].nomban?ctime:"");
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"转账额度:%d/10000",g_Users_sp[client].pay_daily);
+	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 	menu.Display(client,MENU_TIME_FOREVER);
 }
 int UserStatusMenuHandler(Menu menu, MenuAction action, int client, int param)
@@ -267,6 +323,12 @@ void Call_OnUserLoaded(int client)
 
 void UpdateUserInfo(int client)
 {
+	if(g_Users_sp[client].loaded==0)
+	{
+		return;
+	}
 	char query[512];
-
+	Format(query,sizeof(query),"UPDATE exgusers SET QD = %d, QDTIME = %d, QDSTART = %d, PAYDAILY = %d WHERE UID = %d",g_Users_sp[client].qd,g_Users_sp[client].qd_time,g_Users_sp[client].qd_start,g_Users_sp[client].pay_daily,g_Users_sp[client].uid);
+	PrintToServer(query);
+	DbTQuery(DbQueryErrorCallback,query);
 }

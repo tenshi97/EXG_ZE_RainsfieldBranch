@@ -2,6 +2,7 @@ char g_wp_path[256];
 KeyValues kv_wp;
 ArrayList g_WP_List;
 ArrayList g_WP_Default_List;
+static char map_name[64];
 enum struct Weapon_AdmEditing
 {
 	int hook_say;
@@ -30,7 +31,6 @@ void WeaponEditOnMapStart()
 	delete kv_wp;
 	delete g_WP_List;
 	g_WP_List = CreateArray(sizeof(WeaponPurchase_Log));
-	char map_name[64];
 	GetCurrentMap(map_name,sizeof(map_name));
 	BuildPath(Path_SM,g_wp_path,sizeof(g_wp_path),"configs/gun_menu/%s.txt",map_name);
 	PrintToConsoleAll("[Rainsfield Debugger]%s",g_wp_path);
@@ -155,6 +155,19 @@ int WeaponSetMenuHandler(Menu menu, MenuAction action, int client, int param)
 				g_WP_List.SetArray(weapon_num,weapon_temp,sizeof(weapon_temp));
 				ModifyWeaponKv(weapon_num);
 				WeaponSet(client,weapon_num);
+				int current_time = GetTime();
+				USER_LOG userinfo_admin;
+				EXGUSERS_GetUserInfo(client,userinfo_admin);
+				ADMIN_LOG admlog_add;
+				admlog_add.uid = userinfo_admin.uid;
+				strcopy(admlog_add.name,sizeof(admlog_add.name),userinfo_admin.name);
+				admlog_add.type=4;
+				admlog_add.value=weapon_temp.restrict;
+				admlog_add.valuestr=weapon_temp.name;
+				admlog_add.target=0;
+				admlog_add.targetstr=map_name;
+				admlog_add.timestamp = current_time;
+				EXGUSERS_AddAdminLog(admlog_add);
 			}
 			case 2:
 			{
@@ -227,23 +240,28 @@ bool WeaponIsClientModifying(int client,const char[] sArgs)
 		admlog_add.uid = userinfo_admin.uid;
 		strcopy(admlog_add.name,sizeof(admlog_add.name),userinfo_admin.name);
 		GetArrayArray(g_WP_List,itemnum,weapon_temp,sizeof(weapon_temp));
-		char map_name[64];
-		
 		if(g_client_weaponedit[client].hook_say == 1)
 		{
-			admlog_add.type=4;
-			admlog_add.value=map.available;
-			admlog_add.valuestr="";
-			admlog_add.target=0;
-			admlog_add.targetstr=map.name;
-			admlog_add.timestamp = current_time;
 			weapon_temp.price = StringToInt(sArgs);
-
+			admlog_add.type=6;
+			admlog_add.value=weapon_temp.price;
+			admlog_add.valuestr=weapon_temp.name;
+			admlog_add.target=0;
+			admlog_add.targetstr=map_name;
+			admlog_add.timestamp = current_time;
 		}
-		else
+		if(g_client_weaponedit[client].hook_say == 2)
 		{
 			weapon_temp.maxpurchase = StringToInt(sArgs);
+			admlog_add.type=5;
+			admlog_add.value=weapon_temp.maxpurchase;
+			admlog_add.valuestr=weapon_temp.name;
+			admlog_add.target=0;
+			admlog_add.targetstr=map_name;
+			admlog_add.timestamp = current_time;
+
 		}
+		EXGUSERS_AddAdminLog(admlog_add);
 		PrintToChat(client," \x05[地图管理]\x01修改成功");
 		g_WP_List.SetArray(itemnum,weapon_temp,sizeof(weapon_temp));
 		g_client_weaponedit[client].hook_say = 0;

@@ -140,59 +140,53 @@ int CrateRewardNum[]=
 }
 int MissionRewardLevels[] =
 {
-	5,15,25,40,50,60,70,75,85,100,110,125,140,150,160,175,180,190,200
+	10,25,40,50,60,75,90,100,110,125,140,150,160,175,190,200
 };
 int MissionRewardCredits[] =
 {
-	500,1000,2000,2000,5000,2000,0,3000,2000,5000,2000,4000,3000,5000,3000,4000,0,5000,5000
+	1000,2000,2000,2000,2000,3000,3000,3000,3000,4000,4000,4000,4000,5000,5000,10000
 };
 int MissionRewardCrates[] =
 {
-	5,5,0,5,0,5,0,0,5,0,5,0,5,0,5,0,0,10,0
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 };
 char MissionRewardItems[][] =
 {
-	"none",//5
-	"none",//15
-	"uid_mvp_sound_fate",//25
+	"none",//10
+	"uid_mvp_s5mvp1",//25
 	"none",//40
-	"uid_mvp_sound_tomandjerry",//50
+	"none",//50
 	"none",//60
-	"uid_mvp_sound_gigachad",//70
-	"uid_wepskin_scarump",//75
-	"none",//85
-	"uid_model_zaodaoji",//100
+	"uid_mvp_s5mvp2",//75
+	"none",//90
+	"uid_model_herloher",//100
 	"none",//110
-	"uid_mvp_sound_holygrail",//125
+	"uid_mvp_s5mvp3",//75
 	"none",//140
-	"uid_wepskin_xuanwu",//150
+	"none",//150
 	"none",//160
-	"uid_mvp_sound_odetojoy",//175
-	"uid_mvp_sound_spring",//180
+	"uid_mvp_s5mvp4",//75
 	"none",//190
-	"uid_model_reimu_v4"
+	"uid_model_machit"//200
 };
 char MissionRewardInfos[][] =
 {
-	"LV5:赛季箱子*5/积分*500",
-	"LV15:赛季箱子*5/积分*1000",
-	"LV25:MVP音效[贝多芬第五交响曲-命运]/积分*2000",
-	"LV40:赛季箱子*5/积分*2000",
-	"LV50:MVP音效[猫和老鼠]/积分*5000",
-	"LV60:赛季箱子*5/积分*2000",
-	"LV70:MVP音效[Gigachad]",
-	"LV75:武器模型 UMP45-朱雀[永久]/积分*3000",
-	"LV85:赛季箱子*5/积分*2000",
-	"LV100:人物模型-早稻叽[永久]/积分*5000",
-	"LV110:赛季箱子*5/积分*2000",
-	"LV125:MVP音效[HolyGrail]/积分*4000",
-	"LV140:赛季箱子*5/积分*3000",
-	"LV150:武器模型AUG-玄武[永久]/积分*5000",
-	"LV160:赛季箱子*5/积分*3000",
-	"LV175:MVP音效[贝多芬第九交响曲-欢乐颂]/积分*4000",
-	"LV180:MVP音效[春之声圆舞曲]",
-	"LV190:赛季箱子*10/积分*5000",
-	"LV200:人物模型:花骑士灵梦[永久]/积分*5000"
+	"LV10:积分*1000",
+	"LV25:MVP音乐:紅蓮の弓矢/积分*2000",
+	"LV40:积分*2000",
+	"LV50:积分*2000/两倍勋章(赛季内自动开启)",
+	"LV60:积分*2000",
+	"LV75:MVP音乐:the monster within/积分*3000",
+	"LV90:积分*3000",
+	"LV100:人物模型-赫洛赫尔 華折[永久]/积分*3000",
+	"LV110:积分*3000",
+	"LV125:MVP音乐:心臓を捧げよ!/积分*4000",
+	"LV140:积分*4000",
+	"LV150:积分*4000/三倍勋章(赛季内自动开启)",
+	"LV160:积分*4000",
+	"LV175:MVP音乐:Barricades/积分*5000",
+	"LV190:积分*5000",
+	"LV200:人物模型:诗歌剧[永久]/积分*10000"
 };
 
 PlayerMissionRoundBuffer playermission_rounddata[65];
@@ -203,8 +197,8 @@ PlayerMissionInfo playermission_list[65];
 PlayerMissionInfo nullpmi;
 Missions Current_Mission;
 LEVEL_LOG Mission_Current_Level;
-int g_Daily_Task_Exp_Factor = 2;
-int g_Weekly_Task_Exp_Factor = 2;
+int g_Daily_Task_Exp_Factor = 1;
+int g_Weekly_Task_Exp_Factor = 1;
 int round_starttime;
 int round_endtime;
 const int mission_lowest_playernum = 20;
@@ -602,23 +596,23 @@ void MissionOnRoundEnd(int winner)
 	{
 		case 0:
 		{
-			exp_bonus = 30;
+			exp_bonus = 50;
 		}
 		case 1:
 		{
-			exp_bonus = 50;
+			exp_bonus = 80;
 		}
 		case 2:
 		{
-			exp_bonus = 70;
+			exp_bonus = 100;
 		}
 		case 3:
 		{
-			exp_bonus = 100;
+			exp_bonus = 120;
 		}
 		case 4:
 		{
-			exp_bonus = 100;
+			exp_bonus = 150;
 		}
 		default:
 		{
@@ -627,11 +621,11 @@ void MissionOnRoundEnd(int winner)
 	}
 	if(Pmap.tag&label_code[8])
 	{
-		exp_bonus += 50;
+		exp_bonus += 70;
 	}
 	if(Pmap.tag&label_code[10])
 	{
-		exp_bonus += 10;
+		exp_bonus += 20;
 	}
 	if(Pmap.tag&label_code[9])
 	{
@@ -639,13 +633,13 @@ void MissionOnRoundEnd(int winner)
 	}
 	if(player_pass>=30)
 	{
-		exp_bonus +=20;
+		exp_bonus +=40;
 	}
 	if(Mission_Current_Level.diff>0&&Mission_Current_Level.id!=-1)
 	{
-		exp_bonus +=10*Mission_Current_Level.diff;
+		exp_bonus +=15*Mission_Current_Level.diff;
 	}
-	exp_bonus *= g_Daily_Task_Exp_Factor
+	exp_bonus *= g_Daily_Task_Exp_Factor;
 	for(int i=1;i<=64;i++)
 	{
 		if(IsClientInGame(i))
@@ -655,11 +649,11 @@ void MissionOnRoundEnd(int winner)
 				if(winner==3&&IsPlayerAlive(i)&&ZR_IsClientHuman(i))
 				{
 
-					PrintToChat(i," \x05[赛季活动]\x01计算地图通关经验为:%d[双倍]",exp_bonus);
-					int dexp_max = 2000;
+					PrintToChat(i," \x05[赛季活动]\x01计算地图通关经验为:%d",exp_bonus);
+					int dexp_max = 1500;
 					if(IsClientVIP(i))
 					{
-						dexp_max = 3000;
+						dexp_max = 2000;
 					}
 					if(playermission_list[i].dexp+exp_bonus<=dexp_max)
 					{
@@ -939,15 +933,15 @@ void MissionMenuBuild(int client)
 	}
 	Menu menu = CreateMenu(MissionMenuHandler);
 	char buffer[512];
-	int dexp_max = 2000;
+	int dexp_max = 1500;
 	if(IsClientVIP(client))
 	{
-		dexp_max = 3000;
+		dexp_max = 2000;
 	}
 	Format(buffer,sizeof(buffer),"赛季活动\n%s\n%s\nLV.%d/%d\nEXP:%d/%d 今日通关经验:%d/%d",Current_Mission.cnname,Current_Mission.name,playermission_list[client].lvl,Current_Mission.max_level,playermission_list[client].exp,Current_Mission.level_exp,playermission_list[client].dexp,dexp_max);
 	menu.SetTitle(buffer);
-	menu.AddItem("","日常任务[5月19日24点作战结束]");
-	menu.AddItem("","周常任务[5月19日24点作战结束]");
+	menu.AddItem("","日常任务[8月4日2点作战结束]");
+	menu.AddItem("","周常任务[8月4日2点作战结束]");
 	menu.AddItem("","奖励兑换");
 	menu.AddItem("","神秘商店");
 	menu.AddItem("","悬赏任务[暂未开放]",ITEMDRAW_DISABLED);
@@ -1289,14 +1283,12 @@ void SecretShopMenu(int client)
 	int credits = Store_GetClientCredits(client);
 	int crate = playermission_list[client].crate;
 	int csave = playermission_list[client].csave;
-	menu.SetTitle("神秘商店\n您当前积分为:%d\n赛季箱子数:%d 音符碎片数:%d",credits,crate,csave);
+	menu.SetTitle("神秘商店\n您当前积分为:%d\n",credits);
 	menu.AddItem("","购买1大行动等级(5000积分)",ITEMDRAW_DEFAULT);
 	menu.AddItem("","购买10大行动等级(45000积分)",ITEMDRAW_DEFAULT);
-	menu.AddItem("","购买赛季箱子(2000积分)",ITEMDRAW_DEFAULT);
-	menu.AddItem("","购买10*赛季箱子(20000积分)",ITEMDRAW_DEFAULT);
-	menu.AddItem("","打开赛季箱子",crate>=1?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
-	menu.AddItem("","兑换莱莎[永久][120*音符碎片]",csave>=120?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
-	menu.AddItem("","兑换FAMAS-无时辩解[永久][80*音符碎片]",csave>=80?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
+	menu.AddItem("","购买赛季箱子(2000积分)[暂未开放]",ITEMDRAW_DISABLED);
+	menu.AddItem("","购买10*赛季箱子(20000积分)[暂未开放]",ITEMDRAW_DISABLED);
+	menu.AddItem("","打开赛季箱子[暂未开放]",ITEMDRAW_DISABLED);
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }
@@ -1372,7 +1364,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 					PrintToChat(client," \x05[任务系统]\x01你的积分不足或你已满级!");
 				}
 			}
-			case 2:
+/*			case 2:
 			{
 				if(!g_pStore)
 				{
@@ -1456,7 +1448,7 @@ int SecretShopHandler(Menu menu, MenuAction action, int client, int param)
 				{
 					PrintToChat(client," \x05[赛季活动]\x01音符碎片不足!");
 				}
-			}
+			} */
 		}
 		UpdatePlayerMissionInfo(client);
 		SecretShopMenu(client);
