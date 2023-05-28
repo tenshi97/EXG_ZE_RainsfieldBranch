@@ -865,6 +865,7 @@ stock void LoadConfig()
 		g_bConfigLoaded = false;
 		LogMessage("Could not load %s", sBuffer_path);
 	}
+	CloseHandle(hKeyValues);
 }
 
 stock void LoadScheme()
