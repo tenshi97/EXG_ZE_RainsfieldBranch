@@ -1,6 +1,6 @@
 #pragma semicolon 1
 #pragma newdecls required
-#pragma dynamic 131072
+#pragma dynamic 2621440
 #include <clientprefs>
 #include <csgocolors_fix>
 #include <cstrike>
@@ -1541,7 +1541,7 @@ public Action OnButtonUse(int iButton, int iActivator, int iCaller, UseType uTyp
 							}
 						}
 						//~~~~ Is this return needed (?) ~~~~
-						return Plugin_Handled;
+						return Plugin_Continue;
 					}
 				}
 			}
@@ -2289,7 +2289,16 @@ public Action EW_Command_Setname(int iClient, int iArgs)
 	char sHammerID[32], sNewName[32];
 
 	GetCmdArg(1, sHammerID, sizeof(sHammerID));
-	GetCmdArg(2, sNewName, sizeof(sNewName));
+	//屏蔽掉，换成下面能识别不带引号的中文的
+	// GetCmdArg(2, sNewName, sizeof(sNewName));
+
+	//能识别不带引号的中文的
+	for (int i = 2; i <= GetCmdArgs(); i++)
+	{
+		char tempname[32];
+		GetCmdArg(i, tempname, sizeof(tempname));
+		StrCat(sNewName, sizeof(sNewName), tempname);    //拼接到sNewName
+	}
 
 	int iHammerID = StringToInt(sHammerID);
 
@@ -2321,7 +2330,16 @@ public Action EW_Command_Setshortname(int iClient, int iArgs)
 	char sHammerID[32], sNewName[32];
 
 	GetCmdArg(1, sHammerID, sizeof(sHammerID));
-	GetCmdArg(2, sNewName, sizeof(sNewName));
+	//屏蔽掉，换成下面能识别不带引号的中文的
+	// GetCmdArg(2, sNewName, sizeof(sNewName));
+
+	//能识别不带引号的中文的
+	for (int i = 2; i <= GetCmdArgs(); i++)
+	{
+		char tempname[32];
+		GetCmdArg(i, tempname, sizeof(tempname));
+		StrCat(sNewName, sizeof(sNewName), tempname);    //拼接到sNewName
+	}
 
 	int iHammerID = StringToInt(sHammerID);
 
