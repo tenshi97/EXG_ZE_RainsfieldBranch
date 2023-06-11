@@ -52,7 +52,7 @@ enum AdmLog_Type
 	TOGGLE_HMHERO = 10
 };
 int tag_num=11;
-char difficulty_name[5][10]={"简单","普通","困难","高难","傻逼"};
+char difficulty_name[6][10]={"简单","普通","困难","高难","极难","傻逼"};
 char label_name[11][64]={"FF","卤粉","弹幕方块","经典","闯关","娱乐","休闲","对抗","长征","感染","活动"};
 int label_code[11]={1,2,4,8,16,32,64,128,256,512,1024};
 Handle g_MapConfigLoaded;
@@ -835,7 +835,7 @@ int MapAdminCfgHandler(Menu menu, MenuAction action, int client, int param)
 			map.difficulty--;
 			if(map.difficulty<0)
 			{
-				map.difficulty = 4;
+				map.difficulty = 5;
 			}
 			MapCfgUpdate(map);
 			MapAdminConfigMenu(client,map);

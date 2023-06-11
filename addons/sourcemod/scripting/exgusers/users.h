@@ -319,6 +319,7 @@ void Call_OnUserLoaded(int client)
 	Call_PushCell(client);
 	Call_Finish();
 	NomBanOnUserLoadCheck(client);
+	PftBanOnUserLoadCheck(client);
 }
 
 void UpdateUserInfo(int client)

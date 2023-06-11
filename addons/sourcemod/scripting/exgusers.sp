@@ -29,6 +29,7 @@ SERVER_LOG g_current_server;
 #include "exgusers/server.h"
 #include "exgusers/monitor.h"
 #include "exgusers/nomban.h"
+#include "exgusers/profitban.h"
 #include "exgusers/uadmin.h"
 #include "exgusers/storeplus.h"
 const int TIME_PERMANENT = 2000000000;
@@ -74,6 +75,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CreateNative("EXGUSERS_GetUserInfo",Native_EXGUSERS_GetUserInfo);
 	CreateNative("EXGUSERS_GetServerByPort",Native_EXGUSERS_GetServerByPort);
 	CreateNative("EXGUSERS_GetUserUID",Native_EXGUSERS_GetUserUID);
+	CreateNative("EXGUSERS_GetUserPbanState",Native_EXGUSERS_GetUserPbanState);
 //	CreateNative("EXGUSERS_GetUserInfoByUID",Native_EXGUSERS_GetUserInfoByUID);
 	RegPluginLibrary("exgusers");
 	MarkNativeAsOptional("Store_GetClientCredits");

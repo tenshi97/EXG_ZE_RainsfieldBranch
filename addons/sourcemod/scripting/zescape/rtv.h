@@ -737,7 +737,7 @@ int NextMapVoteHandler(Menu menu, MenuAction action, int param1, int param2)
 							}
 
 							PrintToChatAll(" \x05[EMC] \x09%s \x01预定的 \x07%s \x01未选上，\x07%d \x01积分已退还",mapv.nominator_name,mapv.name,credits_return);
-			 			}
+			 			}	
 			 		}
 			 	}
 			}
@@ -798,7 +798,6 @@ public void MapVoteHandler(Menu menu, int num_votes, int num_clients, const int[
 	char result[64];
 	char buffer[256];
 	GetMenuItem(menu,item_info[0][VOTEINFO_ITEM_INDEX],result,sizeof(result));
-	PrintToChatAll(buffer);
 	Maps_VoteInfo mapv;
 	int nominator_credits;
 	int credits_return;
@@ -851,6 +850,12 @@ public void MapVoteHandler(Menu menu, int num_votes, int num_clients, const int[
 				g_Nextmap_Result = mapv;
 				g_LastRound_MapVoteSave = g_Nextmap_Result;
 				g_Nextmap_Selected = true;
+				char vote_result[256];
+				int vote_result_num = item_info[0][VOTEINFO_ITEM_VOTES];
+				int pctg = 100*vote_result_num/num_clients;
+				Format(vote_result,sizeof(vote_result)," \x05[EMC]投票结果:地图\x07%s\x05得票最高，为\x07%d票(%d",mapv.name,vote_result_num,pctg);
+				StrCat(vote_result,sizeof(vote_result),"%%)");
+				PrintToChatAll(vote_result);
 				Call_StartForward(g_RTV_Forward_NextMapSelected);
 				Call_PushString(mapv.name);
 				Call_Finish();
@@ -915,7 +920,7 @@ void ChangeMap()
 	}
 	else if(g_ChangeMap_Time == MapChangeTime_MapEnd)
 	{
-		PrintToChatAll(" x05[EMC]\x01地图将在时间结束后更换，再发起rtv可以立刻换图");
+		PrintToChatAll(" \x05[EMC]\x01地图将在时间结束后更换，再发起rtv可以立刻换图");
 		g_Instant_RTV = true;
 	}
 }

@@ -10,6 +10,7 @@ void TimerOnMapStart()
 Action UserTimerHndl(Handle timer)
 {
     NomBanLogTimerCheck();
+    PftBanLogTimerCheck();
 	return Plugin_Continue;
 }
 

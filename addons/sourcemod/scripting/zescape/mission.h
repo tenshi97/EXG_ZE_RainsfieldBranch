@@ -367,7 +367,7 @@ void LoadPlayerMissionInfoCallBack(Handle owner, Handle hndl, char[] error, Data
 	if(!SQL_FetchRow(hndl))
 	{
 		PrintToConsoleAll("[调试]未检测到玩家%d赛季活动数据，注册新玩家%d 当前时间:%d",client,uid,current_time);
-		Format(query,sizeof(query),"INSERT INTO %s (UID,TIMESTAMP,VIP) VALUES(%d,%d,0)",Current_Mission.playerdbname,uid,current_time);
+		Format(query,sizeof(query),"INSERT INTO %s (UID,TIMESTAMP,VIP) VALUES(%d,%d,0)",Current_Mission.playerdbname,uid,Current_Mission.daily_timestamp+60);
 	}
 	else
 	{
@@ -407,24 +407,41 @@ void LoadPlayerMissionInfoCallBack(Handle owner, Handle hndl, char[] error, Data
 		playermission_list[client].challenge[3] = DbFetchInt(hndl,"CH3");
 		playermission_list[client].challenge[4] = DbFetchInt(hndl,"CH4");
 		playermission_list[client].challenge[0] = DbFetchInt(hndl,"CH");
-		if(playermission_list[client].dataupdate_time<Current_Mission.daily_timestamp)
-		{
-			PlayerMissionDailyUpdate(client);
-		}
-		if(playermission_list[client].dataupdate_time<Current_Mission.weekly_timestamp)
-		{
-			PlayerMissionWeeklyUpdate(client);
-		}
-		Format(query,sizeof(query),"UPDATE %s SET TIMESTAMP = %d WHERE UID = %d",Current_Mission.playerdbname,current_time,uid);
+		CheckPlayerMissionUpdate(client);
+		Format(query,sizeof(query),"UPDATE %s SET TIMESTAMP = %d WHERE UID = %d",Current_Mission.playerdbname,Current_Mission.daily_timestamp+60,uid);
 	}
-	playermission_list[client].dataupdate_time = current_time;
+	playermission_list[client].dataupdate_time = Current_Mission.daily_timestamp+60;
 	PrintToServer(query);
-	PrintToConsoleAll(query);
 	DbTQuery(DbQueryErrorCallback,query);
 	playermission_list[client].loaded = 1;
 	delete hndl;
 }
+void CheckPlayerMissionUpdate(int client)
+{
+	if(playermission_list[client].dataupdate_time<Current_Mission.daily_timestamp)
+	{
+		for(int i=0;i<=5;i++)
+		{
+			playermission_list[client].taskdata[i]=0;
+			playermission_list[client].taskstage[i]=0;
+		}
+		playermission_list[client].loaded = 1;
+		playermission_list[client].dexp = 0;		
+	}
+	if(playermission_list[client].dataupdate_time<Current_Mission.weekly_timestamp)
+	{
+		for(int i=0;i<=5;i++)
+		{
+			playermission_list[client].taskdata[i]=0;
+			playermission_list[client].taskstage[i]=0;
+		}
+		playermission_list[client].loaded = 1;
+		playermission_list[client].dexp = 0;		
+	}
+	playermission_list[client].dataupdate_time = Current_Mission.daily_timestamp+60;
+	UpdatePlayerMissionInfo(client);
 
+}
 void ReloadAllPlayerMissionInfo()
 {
 	for(int i=1;i<=64;i++)
@@ -500,7 +517,7 @@ void UpdatePlayerMissionInfo(int client,int force=0)
 	Current_Mission.playerdbname,lvl,exp,dexp,
 	taskdata[0],taskdata[1],taskdata[2],taskdata[3],taskdata[4],taskdata[5],taskdata[6],taskdata[7],taskdata[8],taskdata[9],taskdata[10],
 	taskstage[0],taskstage[1],taskstage[2],taskstage[3],taskstage[4],taskstage[5],taskstage[6],taskstage[7],taskstage[8],taskstage[9],taskstage[10],
-	current_time,sp,vip,crate,csave,
+	Current_Mission.daily_timestamp+60,sp,vip,crate,csave,
 	playermission_list[client].challenge[1],playermission_list[client].challenge[2],playermission_list[client].challenge[3],playermission_list[client].challenge[4],playermission_list[client].challenge[0],uid);
 	DbTQuery(DbQueryErrorCallback,query);
 	if(force==1)
@@ -600,15 +617,15 @@ void MissionOnRoundEnd(int winner)
 		}
 		case 1:
 		{
-			exp_bonus = 80;
+			exp_bonus = 100;
 		}
 		case 2:
 		{
-			exp_bonus = 100;
+			exp_bonus = 120;
 		}
 		case 3:
 		{
-			exp_bonus = 120;
+			exp_bonus = 150;
 		}
 		case 4:
 		{
@@ -639,6 +656,7 @@ void MissionOnRoundEnd(int winner)
 	{
 		exp_bonus +=15*Mission_Current_Level.diff;
 	}
+	exp_bonus+=Min(round_time/30,40);
 	exp_bonus *= g_Daily_Task_Exp_Factor;
 	for(int i=1;i<=64;i++)
 	{

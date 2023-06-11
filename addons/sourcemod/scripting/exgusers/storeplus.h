@@ -216,6 +216,9 @@ void DeActivatingHB(int init=0)
     g_activating_hb_player = -1;
     if(init)    return;
     PrintToChatAll(" \x05[红包系统]\x01由于时间耗尽或红包已领完，红包环节结束");
+    PrintToChatAll(" \x05[红包系统]\x01由于时间耗尽或红包已领完，红包环节结束");
+    PrintToChatAll(" \x05[红包系统]\x01问题的答案是:\x07 %s",g_activating_hb_answer);
+    PrintToChatAll(" \x05[红包系统]\x01问题的答案是:\x07 %s",g_activating_hb_answer);
 }
 
 Action Command_CPPay(int client,int args)

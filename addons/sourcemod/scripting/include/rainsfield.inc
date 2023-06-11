@@ -98,6 +98,8 @@ enum struct USER_LOG
     int loaded;//temp
     int last_login;
     int regtime;
+    int pftban;
+    int pftban_expiretime;
 }
 enum struct USER_STOREPLUS_LOG
 {
@@ -184,6 +186,7 @@ native int EXGUSERS_GetUserInfo(int client, any userinfo[sizeof(USER_LOG)]);
 native int EXGUSERS_GetUserUID(int client);
 native void EXGUSERS_GetServerByPort(int ip,int port, any server[sizeof(SERVER_LOG)]);
 forward void EXGUSERS_OnUserLoaded(int client);
+native bool EXGUSERS_GetUserPbanState(int client);
 
 
 /////////////////////
