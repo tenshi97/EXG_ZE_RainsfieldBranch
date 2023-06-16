@@ -44,7 +44,7 @@ void PftBanLoadCallback(Handle owner, Handle hndl, char[] error, any data)
 void SetPftBanState(int client,int pban,int pban_expire)
 {
     if(client<=0||client>64)    return;
-    if(!IsClientInGame(client)) return; 
+    if(!IsClientInGame(client)) return;
     if(IsFakeClient(client))    return;
     g_Users[client].pftban = pban;
     if(pban==1)
@@ -160,7 +160,7 @@ void PftBanLogTimerCheckCallback(Handle owner, Handle hndl, char[] error, any da
                 {
                     SetPftBanState(i,0,0);
                     GetClientName(i,pName,sizeof(pName));
-                    PrintToChatAll(" \x05[用户系统]\x01玩家\x07%s\x01的订图收益已过期",pName);
+                    PrintToChatAll(" \x05[用户系统]\x01玩家\x07%s\x01的订图收益封禁已过期",pName);
                 }
                 DeletePftBanLog(bid);
             }
@@ -169,13 +169,13 @@ void PftBanLogTimerCheckCallback(Handle owner, Handle hndl, char[] error, any da
 	delete hndl;
 }
 
-public bool Native_EXGUSERS_GetUserPbanState(Handle plugin, int numParams)
+public int Native_EXGUSERS_GetUserPbanState(Handle plugin, int numParams)
 {
 	int client = GetNativeCell(1);
 	char buffer[256];
-	if(g_Users[client].loaded==0||g_Users[client].pban==0)
+	if(g_Users[client].loaded==0||g_Users[client].pftban==0)
     {
-        return false;
+        return 0;
     }
-    return true;
+    return 1;
 }

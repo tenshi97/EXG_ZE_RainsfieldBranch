@@ -290,6 +290,13 @@ void UserStatusMenu(int client)
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 	Format(buffer,sizeof(buffer),"转账额度:%d/10000",g_Users_sp[client].pay_daily);
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+	FormatTime(ctime,64,NULL_STRING,g_Users[client].pftban_expiretime);
+	if(g_Users[client].pftban_expiretime>TIME_PERMANENT)
+	{
+		Format(ctime,sizeof(ctime),"永久");
+	}
+	Format(buffer,sizeof(buffer),"收益封禁:%s%s%s", g_Users[client].pftban?"封禁":"正常", g_Users[client].pftban?"\n":"", g_Users[client].pftban?ctime:"");
+	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 	menu.Display(client,MENU_TIME_FOREVER);
 }
 int UserStatusMenuHandler(Menu menu, MenuAction action, int client, int param)

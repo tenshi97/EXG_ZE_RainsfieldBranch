@@ -186,7 +186,7 @@ native int EXGUSERS_GetUserInfo(int client, any userinfo[sizeof(USER_LOG)]);
 native int EXGUSERS_GetUserUID(int client);
 native void EXGUSERS_GetServerByPort(int ip,int port, any server[sizeof(SERVER_LOG)]);
 forward void EXGUSERS_OnUserLoaded(int client);
-native bool EXGUSERS_GetUserPbanState(int client);
+native int EXGUSERS_GetUserPbanState(int client);
 
 
 /////////////////////

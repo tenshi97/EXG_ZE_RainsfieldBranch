@@ -368,6 +368,7 @@ void LoadPlayerMissionInfoCallBack(Handle owner, Handle hndl, char[] error, Data
 	{
 		PrintToConsoleAll("[调试]未检测到玩家%d赛季活动数据，注册新玩家%d 当前时间:%d",client,uid,current_time);
 		Format(query,sizeof(query),"INSERT INTO %s (UID,TIMESTAMP,VIP) VALUES(%d,%d,0)",Current_Mission.playerdbname,uid,Current_Mission.daily_timestamp+60);
+		playermission_list[client].loaded = 1;
 	}
 	else
 	{
@@ -425,8 +426,7 @@ void CheckPlayerMissionUpdate(int client)
 			playermission_list[client].taskdata[i]=0;
 			playermission_list[client].taskstage[i]=0;
 		}
-		playermission_list[client].loaded = 1;
-		playermission_list[client].dexp = 0;		
+		playermission_list[client].dexp = 0;
 	}
 	if(playermission_list[client].dataupdate_time<Current_Mission.weekly_timestamp)
 	{
@@ -435,9 +435,9 @@ void CheckPlayerMissionUpdate(int client)
 			playermission_list[client].taskdata[i]=0;
 			playermission_list[client].taskstage[i]=0;
 		}
-		playermission_list[client].loaded = 1;
-		playermission_list[client].dexp = 0;		
+		playermission_list[client].dexp = 0;
 	}
+	playermission_list[client].loaded = 1;
 	playermission_list[client].dataupdate_time = Current_Mission.daily_timestamp+60;
 	UpdatePlayerMissionInfo(client);
 
@@ -590,6 +590,19 @@ void MissionOnRoundEnd(int winner)
 	round_endtime = GetTime();
 	int exp_bonus = 0;
 	int round_time = round_endtime - round_starttime;
+	for(int i=1;i<=64;i++)
+	{
+		if(IsClientInGame(i))
+		{
+			if(!IsFakeClient(i))
+			{
+				if(EXGUSERS_GetUserPbanState(i))
+				{
+					PrintToChat(i,"宁已被");
+				}
+			}
+		}
+	}
 	if(round_time<=120||GetClientCount(true)<mission_lowest_playernum)
 	{
 		PrintToChatAll(" \x05[活动系统]\x01人数不足\x07%d\x01人，或回合时间<2分钟，不计入",mission_lowest_playernum);
@@ -666,7 +679,10 @@ void MissionOnRoundEnd(int winner)
 			{
 				if(winner==3&&IsPlayerAlive(i)&&ZR_IsClientHuman(i))
 				{
-
+					if(EXGUSERS_GetUserPbanState(i))
+					{
+						exp_bonus = 0;
+					}
 					PrintToChat(i," \x05[赛季活动]\x01计算地图通关经验为:%d",exp_bonus);
 					int dexp_max = 1500;
 					if(IsClientVIP(i))
