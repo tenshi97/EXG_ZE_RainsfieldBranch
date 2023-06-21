@@ -226,12 +226,12 @@ Action Command_CPPay(int client,int args)
 	if(GetTime()<=Store_GetClientDataProtect(client))
 	{
 		PrintToChat(client," \x05[赛季活动]\x01数据保护中，无法操作!");
-		return 0;
+        return Plugin_Handled;
 	}
     if(args!=1)
     {
-            PrintToChat(client," \x05[积分转账]\x01参数错误!")
-            return Plugin_Handled;
+        PrintToChat(client," \x05[积分转账]\x01参数错误!")
+        return Plugin_Handled;
     }
     char arg1[64];
     GetCmdArg(1,arg1,sizeof(arg1));
@@ -290,12 +290,12 @@ Action Command_Pay(int client,int args)
 	if(GetTime()<=Store_GetClientDataProtect(client))
 	{
 		PrintToChat(client," \x05[积分转账]\x01数据保护中，无法操作!");
-		return 0;
+		return Plugin_Handled;
 	}
     if(args!=2)
     {
-            PrintToChat(client," \x05[积分转账]\x01参数错误，请输入!zz 用户名 转账数额")
-            return Plugin_Handled;
+        PrintToChat(client," \x05[积分转账]\x01参数错误，请输入!zz 用户名 转账数额")
+        return Plugin_Handled;
     }
     if(!IsClientVIP(client))
     {

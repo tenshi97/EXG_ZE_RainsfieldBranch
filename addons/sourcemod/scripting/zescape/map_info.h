@@ -353,7 +353,6 @@ void MapInfoOnRoundEnd(int winner)
 		Cvar_InfectSpawnTimeMin = FindConVar("zr_infect_spawntime_min");
 		Cvar_InfectSpawnTimeMax = FindConVar("zr_infect_spawntime_max");
 	}
-	Pmap.temp_cooldown = false;
 	MapCfgUpdate(Pmap);
 	CheckMapCoolDown();
 	return;
