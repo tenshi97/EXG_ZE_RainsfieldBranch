@@ -319,7 +319,10 @@ public int Native_EXGUSERS_GetUserUID(Handle plugin, int numParams)
 	if(g_Users[client].loaded == 0 )	return -1;
 	return g_Users[client].uid;
 }
-
+USER_LOG GetUserInfo(int client)
+{
+	return g_Users[client];
+}
 void Call_OnUserLoaded(int client)
 {
 	Call_StartForward(g_fwOnUserLoaded);
@@ -327,6 +330,7 @@ void Call_OnUserLoaded(int client)
 	Call_Finish();
 	NomBanOnUserLoadCheck(client);
 	PftBanOnUserLoadCheck(client);
+	NameTag_OnClientConnected(client);
 }
 
 void UpdateUserInfo(int client)

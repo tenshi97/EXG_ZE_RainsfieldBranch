@@ -25,6 +25,23 @@ void TriggerOutputOnMapStart()
 }
 */
 int g_antispam_hammerid=0;
+bool Breakable_Recorded = false;
+char Breakable_Recorded_Maps_List[][] = 
+{
+	"ze_lotr_minas_tirith_p5",
+	"ze_tilex_ultimate_v2_13e",
+	"ze_elevator_escape_p3",
+	"ze_death_wish_gf1_1",
+	"ze_obj_rescape_v1",
+	"ze_obj_blackout_b4"
+}
+void TriggerOnRoundStart()
+{
+	if(Breakable_Recorded)
+	{
+		PrintToChatAll(" \x05[触发检测]\x07本地图启用了破坏实体检测，请注意");
+	}
+}
 public Action ButtonOnPressed(const char[] output, int caller, int activator, float delay)
 {
 	if (GetEntPropEnt(caller, Prop_Data, "m_hMoveParent") != -1 ||
@@ -71,7 +88,20 @@ public Action ButtonOnPressed(const char[] output, int caller, int activator, fl
 // 	Button_Spam_Client[activator] = false;
 // 	return Plugin_Handled;
 // }
-
+void TriggerOnMapStart()
+{
+	Breakable_Recorded = false;
+	char map_name[64];
+	GetCurrentMap(map_name,sizeof(map_name));
+	for(int i =0;i<=1;i++)
+	{
+		if(strcmp(map_name,Breakable_Recorded_Maps_List[i],false)==0)
+		{
+			Breakable_Recorded = true;
+			break;
+		}
+	}
+}
 void TriggerOnEntityCreated(int entity, const char[] classname)
 {
 	if (IsValidEntity(entity))
@@ -83,6 +113,21 @@ void TriggerOnEntityCreated(int entity, const char[] classname)
 		else if (strcmp(classname, "func_button", false) == 0)
 		{
 			SDKHook(entity, SDKHook_SpawnPost, TriggerOnButtonSpawnPost);
+		}
+		if(Breakable_Recorded)
+		{
+			if(strcmp(classname,"func_breakable",false)==0)
+			{
+				SDKHook(entity, SDKHook_SpawnPost, TriggerOnBreakableSpawnPost);				
+			}
+			if(strcmp(classname,"func_physbox",false)==0)
+			{
+				SDKHook(entity, SDKHook_SpawnPost, TriggerOnBreakableSpawnPost);				
+			}
+			if(strcmp(classname,"func_physbox_multiplayer",false)==0)
+			{
+				SDKHook(entity, SDKHook_SpawnPost, TriggerOnBreakableSpawnPost);				
+			}
 		}
 	}
 }
@@ -96,6 +141,43 @@ public void TriggerOnButtonSpawnPost(int entity)
 
 	HookSingleEntityOutput(entity, "OnPressed", ButtonOnPressed, true);
 	HookSingleEntityOutput(entity, "OnDamaged", ButtonOnPressed, true);
+}
+public void TriggerOnBreakableSpawnPost(int entity)
+{
+	if(!IsValidEntity(entity))
+	{
+		return;
+	}
+	SDKUnhook(entity,SDKHook_SpawnPost,TriggerOnBreakableSpawnPost);
+	HookSingleEntityOutput(entity,"OnBreak",TriggerOnBreak,true);
+}
+public Action TriggerOnBreak(const char[] output, int caller, int activator, float delay)
+{
+	int breaker=activator;
+	int entity=caller;
+	//SDKUnhook(entity,SDKHook_SpawnPost,TriggerOnBreak);	
+	if(breaker<=0||breaker>64)
+	{
+		return Plugin_Continue;
+	}
+	char activator_name[64];
+	char activator_auth[64];
+	GetClientName(breaker,activator_name,sizeof(activator_name));
+	GetClientAuthId(breaker, AuthId_Steam2, activator_auth, sizeof(activator_auth), true);
+	char break_name[64];
+	GetEntPropString(entity,Prop_Data,"m_iName",break_name,sizeof(break_name));
+	if (break_name[0] == NULL_STRING[0])	//exactly means button_name == NULL_STRING(aka \0)
+	{
+		GetEntPropString(entity, Prop_Data, "m_iGlobalname", break_name, sizeof(break_name));
+	}
+	int hammerid = GetEntProp(entity, Prop_Data, "m_iHammerID");
+	if(hammerid != g_antispam_hammerid)
+	{
+		g_antispam_hammerid = hammerid;
+		PrintToChatAll(" \x04[触发检测] \x09%s(%s) \x01打碎了 \x06可破坏实体%s(%d)", activator_name, activator_auth, break_name, hammerid);
+		PrintToConsoleAll("[触发检测] %s(%s) 打碎了 可破坏实体%s(%d)", activator_name, activator_auth, break_name, hammerid);
+	}	
+	return Plugin_Continue;
 }
 
 public void TriggerOnTriggerSpawnPost(int entity)
@@ -119,7 +201,7 @@ public Action TriggerOnStartTouch(int entity, int toucher)
 
 		char activator_auth[64];
 		GetClientAuthId(toucher, AuthId_Steam2, activator_auth, sizeof(activator_auth), true);
-		ReplaceString(activator_auth, sizeof(activator_auth), "STEAM_1:", "", false);
+		//ReplaceString(activator_auth, sizeof(activator_auth), "STEAM_1:", "", false);
 
 		char button_name[64];
 		GetEntPropString(entity, Prop_Data, "m_iName", button_name, sizeof(button_name));

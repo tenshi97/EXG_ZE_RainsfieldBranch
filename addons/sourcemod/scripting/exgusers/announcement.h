@@ -47,6 +47,7 @@ int SuperChatCheckQueryCallBack(Handle owner, Handle hndl, char[] error, any dat
 		if(broadcastag&server_tag==0)
 		{
 			broadcastag = broadcastag|server_tag;
+			if(!Is_Server_Chat_Received())	continue;
 			char message[512];
 			char sender_name[64];
 			char query[512];

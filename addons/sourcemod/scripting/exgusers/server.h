@@ -2,6 +2,7 @@ bool EXGUSERS_serverconnected = false;
 ArrayList ServerList;
 static int server_ip;
 static int server_port;
+int server_chat_receive = 0;
 void ServerOnPluginStart()
 {
 	server_ip = FindConVar("hostip").IntValue;
@@ -43,7 +44,14 @@ void ServerAdminMenu(int client)
 	menu.AddItem("",buffer,g_current_server.mode==0?ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED);
 	Format(buffer,sizeof(buffer),"跳转信息:[缩写]%s,[IP]%s:%d",g_current_server.shortname,g_current_server.ip,g_current_server.port);
 	menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+	Format(buffer,sizeof(buffer),"接受全服聊天:%s",server_chat_receive==0?"接受":"关闭");
+	menu.AddItem("",buffer);
 	menu.Display(client,MENU_TIME_FOREVER);
+}
+bool Is_Server_Chat_Received()
+{
+	if(server_chat_receive==0)	return true;
+	return false;
 }
 int ServerAdminMenuHandler(Menu menu, MenuAction action, int client, int param)
 {
@@ -58,6 +66,12 @@ int ServerAdminMenuHandler(Menu menu, MenuAction action, int client, int param)
 			if(g_current_server.ze_fatigue==0)	g_current_server.ze_fatigue =1;
 			else g_current_server.ze_fatigue = 0;
 			ServerModify(g_current_server);
+			ServerAdminMenu(client);
+		}
+		if(param == 3)
+		{
+			if(server_chat_receive==0)	server_chat_receive=1;
+			else	server_chat_receive = 0;
 			ServerAdminMenu(client);
 		}
 		return 0;

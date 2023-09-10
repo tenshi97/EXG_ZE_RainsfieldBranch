@@ -565,6 +565,7 @@ void CreateNextMapVote()
 	menu.SetTitle("地图投票");
 	menu.AddItem("","选择下一张地图",ITEMDRAW_DISABLED);
 	menu.AddItem("","请慎重投票，不要随意选图",ITEMDRAW_DISABLED);
+	int Nom_Invalid = 0;
 	for(int i = 0 ; i < Nom_Map_List.Length; i++)
 	{
 		GetArrayArray(Nom_Map_List,i,nomlog,sizeof(nomlog));
@@ -574,6 +575,11 @@ void CreateNextMapVote()
 		mapv.nominator_name = nomlog.nominator_name;
 		mapv.nominator_uid = nomlog.nominator_uid;
 		strcopy(mapv.nominator_steamauth,sizeof(mapv.nominator_steamauth),nomlog.nominator_steamauth);
+		/*if(GetTime()<=map.last_run_time+map.cooldown*60&&map.temp_cd==0)
+		{
+			PrintToChatAll(" \x05[地图系统]\x01玩家%s预定的%s地图由于CD不合法")
+			continue;
+		}*/
 		mapv.name_cn = map.name_cn;
 		mapv.difficulty = map.difficulty;
 		mapv.nominate_cost = map.cost;

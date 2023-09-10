@@ -1,5 +1,27 @@
-
-
+/*
+#############################################
+#											#
+#											#
+#											#
+#			Rainsfield						#
+#											#
+#											#
+#											#
+#			is								#
+#											#
+#											#
+#											#
+#			watching						#
+#											#
+#											#
+#											#
+#			you								#
+#											#
+#											#
+#											#
+#											#
+#############################################
+*/
 bool g_pStore = false;
 SERVER_LOG g_current_server;
 #include <clientprefs>
@@ -17,6 +39,8 @@ SERVER_LOG g_current_server;
 #include <mostactive>
 #include <outputinfo>
 #include <weddings>
+#include <herolevel>
+#include <csgopwapi>
 #pragma semicolon 1
 #pragma newdecls required
 #include "exgusers/timer.h"
@@ -32,6 +56,7 @@ SERVER_LOG g_current_server;
 #include "exgusers/profitban.h"
 #include "exgusers/uadmin.h"
 #include "exgusers/storeplus.h"
+#include "exgusers/nametag.h"
 const int TIME_PERMANENT = 2000000000;
 int pay_limit[65]={0};
 public Plugin myinfo = {
@@ -68,6 +93,7 @@ public void OnPluginStart()
 	TimerOnPluginStart();
 	uAdminOnPluginStart();
 	StorePlusOnPluginStart();
+	NameTagOnPluginStart();
 }
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
@@ -76,6 +102,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CreateNative("EXGUSERS_GetServerByPort",Native_EXGUSERS_GetServerByPort);
 	CreateNative("EXGUSERS_GetUserUID",Native_EXGUSERS_GetUserUID);
 	CreateNative("EXGUSERS_GetUserPbanState",Native_EXGUSERS_GetUserPbanState);
+    CreateNative("EXGUSERS_GetUserNameTag",Native_GetUserNameTag);
 //	CreateNative("EXGUSERS_GetUserInfoByUID",Native_EXGUSERS_GetUserInfoByUID);
 	RegPluginLibrary("exgusers");
 	MarkNativeAsOptional("Store_GetClientCredits");
@@ -94,6 +121,7 @@ public void OnMapStart()
 public void OnClientPostAdminCheck(int client)
 {
 	UsersOnClientInServer(client);
+	StorePlusOnClientConnected(client);
 }
 public void OnClientDisconnect(int client)
 {

@@ -49,7 +49,9 @@ enum AdmLog_Type
 	TOGGLE_ZMCLASS = 7,
 	TOGGLE_HMCLASS = 8,
 	TOGGLE_ZMHERO = 9,
-	TOGGLE_HMHERO = 10
+	TOGGLE_HMHERO = 10,
+	FORCE_NOM = 11,
+	RESET_COOLDOWN = 12
 };
 int tag_num=11;
 char difficulty_name[6][10]={"简单","普通","困难","高难","极难","傻逼"};
@@ -227,7 +229,7 @@ void MapAdminHistoryViewCallback(Handle owner, Handle hndl, char[] error, any da
 		char valuestr[64];
 		char admin_name[64];
 		count++;
-		DbFetchString(hndl,"NAME",admin_name,sizeof(name));
+		DbFetchString(hndl,"NAME",admin_name,16);
 		admin_uid = DbFetchInt(hndl,"UID");
 		type = DbFetchInt(hndl,"TYPE");
 		timestamp = DbFetchInt(hndl,"TIMESTAMP");
@@ -236,81 +238,14 @@ void MapAdminHistoryViewCallback(Handle owner, Handle hndl, char[] error, any da
 		FormatTime(ctime,64,NULL_STRING,timestamp);
 		switch(type)
 		{
-			case CHANGE_COOLDOWN:
-			{
-				Format(buffer,sizeof(buffer),"修改冷却时间至%d分钟[%s]\n操作人:[%d]%s",value,ctime,admin_uid,admin_name);
-				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-			}
-			case CHANGE_COST:
-			{
-				Format(buffer,sizeof(buffer),"修改地图定价至:%d积分[%s]\n操作人:[%d]%s",value,ctime,admin_uid,admin_name);
-				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-			}
-			case TOGGLE_AVAILABLE:
-			{
-				Format(buffer,sizeof(buffer),"开放订阅:%s[%s]\n操作人:[%d]%s",value?"开":"关",ctime,admin_uid,admin_name);
-				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-			}
-			case CHANGE_WEAPON_AVAILABLE:
-			{
-				Format(buffer,sizeof(buffer),"%s开放购买:%s[%s]\n操作人:%s[UID:%d]",valuestr,value?"开":"关",ctime,admin_name,admin_uid);
-				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-			}
-			case CHANGE_WEAPON_NUM:
-			{
-				Format(buffer,sizeof(buffer),"%s购买数量:%d[%s]\n操作人:%s[UID:%d]",valuestr,value,ctime,admin_name,admin_uid);
-				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-			}
-			case CHANGE_WEAPON_PRICE:
-			{
-				Format(buffer,sizeof(buffer),"%s购买价格:%d[%s]\n操作人:%s[UID:%d]",valuestr,value,ctime,admin_name,admin_uid);
-				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-			}
-			case TOGGLE_ZMCLASS:
-			{
-				Format(buffer,sizeof(buffer),"僵尸类型:%s[%s]\n操作人:%s[UID:%d]",value?"开":"关",ctime,admin_name,admin_uid);
-				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-			}
-			case TOGGLE_HMCLASS:
-			{
-				Format(buffer,sizeof(buffer),"人类类型:%s[%s]\n操作人:%s[UID:%d]",value?"开":"关",ctime,admin_name,admin_uid);
-				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-			}
-			case TOGGLE_ZMHERO:
-			{
-				Format(buffer,sizeof(buffer),"僵尸英雄:%s[%s]\n操作人:%s[UID:%d]",value?"开":"关",ctime,admin_name,admin_uid);
-				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-			}
-			case TOGGLE_HMHERO:
-			{
-				Format(buffer,sizeof(buffer),"人类英雄:%s[%s]\n操作人:%s[UID:%d]",value?"开":"关",ctime,admin_name,admin_uid);
-				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-			}
-			default:
-			{
-				Format(buffer,sizeof(buffer),"未知操作[%s]\n操作人:[%d]%s",ctime,admin_uid,admin_name);
-				menu.AddItem("",buffer,ITEMDRAW_DISABLED);
-			}
-		}
-		while(SQL_FetchRow(hndl))
-		{
-			count++;
-			DbFetchString(hndl,"NAME",admin_name,sizeof(name));
-			admin_uid = DbFetchInt(hndl,"UID");
-			type = DbFetchInt(hndl,"TYPE");
-			timestamp = DbFetchInt(hndl,"TIMESTAMP");
-			DbFetchString(hndl,"VALUESTR",valuestr,sizeof(valuestr));
-			FormatTime(ctime,64,NULL_STRING,timestamp);
-			switch(type)
-			{
 				case CHANGE_COOLDOWN:
 				{
-					Format(buffer,sizeof(buffer),"修改冷却时间至%d分钟[%s]\n操作人:[%d]%s",value,ctime,admin_uid,admin_name);
+					Format(buffer,sizeof(buffer),"修改CD至%d分钟[%s]\n操作人:[%d]%s",value,ctime,admin_uid,admin_name);
 					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 				}
 				case CHANGE_COST:
 				{
-					Format(buffer,sizeof(buffer),"修改地图定价至:%d积分[%s]\n操作人:[%d]%s",value,ctime,admin_uid,admin_name);
+					Format(buffer,sizeof(buffer),"修改定价至:%d积分[%s]\n操作人:[%d]%s",value,ctime,admin_uid,admin_name);
 					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 				}
 				case TOGGLE_AVAILABLE:
@@ -320,37 +255,125 @@ void MapAdminHistoryViewCallback(Handle owner, Handle hndl, char[] error, any da
 				}
 				case CHANGE_WEAPON_AVAILABLE:
 				{
-					Format(buffer,sizeof(buffer),"%s开放购买:%s[%s]\n操作人:%s[UID:%d]",valuestr,value?"开":"关",ctime,admin_name,admin_uid);
+					Format(buffer,sizeof(buffer),"%s开放购买:%s[%s]\n操作人:[%d]%s",valuestr,value?"开":"关",ctime,admin_uid,admin_name);
 					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 				}
 				case CHANGE_WEAPON_NUM:
 				{
-					Format(buffer,sizeof(buffer),"%s购买数量:%d[%s]\n操作人:%s[UID:%d]",valuestr,value,ctime,admin_name,admin_uid);
+					Format(buffer,sizeof(buffer),"%s购买数量:%d[%s]\n操作人:[%d]%s",valuestr,value,ctime,admin_uid,admin_name);
 					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 				}
 				case CHANGE_WEAPON_PRICE:
 				{
-					Format(buffer,sizeof(buffer),"%s购买价格:%d[%s]\n操作人:%s[UID:%d]",valuestr,value,ctime,admin_name,admin_uid);
+					Format(buffer,sizeof(buffer),"%s购买价格:%d[%s]\n操作人:[%d]%s",valuestr,value,ctime,admin_uid,admin_name);
 					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 				}
 				case TOGGLE_ZMCLASS:
 				{
-					Format(buffer,sizeof(buffer),"僵尸类型:%d[%s]\n操作人:%s[UID:%d]",value?"开":"关",ctime,admin_name,admin_uid);
+					Format(buffer,sizeof(buffer),"僵尸类型:%d[%s]\n操作人:[%d]%s",value?"开":"关",ctime,admin_uid,admin_name);
 					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 				}
 				case TOGGLE_HMCLASS:
 				{
-					Format(buffer,sizeof(buffer),"人类类型:%d[%s]\n操作人:%s[UID:%d]",value?"开":"关",ctime,admin_name,admin_uid);
+					Format(buffer,sizeof(buffer),"人类类型:%d[%s]\n操作人:[%d]%s",value?"开":"关",ctime,admin_uid,admin_name);
 					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 				}
 				case TOGGLE_ZMHERO:
 				{
-					Format(buffer,sizeof(buffer),"僵尸英雄:%d[%s]\n操作人:%s[UID:%d]",value?"开":"关",ctime,admin_name,admin_uid);
+					Format(buffer,sizeof(buffer),"僵尸英雄:%d[%s]\n操作人:[%d]%s",value?"开":"关",ctime,admin_uid,admin_name);
 					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 				}
 				case TOGGLE_HMHERO:
 				{
-					Format(buffer,sizeof(buffer),"人类英雄:%d[%s]\n操作人:%s[UID:%d]",value?"开":"关",ctime,admin_name,admin_uid);
+					Format(buffer,sizeof(buffer),"人类英雄:%d[%s]\n操作人:[%d]%s",value?"开":"关",ctime,admin_uid,admin_name);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case FORCE_NOM:
+				{
+					Format(buffer,sizeof(buffer),"强制预定:[时间:%s]\n操作人:[%d]%s",ctime,admin_uid,admin_name);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case RESET_COOLDOWN:
+				{
+					Format(buffer,sizeof(buffer),"重置冷却:[时间:%s]\n操作人:[%d]%s",ctime,admin_uid,admin_name);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				default:
+				{
+					Format(buffer,sizeof(buffer),"未知操作[%s]\n操作人:[%d]%s",ctime,admin_uid,admin_name);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+		}
+		while(SQL_FetchRow(hndl))
+		{
+			count++;
+			DbFetchString(hndl,"NAME",admin_name,16);
+			admin_uid = DbFetchInt(hndl,"UID");
+			type = DbFetchInt(hndl,"TYPE");
+			timestamp = DbFetchInt(hndl,"TIMESTAMP");
+			value = DbFetchInt(hndl,"VALUE");
+			DbFetchString(hndl,"VALUESTR",valuestr,sizeof(valuestr));
+			FormatTime(ctime,64,NULL_STRING,timestamp);
+			switch(type)
+			{
+				case CHANGE_COOLDOWN:
+				{
+					Format(buffer,sizeof(buffer),"修改CD至%d分钟[%s]\n操作人:[%d]%s",value,ctime,admin_uid,admin_name);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case CHANGE_COST:
+				{
+					Format(buffer,sizeof(buffer),"修改定价至:%d积分[%s]\n操作人:[%d]%s",value,ctime,admin_uid,admin_name);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case TOGGLE_AVAILABLE:
+				{
+					Format(buffer,sizeof(buffer),"开放订阅:%s[%s]\n操作人:[%d]%s",value?"开":"关",ctime,admin_uid,admin_name);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case CHANGE_WEAPON_AVAILABLE:
+				{
+					Format(buffer,sizeof(buffer),"%s开放购买:%s[%s]\n操作人:[%d]%s",valuestr,value?"开":"关",ctime,admin_uid,admin_name);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case CHANGE_WEAPON_NUM:
+				{
+					Format(buffer,sizeof(buffer),"%s购买数量:%d[%s]\n操作人:[%d]%s",valuestr,value,ctime,admin_uid,admin_name);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case CHANGE_WEAPON_PRICE:
+				{
+					Format(buffer,sizeof(buffer),"%s购买价格:%d[%s]\n操作人:[%d]%s",valuestr,value,ctime,admin_uid,admin_name);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case TOGGLE_ZMCLASS:
+				{
+					Format(buffer,sizeof(buffer),"僵尸类型:%d[%s]\n操作人:[%d]%s",value?"开":"关",ctime,admin_uid,admin_name);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case TOGGLE_HMCLASS:
+				{
+					Format(buffer,sizeof(buffer),"人类类型:%d[%s]\n操作人:[%d]%s",value?"开":"关",ctime,admin_uid,admin_name);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case TOGGLE_ZMHERO:
+				{
+					Format(buffer,sizeof(buffer),"僵尸英雄:%d[%s]\n操作人:[%d]%s",value?"开":"关",ctime,admin_uid,admin_name);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case TOGGLE_HMHERO:
+				{
+					Format(buffer,sizeof(buffer),"人类英雄:%d[%s]\n操作人:[%d]%s",value?"开":"关",ctime,admin_uid,admin_name);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case FORCE_NOM:
+				{
+					Format(buffer,sizeof(buffer),"强制预定:[时间:%s]\n操作人:[%d]%s",ctime,admin_uid,admin_name);
+					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
+				}
+				case RESET_COOLDOWN:
+				{
+					Format(buffer,sizeof(buffer),"重置冷却:[时间:%s]\n操作人:[%d]%s",ctime,admin_uid,admin_name);
 					menu.AddItem("",buffer,ITEMDRAW_DISABLED);
 				}
 				default:

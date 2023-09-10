@@ -4,7 +4,25 @@ void uAdminOnPluginStart()
     RegAdminCmd("sm_nunban",NomUnbanCommand,ADMFLAG_GENERIC);
     RegAdminCmd("sm_pban",PftBanCommand,ADMFLAG_GENERIC);
     RegAdminCmd("sm_punban",PftUnbanCommand,ADMFLAG_GENERIC);
+	//RegAdminCmd("sm_uadmin",UAdminCommand,ADMFLAG_GENERIC);
+	//RegAdminCmd("sm_aimadmin",AimAdminCommand,ADMFLAG_GENERIC);
 }
+/*Action UAdminCommand(int client,int args)
+{
+	if(args!=1)
+	{
+		PrintToChat(client," \x05[用户管理系统}用法错误");
+		return Plugin_Handled;
+	}
+	char arg1[256];
+	GetCmdArg(1,arg1,sizeof(arg1));
+	//STEAMID
+	if(StrContains("STEAM_",arg1,false))
+	{
+		Datapack dp = new DataPack();
+		DbTQuery(,arg1);
+	}
+}*/
 Action NomBanCommand(int client, int args)
 {
 	char arg1[256];

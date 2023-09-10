@@ -6,6 +6,7 @@ char g_activating_hb_answer[256]="";
 Handle g_Timer_HB = INVALID_HANDLE;
 int g_HB_Time = 20;
 int g_player_hb_get[65]={0};
+int StorePlus_PlayerDataProtect[65];
 void StorePlusOnPluginStart()
 {
     RegAdminCmd("sm_gift",Command_Gift,ADMFLAG_GENERIC);
@@ -20,6 +21,23 @@ void StorePlusOnPluginStart()
 void StorePlusOnMapStart()
 {
     ResetHB();
+    for(int i=1;i<=64;i++)
+    {
+        StorePlus_PlayerDataProtect[i]=0;
+    }
+}
+void StorePlusOnClientConnected(int client)
+{
+    StorePlus_PlayerDataProtect[client]=0;
+}
+bool CheckDataProtect(int client)
+{
+    if(GetTime()<StorePlus_PlayerDataProtect[client])
+    {
+        PrintToChat(client," \x05[转账系统]\x01触发数据保护无法转账，剩余\x07 %d\x01秒",StorePlus_PlayerDataProtect[client]-GetTime());
+        return false;
+    }
+    return true;
 }
 void ResetHB()
 {
@@ -247,6 +265,10 @@ Action Command_CPPay(int client,int args)
     }
     credits_sender = Store_GetClientCredits(client);
     GetPartnerID(client,cp_auth,sizeof(cp_auth));
+    if(!CheckDataProtect(client))
+    {
+        return Plugin_Handled;
+    }
     if(pay_credits>credits_sender)
     {
         PrintToChat(client," \x05[积分转账]\x01你没有那么多积分，别想啦!");
@@ -272,12 +294,18 @@ Action Command_CPPay(int client,int args)
         {
             char sender_name[64];
             char receiver_name[64];
+            char reason[256];
             GetClientName(client,sender_name,sizeof(sender_name));
             GetClientName(i,receiver_name,sizeof(receiver_name));
             credits_receiver = Store_GetClientCredits(i);
-            Store_SetClientCredits(client,credits_sender-pay_credits,"CP转账[给出]");
-            Store_SetClientCredits(i,credits_receiver+pay_credits,"CP转账[接收]");
+            int sender_uid = EXGUSERS_GetUserUID(client);
+            int receiver_uid = EXGUSERS_GetUserUID(i);
+            Format(reason,sizeof(reason),"CP转账[给出][%d-->%d]",sender_uid,receiver_uid);
+            Store_SetClientCredits(client,credits_sender-pay_credits,reason);
+            Format(reason,sizeof(reason),"CP转账[接收][%d-->%d]",sender_uid,receiver_uid);
+            Store_SetClientCredits(i,credits_receiver+pay_credits,reason);
             PrintToChatAll(" \x05[积分转账]\x01 \x05%s \x01向TA的CP \x05%s \x01转账了\x07%d \x01积分，这其中恐怕存在什么交易!",sender_name,receiver_name,pay_credits);
+            StorePlus_PlayerDataProtect[client] = GetTime()+60;
             return Plugin_Handled;
         }
     }
@@ -325,6 +353,10 @@ Action Command_Pay(int client,int args)
         return Plugin_Handled;
     }
     credits_receiver = Store_GetClientCredits(client);
+    if(!CheckDataProtect(client))
+    {
+        return Plugin_Handled;
+    }
     if(pay_credits>credits_sender)
     {
         PrintToChat(client," \x05[积分转账]\x01你没有那么多积分，别想啦!");
@@ -337,13 +369,19 @@ Action Command_Pay(int client,int args)
     }
     char sender_name[64];
     char receiver_name[64];
+    char reason[256];
     GetClientName(client,sender_name,sizeof(sender_name));
     GetClientName(receiver,receiver_name,sizeof(receiver_name));
     credits_receiver = Store_GetClientCredits(receiver);
-    Store_SetClientCredits(client,credits_sender-pay_credits,"普通转账[给出]");
-    Store_SetClientCredits(receiver,credits_receiver+RoundToFloor(pay_credits*0.9),"普通转账[接收]");
+    int sender_uid = EXGUSERS_GetUserUID(client);
+    int receiver_uid = EXGUSERS_GetUserUID(receiver);
+    Format(reason,sizeof(reason),"普通转账[给出][%d-->%d]",sender_uid,receiver_uid);
+    Store_SetClientCredits(client,credits_sender-pay_credits,reason);
+    Format(reason,sizeof(reason),"普通转账[接受][%d-->%d]",sender_uid,receiver_uid);
+    Store_SetClientCredits(receiver,credits_receiver+RoundToFloor(pay_credits*0.9),reason);
     PrintToChatAll(" \x05[积分转账]\x01 \x05%s \x01向 \x05%s \x01转账了\x07%d \x01积分，这其中恐怕存在什么交易!",sender_name,receiver_name,RoundToFloor(pay_credits*0.9));
     g_Users_sp[client].pay_daily+=pay_credits;
+    StorePlus_PlayerDataProtect[client] = GetTime()+60;
     UpdateUserInfo(client);
     return Plugin_Handled;
 }

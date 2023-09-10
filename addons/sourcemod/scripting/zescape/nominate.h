@@ -244,6 +244,14 @@ int NomMapInfoMenuHandler(Menu menu, MenuAction action, int client, int param)
 		}
 		else if (param == 1)
 		{
+			int nominator_uid = EXGUSERS_GetUserUID(client);
+			ADMIN_LOG adm_log;
+			adm_log.uid = nominator_uid;
+			adm_log.name = client_name;
+			adm_log.timestamp = GetTime();
+			adm_log.type = 11;
+			adm_log.targetstr = map.name;
+			EXGUSERS_AddAdminLog(adm_log);
 			map.temp_cooldown = true;
 			Maps.SetArray(map.name,map,sizeof(map),true);
 			Format(buffer,sizeof(buffer)," \x05[EMC] \x09%s \x01重置了地图 \x07%s \x01的冷却",client_name,map.name);
@@ -272,7 +280,10 @@ int NomMapInfoMenuHandler(Menu menu, MenuAction action, int client, int param)
 void NominateMap(int client,Map_Info map,int forcenom=0)
 {
 	char buffer[PLATFORM_MAX_PATH];
+	char reason[256];
 	Nomlist_Log nommap,nom_log;
+	int nominator_uid = EXGUSERS_GetUserUID(client);
+	ADMIN_LOG adm_log;
 	int nom_index;
 	nom_index = is_Nominator(client);
 	nommap.id = map.id;
@@ -320,7 +331,7 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 		return;
 	}
 	int credits_temp=0;
-	if(!g_pStore || credits>=map.cost || forcenom)
+	if(!g_pStore || credits>=map.cost || ((GetUserFlagBits(client) && ADMFLAG_RESERVATION)&&credits>=map.cost*0.5) || forcenom)
 	{
 		if(nom_index!=-1)
 		{
@@ -349,7 +360,8 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 
 			if (g_pStore)
 			{
-				Store_SetClientCredits(client,credits-nommap.nom_cost+credits_temp,"活动");
+				Format(reason,sizeof(reason),"预订地图%s",nommap.name);
+				Store_SetClientCredits(client,credits-nommap.nom_cost+credits_temp,reason);
 				Format(buffer,sizeof(buffer),"[EMC]消费积分%d",nommap.nom_cost);
 				PrintCenterText(client,buffer);
 			}
@@ -357,6 +369,13 @@ void NominateMap(int client,Map_Info map,int forcenom=0)
 		Nom_Map_List.PushArray(nommap,sizeof(nommap));
 		if(forcenom)
 		{
+			adm_log.uid = nominator_uid;
+			adm_log.name = nommap.nominator_name;
+			adm_log.timestamp = GetTime();
+			adm_log.type = 11;
+			adm_log.targetstr = nommap.name;	
+			EXGUSERS_AddAdminLog(adm_log);
+			PrintToChatAll("123");
 			Format(buffer,sizeof(buffer)," \x05[EMC] \x09%s\x06[\x07%s\x06] \x01强制预定了地图 \x07%s",nommap.nominator_name,nommap.nominator_steamauth,nommap.name);
 		}
 		else
@@ -457,6 +476,7 @@ void CancelNom(int index,int opt)
 {
 	Nomlist_Log nom_log;
 	char buffer[256];
+	char reason[256];
 	int opt_uid;
 	opt_uid = EXGUSERS_GetUserUID(opt);
 	int nominator_credits,nominator_index;
@@ -471,7 +491,8 @@ void CancelNom(int index,int opt)
 		if (g_pStore)
 		{
 			nominator_credits = Store_GetClientCredits(opt);
-			Store_SetClientCredits(opt,nominator_credits+nom_log.nom_cost,"活动");
+			Format(reason,sizeof(reason),"预订地图%s退款",nom_log.name);
+			Store_SetClientCredits(opt,nominator_credits+nom_log.nom_cost,reason);
 		}
 	}
 	else
@@ -493,7 +514,8 @@ void CancelNom(int index,int opt)
 				if (g_pStore)
 				{
 					nominator_credits = Store_GetClientCredits(nominator_index);
-					Store_SetClientCredits(nominator_index,nominator_credits+nom_log.nom_cost,"活动");
+					Format(reason,sizeof(reason),"预订地图%s退款",nom_log.name);
+					Store_SetClientCredits(nominator_index,nominator_credits+nom_log.nom_cost,reason);
 					PrintToChatAll("[EMC]费用已归还本人");
 				}
 			}

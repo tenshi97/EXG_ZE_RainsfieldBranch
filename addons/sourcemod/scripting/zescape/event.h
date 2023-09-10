@@ -60,6 +60,7 @@ void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 	MapInfoOnRoundStart();
 	MissionOnRoundStart();
 	QuestOnRoundStart();
+	TriggerOnRoundStart();
 }
 void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 {

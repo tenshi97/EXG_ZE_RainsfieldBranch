@@ -1,4 +1,27 @@
-
+/*
+#############################################
+#											#
+#											#
+#											#
+#			Rainsfield						#
+#											#
+#											#
+#											#
+#			is								#
+#											#
+#											#
+#											#
+#			watching						#
+#											#
+#											#
+#											#
+#			you								#
+#											#
+#											#
+#											#
+#											#
+#############################################
+*/
 bool g_pStore;
 #include <sourcemod>
 #include <sdkhooks>
@@ -9,6 +32,7 @@ bool g_pStore;
 #include <zombiereloaded>
 #include <store>
 #include <timers>
+#include <herolevel>
 #include <nextmap>
 #include <server_redirect>
 #include <rainsfield>
@@ -120,6 +144,7 @@ public void OnMapStart()
 	NominateOnMapStart();
 	QuestOnMapStart();
 	HdOnMapStart();
+	TriggerOnMapStart();
 	//RoundOnMapStart();
 	if(!isDbConnected())	return;			//未连接，return，通过Db连接函数的函数执行Post，已连接则通直接Post使得换图后重载各插件数据
 	PrintToServer("DbOnDbConnected_MapStartPost");
