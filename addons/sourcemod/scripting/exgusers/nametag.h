@@ -41,7 +41,7 @@ char Nametag_String[][]=
     " \x10天人合一",         //24
     " \x06服主",        //25
     " \x08狗管理",      //26
-    " \x11自由之雨"     //27
+    " \x0A自\x0B由\x0C之\x0D雨"     //27
 }
 Nametag_Group g_Nametags[10];
 const g_Nametags_Num = 8;
@@ -322,9 +322,11 @@ int NameTagItemMenuHandler(Menu menu, MenuAction action, int client, int param)
             if(Store_GetClientCredits(client)<g_Nametags[id].price)
             {
                 PrintToChat(client," \x05[商店系统]\x01积分不足!")
+                return 0;
             }
             Store_SetClientCredits(client,Store_GetClientCredits(client)-g_Nametags[id].price,"购买头衔");
             g_client_nametag_inventory_group1[client]|=(1<<id);
+            NameTag_ItemMenuBuild(client,id);
         }
         if(param == 3)
         {
@@ -336,6 +338,7 @@ int NameTagItemMenuHandler(Menu menu, MenuAction action, int client, int param)
             {
                 g_client_nametag_equip[client]=id;
             }
+            NameTag_ItemMenuBuild(client,id);
         }
         UpdatePlayerNameTagInventory(client);
 	}
@@ -364,7 +367,7 @@ void NameTag_GetUserNameTag(int client,char[] NameTagBuffer)
     lvl = Hero_GetLevel(client);
     if(g_Nametags[tag].level>=1)
     {
-        serie_num = Min(g_Nametags[tag].level,(lvl+1)%500);
+        serie_num = Min(g_Nametags[tag].level,(lvl+1)/1000);
     }
     else
     {
@@ -376,7 +379,6 @@ void NameTag_GetUserNameTag(int client,char[] NameTagBuffer)
     strcopy(nametag,sizeof(nametag),Nametag_String[g_Nametags[tag].title_serie[serie_num]]);
     ReplaceString(nametag,sizeof(nametag),"lvl",level_str,true);
     Format(NameTagBuffer,64,"%s",nametag);
-    PrintToServer(nametag);
     return;    
 }
 public int Native_GetUserNameTag(Handle plugin, int numParams)
