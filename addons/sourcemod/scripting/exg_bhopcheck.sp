@@ -1,22 +1,29 @@
 #include <sourcemod>
 #include <sdktools>
 #include <rainsfield>
+
 float afPlayerAverageSpeed[65];
 float afPlayerAverageJumps[65];
+
 int aiPlayerJumps[65];
 int aiPlayerLastJumps[65][30];
 int aiPlayerLastPos[65];
+
 float afPlayerAveragePerfJumps[65];
+
 bool bHoldingJump[65];
 bool bLastOnGround[65];
 bool SuspectTag[65];
-public Plugin myinfo = {
+
+public Plugin myinfo =
+{
 	name = " EXG BHOP CHECK",
 	author = "Rainsfield&WackoD&EXGNullab",
 	description = "For Server MACRO CHECK USE",
 	version = "1.0",
 	url = "https://zegod.cn"
 };
+
 void ArrayReset()
 {
 	for(int i=1;i<=64;i++)
@@ -35,6 +42,7 @@ void ArrayReset()
 		SuspectTag[i]=false;
 	}
 }
+
 public void OnClientConnected(int client)
 {
 	afPlayerAverageSpeed[client]=250.0;
@@ -50,6 +58,7 @@ public void OnClientConnected(int client)
 	bLastOnGround[client]=false;
 	SuspectTag[client]=false;
 }
+
 public void OnClientDisconnected(int client)
 {
 	afPlayerAverageSpeed[client]=250.0;
@@ -65,12 +74,14 @@ public void OnClientDisconnected(int client)
 	bLastOnGround[client]=false;
 	SuspectTag[client]=false;
 }
+
 public void OnPluginStart()
 {
 	HookEvent("player_jump",OnPlayerJump,EventHookMode_Post);
 	ArrayReset();
-	RegAdminCmd("sm_bhc",Command_BhopCheck,ADMFLAG_GENERIC);
-	RegAdminCmd("sm_bhcl",Command_BhopCheck_SuspectList,ADMFLAG_GENERIC);
+
+	RegAdminCmd("sm_bhc",	Command_BhopCheck,				ADMFLAG_GENERIC);
+	RegAdminCmd("sm_bhcl",	Command_BhopCheck_SuspectList,	ADMFLAG_GENERIC);
 }
 public void OnMapStart()
 {
@@ -130,12 +141,12 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 Action Command_BhopCheck_SuspectList(int client,int args)
 {
 	char name[64];
-	for(int i=1;i<=64;i++)
+	for(int i = 1; i <= 64; i++)
 	{
 		if(SuspectTag[i])
 		{
 			GetClientName(i,name,sizeof(name));
-			PrintToConsole(client,"[嫌疑]%s",name);
+			PrintToConsole(client,"[嫌疑] %s",name);
 		}
 	}
 	return Plugin_Handled;
@@ -145,7 +156,7 @@ Action Command_BhopCheck(int client,int args)
 {
 	if(args<1||args>=2)
 	{
-		PrintToChat(client," \x05[连跳检测]\x01 正确用法:!bc \"玩家名\"/@all/@ct/@t");
+		PrintToChat(client," \x05[连跳检测] \x01正确用法:!bhc <#userid> / <@all @ct @t>");
 		return Plugin_Handled;
 	}
 	else
@@ -246,7 +257,7 @@ void ShowBhopStats(int client,int target)
 	GetClientAuthId(target, AuthId_Steam2, auth_id, sizeof(auth_id), true);
 	char name[64];
 	GetClientName(target,name,sizeof(name));
-	Format(buffer,sizeof(buffer),"玩家序号:%d UID:%d STEAMID:%s 昵称:%s\n 统计数据: 平均跳跃次数:%f 平均速度:%f 同步率:%.4f  最近30次跳跃次数:%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+	Format(buffer, sizeof(buffer), "玩家序号:%d UID:%d STEAMID:%s 昵称:%s\n平均跳跃次数:%f 平均速度:%f 同步率:%.4f 最近30次跳跃次数:%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
 		target,UID,auth_id,name,
 		afPlayerAverageJumps[target],
 		afPlayerAverageSpeed[target],
@@ -323,7 +334,7 @@ void SuspectReport(int client,int pattern)
 		return;
 	}
 	SuspectTag[client]=true;
-	for(int i=1;i<=64;i++)
+	for(int i = 1; i <= 64; i++)
 	{
 		if(!IsClientInGame(i)||IsFakeClient(i))
 		{
@@ -334,10 +345,10 @@ void SuspectReport(int client,int pattern)
 			int uid = EXGUSERS_GetUserUID(client);
 			char auth_id[64];
 			char name[64];
-			GetClientName(client,name,sizeof(name));
+			GetClientName(client, name, sizeof(name));
 			GetClientAuthId(client, AuthId_Steam2, auth_id, sizeof(auth_id), true);
-			PrintToChat(i," \x05[连跳检测]\x01玩家\x07%s\x01有疑似\x07连跳作弊/宏\x01嫌疑，若您有空请检测其数据并观察其视角进行录像[玩家UID:%d,STEAMID:%s]",name,uid,auth_id);
-			PrintToChat(i," \x05[连跳检测]\x06注意，由于地图自带的推力（包括神器和风的吸推）、下坡、低重力区域会导致数据异常，请遵循疑罪从无原则");
+			PrintToChat(i," \x05[连跳检测] \x01玩家\x07%s\x01有疑似\x07连跳作弊/宏\x01嫌疑,若您有空请检测其数据并观察其视角进行录像 [玩家UID:%d,STEAMID:%s]", name, uid, auth_id);
+			PrintToChat(i," \x05[连跳检测] \x06注意,由于地图自带的推力(包括神器和风的吸推),下坡,低重力区域会导致数据异常,请遵循疑罪从无原则");
 		}
 	}
 }
