@@ -1,33 +1,32 @@
-/*
-#############################################
-#											#
-#											#
-#											#
-#			Rainsfield						#
-#											#
-#											#
-#											#
-#			is								#
-#											#
-#											#
-#											#
-#			watching						#
-#											#
-#											#
-#											#
-#			you								#
-#											#
-#											#
-#											#
-#											#
-#############################################
-*/
-bool g_pStore;
+#pragma semicolon 1
+#pragma newdecls required
+#pragma dynamic 131072 
+
+//////////////////////////////
+//    PLUGIN DEFINITION     //
+//////////////////////////////
+#define PLUGIN_NAME         "EXG_Zombie_Escape_RY"
+#define PLUGIN_AUTHOR       "Rainsfield&WackoD&EXGNullable"
+#define PLUGIN_DESCRIPTION  "EXG ZombieEscape Rainsfield's Branch Plugins"
+#define PLUGIN_VERSION      "1.0"
+#define PLUGIN_URL          "https://zegod.cn"
+
+public Plugin myinfo =
+{
+	name 		= PLUGIN_NAME,
+	author 		= PLUGIN_AUTHOR,
+	description = PLUGIN_DESCRIPTION,
+	version 	= PLUGIN_VERSION,
+	url 		= PLUGIN_URL
+};
+
+//////////////////////////////
+//          INCLUDES        //
+//////////////////////////////
 #include <sourcemod>
 #include <sdkhooks>
 #include <cstrike>
 #include <sdktools>
-//#include <json>
 #include <outputinfo>
 #include <zombiereloaded>
 #include <store>
@@ -40,9 +39,8 @@ bool g_pStore;
 #include <mostactive>
 #include <sourcecomms>
 #include <weddings>
-#pragma semicolon 1
-#pragma newdecls required
-#pragma dynamic 131072 
+//#include <json>
+
 #include "zescape/basic_func.h"
 #include "zescape/event.h"
 #include "zescape/db.h"
@@ -61,18 +59,17 @@ bool g_pStore;
 #include "zescape/quest.h"
 #include "zescape/hd.h"
 //#include "zescape/entwatchedit.h"
+
+//////////////////////////////
+//          DEFINE          //
+//////////////////////////////
+bool g_pStore;
 Handle g_Warmup_Timer;
 ConVar g_Cvar_Mp_Warmup_Time;
 SERVER_LOG g_current_server;
 int g_server_ip;
 int g_server_port;
-public Plugin myinfo = {
-	name = " EXG_Zombie_Escape_RY",
-	author = "Rainsfield&WackoD&EXGNullable",
-	description = "EXG ZombieEscape Rainsfield's Branch Plugins",
-	version = "1.0",
-	url = "https://zegod.cn"
-};
+
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	CreateNative("RY_MapProperty_BanHumanSkills",Native_RY_MapProperty_BanHumanSkills);
@@ -85,8 +82,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CreateNative("RY_Map_GetCurrentMapInfo",Native_RY_Map_GetCurrentMapInfo);
 	CreateNative("RY_Map_GetCurrentMapNominator",Native_RY_Map_GetCurrentMapNominator);
 	CreateNative("RY_ZE_ZBUYCOUNT",Native_RY_ZE_ZBUYCOUNT);
-//	CreateNative("RY_Map_GetMapDataByMapName",Native_Map_GetMapDataByMapName);
-//	CreateNative("RY_MapProperty_GetMapPushBackFactor");
+	//CreateNative("RY_Map_GetMapDataByMapName",Native_Map_GetMapDataByMapName);
+	//CreateNative("RY_MapProperty_GetMapPushBackFactor");
 
 	MarkNativeAsOptional("Store_GetClientCredits");
 	MarkNativeAsOptional("Store_SetClientCredits");
@@ -146,15 +143,17 @@ public void OnMapStart()
 	HdOnMapStart();
 	TriggerOnMapStart();
 	//RoundOnMapStart();
-	if(!isDbConnected())	return;			//未连接，return，通过Db连接函数的函数执行Post，已连接则通直接Post使得换图后重载各插件数据
+	if(!isDbConnected()) return;			//未连接，return，通过Db连接函数的函数执行Post，已连接则通直接Post使得换图后重载各插件数据
 	PrintToServer("DbOnDbConnected_MapStartPost");
 	DbOnDbConnected_MapStartPost();
 	//EWEditOnMapStart();
 }
+
 public void OnEntityCreated(int entity, const char[] classname)
 {
 	TriggerOnEntityCreated(entity, classname);
 }
+
 void WarmUpTimerBuild()
 {
 	g_Warmup_Timer = INVALID_HANDLE;
@@ -175,7 +174,7 @@ Action OnWarmUpEnd(Handle timer)
 
 public void OnPluginEnd()
 {
-    Db_Close();
+	Db_Close();
 }
 
 public void OnMapEnd()
@@ -211,6 +210,7 @@ public void OnClientDisconnect(int client)
 	MissionOnClientDisconnect(client);
 	QuestOnPlayerDisconnected(client);
 }
+
 public void OnClientPostAdminCheck(int client)
 {
 	VoiceChatOnClientConnected(client);
@@ -221,6 +221,7 @@ public void EXGUSERS_OnUserLoaded(int client)
 	MissionOnClientConnected(client);
 	QuestOnPlayerConnected(client);
 }
+
 public void EXGZE_OnLevelSet(any level[sizeof(LEVEL_LOG)])
 {
 	MissionOnLevelSet(level);
