@@ -1,17 +1,19 @@
 void uAdminOnPluginStart()
 {
-    RegAdminCmd("sm_nban",NomBanCommand,ADMFLAG_GENERIC);
-    RegAdminCmd("sm_nunban",NomUnbanCommand,ADMFLAG_GENERIC);
-    RegAdminCmd("sm_pban",PftBanCommand,ADMFLAG_GENERIC);
-    RegAdminCmd("sm_punban",PftUnbanCommand,ADMFLAG_GENERIC);
+	RegAdminCmd("sm_nban",		NomBanCommand,		ADMFLAG_GENERIC);
+	RegAdminCmd("sm_nunban",	NomUnbanCommand,	ADMFLAG_GENERIC);
+	RegAdminCmd("sm_pban",		PftBanCommand,		ADMFLAG_GENERIC);
+	RegAdminCmd("sm_punban",	PftUnbanCommand,	ADMFLAG_GENERIC);
+
 	//RegAdminCmd("sm_uadmin",UAdminCommand,ADMFLAG_GENERIC);
 	//RegAdminCmd("sm_aimadmin",AimAdminCommand,ADMFLAG_GENERIC);
 }
+
 /*Action UAdminCommand(int client,int args)
 {
 	if(args!=1)
 	{
-		PrintToChat(client," \x05[用户管理系统}用法错误");
+		PrintToChat(client, " \x05[用户管理系统}用法错误");
 		return Plugin_Handled;
 	}
 	char arg1[256];
@@ -23,44 +25,45 @@ void uAdminOnPluginStart()
 		DbTQuery(,arg1);
 	}
 }*/
+
 Action NomBanCommand(int client, int args)
 {
 	char arg1[256];
 	char arg2[256];
-    char arg3[256];
+	char arg3[256];
 	int target_count;
 	int target_list[65];
 	char target_name[256];
 	bool tn_is_ml;
-    int uid;
-	if(args<=1||args>3)
+	int uid;
+	if(args <= 1 || args > 3)
 	{
-		PrintToChat(client," \x05[NomBan]用法:\x01!nban 玩家 时长(分钟) (原因可选)");
+		PrintToChat(client, " \x05[订图封禁] 用法:\x01!nban 玩家 时长(分钟) (原因可选)");
 		return Plugin_Handled;
 	}
 	else
 	{
-		GetCmdArg(1,arg1,sizeof(arg1));
-		GetCmdArg(2,arg2,sizeof(arg2));
-        int duration = StringToInt(arg2);
-        if(duration == 0 )
-        {
-            if(strcmp(arg2,"0",false)!=0)
-            {
-		        PrintToChat(client," \x05[NomBan]用法:\x01!nban 玩家 时长(分钟) (原因可选)");
-                return Plugin_Handled;
-            }
-        }
-        if(args==3)
-        {
-		    GetCmdArg(3,arg3,sizeof(arg3));
-        }
-		target_count = ProcessTargetString(arg1,client,target_list,64,COMMAND_FILTER_CONNECTED,target_name,sizeof(target_name),tn_is_ml);
+		GetCmdArg(1, arg1, sizeof(arg1));
+		GetCmdArg(2, arg2, sizeof(arg2));
+		int duration = StringToInt(arg2);
+		if(duration == 0)
+		{
+			if(strcmp(arg2, "0", false) != 0)
+			{
+				PrintToChat(client, " \x05[订图封禁] 用法:\x01!nban 玩家 时长(分钟) (原因可选)");
+				return Plugin_Handled;
+			}
+		}
+		if(args==3)
+		{
+			GetCmdArg(3,arg3,sizeof(arg3));
+		}
+		target_count = ProcessTargetString(arg1, client, target_list, 64, COMMAND_FILTER_CONNECTED, target_name, sizeof(target_name), tn_is_ml);
 		if(target_count>0)
 		{
 			for(int i=0;i<target_count;i++)
 			{
-                AddNomBanLog(target_list[i],duration,arg3,client);
+				AddNomBanLog(target_list[i], duration, arg3, client);
 			}
 		}
 	}
@@ -74,10 +77,10 @@ Action NomUnbanCommand(int client, int args)
 	int target_list[65];
 	char target_name[256];
 	bool tn_is_ml;
-    int uid;
+	int uid;
 	if(args<1||args>=2)
 	{
-		PrintToChat(client," \x05[NomBan]用法:\x01!nunban 玩家");
+		PrintToChat(client, " \x05[订图封禁] 用法:\x01!nunban 玩家");
 		return Plugin_Handled;
 	}
 	else
@@ -88,7 +91,7 @@ Action NomUnbanCommand(int client, int args)
 		{
 			for(int i=0;i<target_count;i++)
 			{
-                RemoveNomBanLog(target_list[i],client);
+				RemoveNomBanLog(target_list[i],client);
 			}
 		}
 	}
@@ -99,40 +102,40 @@ Action PftBanCommand(int client, int args)
 {
 	char arg1[256];
 	char arg2[256];
-    char arg3[256];
+	char arg3[256];
 	int target_count;
 	int target_list[65];
 	char target_name[256];
 	bool tn_is_ml;
-    int uid;
+	int uid;
 	if(args<=1||args>3)
 	{
-		PrintToChat(client," \x05[用户系统]用法:\x01!pban 玩家 时长(分钟) (原因可选)");
+		PrintToChat(client, " \x05[用户系统] 用法:\x01!pban 玩家 时长(分钟) (原因可选)");
 		return Plugin_Handled;
 	}
 	else
 	{
 		GetCmdArg(1,arg1,sizeof(arg1));
 		GetCmdArg(2,arg2,sizeof(arg2));
-        int duration = StringToInt(arg2);
-        if(duration == 0 )
-        {
-            if(strcmp(arg2,"0",false)!=0)
-            {
-		        PrintToChat(client," \x05[用户系统]用法:\x01!pban 玩家 时长(分钟) (原因可选)");
-                return Plugin_Handled;
-            }
-        }
-        if(args==3)
-        {
-		    GetCmdArg(3,arg3,sizeof(arg3));
-        }
+		int duration = StringToInt(arg2);
+		if(duration == 0 )
+		{
+			if(strcmp(arg2,"0",false)!=0)
+			{
+				PrintToChat(client, " \x05[用户系统] 用法:\x01!pban 玩家 时长(分钟) (原因可选)");
+				return Plugin_Handled;
+			}
+		}
+		if(args==3)
+		{
+			GetCmdArg(3,arg3,sizeof(arg3));
+		}
 		target_count = ProcessTargetString(arg1,client,target_list,64,COMMAND_FILTER_CONNECTED,target_name,sizeof(target_name),tn_is_ml);
 		if(target_count>0)
 		{
 			for(int i=0;i<target_count;i++)
 			{
-                AddPftBanLog(target_list[i],duration,arg3,client);
+				AddPftBanLog(target_list[i],duration,arg3,client);
 			}
 		}
 	}
@@ -146,10 +149,10 @@ Action PftUnbanCommand(int client, int args)
 	int target_list[65];
 	char target_name[256];
 	bool tn_is_ml;
-    int uid;
+	int uid;
 	if(args<1||args>=2)
 	{
-		PrintToChat(client," \x05[用户系统]用法:\x01!punban 玩家");
+		PrintToChat(client, " \x05[用户系统] 用法:\x01!punban 玩家");
 		return Plugin_Handled;
 	}
 	else
@@ -160,7 +163,7 @@ Action PftUnbanCommand(int client, int args)
 		{
 			for(int i=0;i<target_count;i++)
 			{
-                RemovePftBanLog(target_list[i],client);
+				RemovePftBanLog(target_list[i],client);
 			}
 		}
 	}
