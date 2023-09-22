@@ -154,9 +154,12 @@ void NameTag_OnClientConnected(int client)
         g_client_nametag_equip[client] = 0;
     }
     Nametag_CheckGroup(client);
-    if(g_client_nametag_inventory_group1[client]&(1<<g_client_nametag_equip[client])==0)    //Check if client doesn't have the equipped nametag
+    if(g_client_nametag_equip[client]!=-1)
     {
-        g_client_nametag_equip[client] = 0;
+        if(g_client_nametag_inventory_group1[client]&(1<<g_client_nametag_equip[client])==0)    //Check if client doesn't have the equipped nametag
+        {
+            g_client_nametag_equip[client] = 0;
+        }
     }
     UpdatePlayerNameTagInventory(client);
 }
@@ -332,7 +335,7 @@ int NameTagItemMenuHandler(Menu menu, MenuAction action, int client, int param)
         {
             if(g_client_nametag_equip[client]==id)
             {
-                g_client_nametag_equip[client]=0;            
+                g_client_nametag_equip[client]=-1;            
             }
             else
             {
@@ -363,6 +366,11 @@ void NameTag_GetUserNameTag(int client,char[] NameTagBuffer)
         return;
     }
     int tag = g_client_nametag_equip[client];
+    if(tag == -1)
+    {
+        Format(NametagBuffer,64,"");
+        return;
+    }
     int serie_num,lvl;
     lvl = Hero_GetLevel(client);
     if(g_Nametags[tag].level>=1)
