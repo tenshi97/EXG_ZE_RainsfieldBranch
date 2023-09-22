@@ -368,7 +368,7 @@ void NameTag_GetUserNameTag(int client,char[] NameTagBuffer)
     int tag = g_client_nametag_equip[client];
     if(tag == -1)
     {
-        Format(NametagBuffer,64,"");
+        Format(NameTagBuffer,64,"");
         return;
     }
     int serie_num,lvl;

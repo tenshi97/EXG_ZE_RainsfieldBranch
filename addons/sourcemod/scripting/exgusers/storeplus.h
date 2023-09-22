@@ -400,13 +400,15 @@ Action Command_QD(int client,int args)
     }
     int credits = Store_GetClientCredits(client);
     int credits_bonus = 0;
+    bool firstDay = false;
+    bool isvip = IsClientVIP(client);
     if(g_Users_sp[client].qd==0)
     {
         g_Users_sp[client].qd++;
         g_Users_sp[client].qd_start =   GetTime()-GetTime()%86400;
         g_Users_sp[client].qd_time =    g_Users_sp[client].qd_start;
         credits_bonus = 20;
-        PrintToChat(client, "\x05[签到系统]\x01 完成签到获得20积分(若您为VIP则为双倍)!");
+        firstDay=true;
     }
     else
     {
@@ -418,44 +420,56 @@ Action Command_QD(int client,int args)
             g_Users_sp[client].qd_time = GetTime()-GetTime()%86400;
             credits_bonus = 20;
         }
-        else
+        else if( GetTime() - g_Users_sp[client].qd_time>=86400)
         {
-            if(GetTime()-g_Users_sp[client].qd_time>=86400)
+            g_Users_sp[client].qd++;
+            g_Users_sp[client].qd_time = GetTime()-GetTime()%86400;
+            switch(g_Users_sp[client].qd)
             {
-                g_Users_sp[client].qd++;
-                g_Users_sp[client].qd_time = GetTime()-GetTime()%86400;
-                switch(g_Users_sp[client].qd)
+                case 1: credits_bonus = 20;
+                case 2: credits_bonus = 40;
+                case 3: credits_bonus = 60;
+                case 4: credits_bonus = 80;
+                case 5: credits_bonus = 100;
+                case 6: credits_bonus = 150;
+                case 7: credits_bonus = 200;
+                default:
                 {
-                    case 1: credits_bonus = 20;
-                    case 2: credits_bonus = 40;
-                    case 3: credits_bonus = 60;
-                    case 4: credits_bonus = 80;
-                    case 5: credits_bonus = 100;
-                    case 6: credits_bonus = 150;
-                    case 7: credits_bonus = 200;
-                    default:
-                    {
-                        g_Users_sp[client].qd = 1;
-                        credits_bonus = 20;
-                    }
+                    g_Users_sp[client].qd = 1;
+                    credits_bonus = 20;
                 }
             }
         }
-        if(IsClientVIP(client))
+        if(isvip)
         {
-            if(credits_bonus>=100)  credits_bonus+=100;
-            else    credits_bonus *=2;
+            if(credits_bonus>=100)  {credits_bonus+=100;}
+            else    {credits_bonus *=2;}
         }
-        if(credits_bonus>0)
-        {
-            PrintToChat(client, "\x05[签到系统]\x01 完成本轮连续%d天签到获得%d积分!",g_Users_sp[client].qd,credits_bonus);
-            Store_SetClientCredits(client,credits+credits_bonus,"签到");
+    }
+    if(credits_bonus>0)
+    {     
+        if(!isvip){
+            bool isExgTagPlayer = IsPlayerUseTag(client, TagExg) || IsPlayerUseTag(client, TagExgCore) || IsPlayerUseTag(client, TagExgLive);
+            if(isExgTagPlayer){
+                int add = 20;
+                PrintToChat(client, "\x05[签到系统]\x01 携带 EXG 组标，签到加赠%d积分",add);
+            }
         }
-        else
-        {
-            int tdelta = g_Users_sp[client].qd_time+86400-GetTime();
-            PrintToChat(client," \x05[签到系统]\x01您已经签到过了，距离你下一次可以签到还有%d小时%d分",tdelta/3600,(tdelta%3600)/60)
+        if(firstDay){
+            if(isvip){
+                PrintToChat(client, "\x05[签到系统]\x01 完成签到获得%d积分(已享VIP双倍加成)",credits_bonus);
+            }else{
+                PrintToChat(client, "\x05[签到系统]\x01 完成签到获得%d积分(若您为VIP则为双倍)",credits_bonus);
+            }
+        }else{
+            PrintToChat(client, "\x05[签到系统]\x01 完成本轮连续%d天签到,共获得%d积分!",g_Users_sp[client].qd,credits_bonus);
         }
+        Store_SetClientCredits(client,credits+credits_bonus,"签到");
+    }
+    else
+    {
+        int tdelta = g_Users_sp[client].qd_time+86400-GetTime();
+        PrintToChat(client," \x05[签到系统]\x01您已经签到过了，距离你下一次可以签到还有%d小时%d分",tdelta/3600,(tdelta%3600)/60)
     }
     UpdateUserInfo(client);
 }
