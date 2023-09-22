@@ -9,7 +9,6 @@ ArrayList g_PendingWeapons_List;
 char g_ew_path[256];
 char colors_name[24][64]={"{default}","{green}","{darkred}","{purple}","{lightgreen}","{lime}","{red}","{grey}","{olive}","{a}","{lightblue}","{blue}","{d}","{pink}","{darkorange}","{orange}","{white}","{yellow}","{magenta}","{silver}","{bluegrey}","{lightred}","{cyan}","{gray}"};
 char colors_cnname[24][64]={"默认色","绿色","暗红","紫色","浅绿","酸橙绿","红色","灰色","橄榄绿","a","浅蓝色","蓝色","d","粉色","暗橙","橙色","白色","黄色","洋红色","银色","蓝灰色","浅红色","天青色","暗灰色"};
-
 enum EntEditing_Type
 {
 	MODIFY_NAME,
@@ -17,18 +16,16 @@ enum EntEditing_Type
 	MODIFY_COOLDOWN,
 	MODIFY_MAXUSES
 };
-
 enum struct Ent_AdmEditing
 {
 	int hook_say;
 	EntEditing_Type type;
 	int item_num;
 }
-
 Ent_AdmEditing g_client_entedit[65];
 void ResetBool()
 {
-	//g_Current_Map_EntWatch = false;
+	g_Current_Map_EntWatch = false;
 	g_KV_Load_Status = true;
 	g_KV_MapPacked = false;
 	g_KV_NormalKv = false;
@@ -38,12 +35,10 @@ void ResetBool()
 		g_client_entedit[i].hook_say = 0;
 	}
 }
-
 void EWEditOnClientDisconnect(int client)
 {
 	g_client_entedit[client].hook_say = 0;
 }
-
 void EWEditOnPluginStart()
 {
 	ResetBool();
@@ -54,7 +49,6 @@ void EWEditOnPluginStart()
 	RegAdminCmd("sm_entadmin",EntAdminCommand,ADMFLAG_GENERIC);
 	RegAdminCmd("sm_eap",EntAdminPendingWeaponCommand,ADMFLAG_GENERIC);
 }
-
 void EWEditOnMapStart()
 {
 	ResetBool();
@@ -80,7 +74,6 @@ void EWEditOnMapStart()
 	BuildCurrentMapEntList();
 
 }
-
 void BuildCurrentMapEntList()
 {
 	if(!g_KV_Override&&FileExists(g_ew_path,false))
@@ -97,7 +90,7 @@ void BuildCurrentMapEntList()
 	if(!kv.GotoFirstSubKey())
 	{
 		delete kv;
-		//g_KV_Load_Status = false;
+		g_KV_Load_Status = false;
 		g_KV_NormalKv = false;
 		g_KV_MapPacked = false;
 		return;
@@ -179,18 +172,16 @@ void BuildCurrentMapEntList()
 	}
 	delete kv;
 }
-
 Action EntAdminCommand(int client,int args)
 {	
 	EntAdmMenuCreate(client);
 	return Plugin_Handled;
 }
-
 void EntAdmMenuCreate(int client)
 {
 	if(g_Ent_List.Length == 0 )
 	{
-		PrintToChat(client," \x05[神器管理] \x01当前地图无神器!");
+		PrintToChat(client," \x05[神器管理]\x01当前地图无神器!");
 	}
 	Menu menu = CreateMenu(EntAdminMenuHandler);
 	menu.SetTitle("神器管理");
@@ -204,7 +195,6 @@ void EntAdmMenuCreate(int client)
 	}
 	menu.Display(client,MENU_TIME_FOREVER);	
 }
-
 int EntAdminMenuHandler(Menu menu, MenuAction action, int client, int param) 
 {
 	if (action == MenuAction_End) menu.Close();
@@ -213,9 +203,7 @@ int EntAdminMenuHandler(Menu menu, MenuAction action, int client, int param)
 		EntSetMenu(client,param);
 		return 0;
 	}
-	return 0;
 }
-
 void EntSetMenu(int client,int itemnum)
 {
 	Ent_Log ent_temp;
@@ -256,7 +244,6 @@ void EntSetMenu(int client,int itemnum)
 	menu.Display(client,MENU_TIME_FOREVER);
 
 }
-
 int EntSetMenuHandler(Menu menu, MenuAction action, int client, int param) 
 {
 	if (action == MenuAction_End) menu.Close();
@@ -275,13 +262,13 @@ int EntSetMenuHandler(Menu menu, MenuAction action, int client, int param)
 			case 0:
 			{
 				g_client_entedit[client].hook_say = 1;
-				PrintToChat(client," \x05[神器管理] \x01输入内容修改神器名,输入\x09 cancel\x01取消，输入\x09 null\x01置空");
+				PrintToChat(client," \x05[神器管理]\x01输入内容修改神器名,输入\x09 cancel\x01取消，输入\x09 null\x01置空");
 				g_client_entedit[client].type = MODIFY_NAME;
 			}
 			case 1:
 			{
 				g_client_entedit[client].hook_say = 1;
-				PrintToChat(client," \x05[神器管理] \x01输入内容修改神器短名,输入\x09 cancel\x01取消，输入\x09 null\x01置空");
+				PrintToChat(client," \x05[神器管理]\x01输入内容修改神器短名,输入\x09 cancel\x01取消，输入\x09 null\x01置空");
 				g_client_entedit[client].type = MODIFY_SHORTNAME;
 			}
 			case 2:
@@ -323,13 +310,13 @@ int EntSetMenuHandler(Menu menu, MenuAction action, int client, int param)
 			case 10:
 			{
 				g_client_entedit[client].hook_say = 1;
-				PrintToChat(client," \x05[神器管理] \x01输入数字修改神器CD,输入\x09 cancel\x01取消");
+				PrintToChat(client," \x05[神器管理]\x01输入数字修改神器CD,输入\x09 cancel\x01取消");
 				g_client_entedit[client].type = MODIFY_COOLDOWN;				
 			}
 			case 11:
 			{
 				g_client_entedit[client].hook_say = 1;
-				PrintToChat(client," \x05[神器管理] \x01输入数字修改神器次数,输入\x09 cancel\x01取消");
+				PrintToChat(client," \x05[神器管理]\x01输入数字修改神器次数,输入\x09 cancel\x01取消");
 				g_client_entedit[client].type = MODIFY_MAXUSES;			
 			}
 			case 12:
@@ -365,7 +352,6 @@ int EntSetMenuHandler(Menu menu, MenuAction action, int client, int param)
 		EntAdmMenuCreate(client);
 		return 0;
 	}
-	return 0;
 }
 
 void EntSetColor(int client,int itemnum)
@@ -384,7 +370,6 @@ void EntSetColor(int client,int itemnum)
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }
-
 int EntSetColorHandler(Menu menu, MenuAction action, int client, int param) 
 {
 	if (action == MenuAction_End) menu.Close();
@@ -411,7 +396,6 @@ int EntSetColorHandler(Menu menu, MenuAction action, int client, int param)
 		EntSetMenu(client,item_num);
 		return 0;
 	}
-	return 0;
 }
 
 void EntSetMode(int client,int itemnum)
@@ -433,7 +417,6 @@ void EntSetMode(int client,int itemnum)
 	menu.ExitBackButton = true;
 	menu.Display(client,MENU_TIME_FOREVER);
 }
-
 int EntSetModeHandler(Menu menu, MenuAction action, int client, int param) 
 {
 	if (action == MenuAction_End) menu.Close();
@@ -460,7 +443,6 @@ int EntSetModeHandler(Menu menu, MenuAction action, int client, int param)
 		EntSetMenu(client,item_num);
 		return 0;
 	}
-	return 0;
 }
 
 void ModifyKv(int item_num)
@@ -499,7 +481,6 @@ void ModifyKv(int item_num)
 	kv_temp.ExportToFile(g_ew_path);
 	delete kv_temp;
 }
-
 void ModifyAll()
 {
 	char buffer[256];
@@ -538,6 +519,10 @@ void ModifyAll()
 	kv_temp.ExportToFile(g_ew_path);
 	delete kv_temp;	
 }
+void BuildNewCfg()
+{
+
+}
 
 bool EntAdmIsClientModifying(int client,const char[] sArgs)
 {
@@ -560,11 +545,11 @@ bool EntAdmIsClientModifying(int client,const char[] sArgs)
 					{
 						strcopy(ent_temp.name,sizeof(ent_temp.name),sArgs);
 					}
-					PrintToChat(client," \x05[神器管理] \x01修改成功");
+					PrintToChat(client," \x05[神器管理]\x01修改成功");
 				}
 				else
 				{
-					PrintToChat(client," \x05[神器管理] \x01已取消修改");					
+					PrintToChat(client," \x05[神器管理]\x01已取消修改");					
 				}
 
 			}
@@ -580,11 +565,11 @@ bool EntAdmIsClientModifying(int client,const char[] sArgs)
 					{
 						strcopy(ent_temp.shortname,sizeof(ent_temp.shortname),sArgs);
 					}
-					PrintToChat(client," \x05[神器管理] \x01修改成功");
+					PrintToChat(client," \x05[神器管理]\x01修改成功");
 				}		
 				else
 				{
-					PrintToChat(client," \x05[神器管理] \x01已取消修改");					
+					PrintToChat(client," \x05[神器管理]\x01已取消修改");					
 				}		
 			}
 			case MODIFY_COOLDOWN:
@@ -593,11 +578,11 @@ bool EntAdmIsClientModifying(int client,const char[] sArgs)
 				{
 					int cd = StringToInt(sArgs);
 					ent_temp.cooldown = cd;
-					PrintToChat(client," \x05[神器管理] \x01修改成功");
+					PrintToChat(client," \x05[神器管理]\x01修改成功");
 				}		
 				else
 				{
-					PrintToChat(client," \x05[神器管理] \x01已取消修改");					
+					PrintToChat(client," \x05[神器管理]\x01已取消修改");					
 				}					
 			}
 			case MODIFY_MAXUSES:
@@ -606,11 +591,11 @@ bool EntAdmIsClientModifying(int client,const char[] sArgs)
 				{
 					int mu = StringToInt(sArgs);
 					ent_temp.maxuses = mu;
-					PrintToChat(client," \x05[神器管理] \x01修改成功");
+					PrintToChat(client," \x05[神器管理]\x01修改成功");
 				}		
 				else
 				{
-					PrintToChat(client," \x05[神器管理] \x01已取消修改");					
+					PrintToChat(client," \x05[神器管理]\x01已取消修改");					
 				}					
 			}
 		}
@@ -633,7 +618,6 @@ void EWEditOnEntityCreated(int entity, const char[] classname)
     	SDKHook(entity, SDKHook_SpawnPost, EWEditOnWeaponSpawned);
     }
 }
-
 void EWEditOnWeaponSpawned(int iWeapon)
 {
 	int iPrevOwner = HasEntProp(iWeapon, Prop_Send, "m_hPrevOwner") ? GetEntPropEnt(iWeapon, Prop_Send, "m_hPrevOwner") : -1;
@@ -708,7 +692,6 @@ Action EntAdminPendingWeaponCommand(int client,int args)
 	PendingWeaponMenu(client);
 	return Plugin_Handled;
 }
-
 void PendingWeaponMenu(int client)
 {
 	Menu menu =CreateMenu(PendingWeaponMenuHandler);
@@ -765,7 +748,6 @@ int PendingWeaponMenuHandler(Menu menu, MenuAction action, int client, int param
 		PendingWeaponMenu(client);
 		return 0;
 	}
-	return 0;
 }
 
 void InsertKV(const char[] new_subkey,Ent_Log ent_temp)

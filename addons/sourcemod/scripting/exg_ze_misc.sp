@@ -46,7 +46,7 @@ public Plugin myinfo =
 //////////////////////////////
 //          DEFINE          //
 //////////////////////////////
-//bool g_pStore;
+bool g_pStore;
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
@@ -62,8 +62,6 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	CreateNative("EXGZE_ToggleSprite",Native_ToggleSprite);
 
 	RegPluginLibrary("exg_ze_misc");
-
-	return APLRes_Success;
 }
 
 public void OnLibraryAdded(const char[] name)
@@ -71,7 +69,7 @@ public void OnLibraryAdded(const char[] name)
 	// Validate library
 	if (StrContains(name, "store", false) != -1)
 	{
-		//g_pStore = (GetFeatureStatus(FeatureType_Native, "Store_GetClientCredits") == FeatureStatus_Available);
+		g_pStore = (GetFeatureStatus(FeatureType_Native, "Store_GetClientCredits") == FeatureStatus_Available);
 	}
 }
 
@@ -80,7 +78,7 @@ public void OnLibraryRemoved(const char[] name)
 	// Validate library
 	if (StrContains(name, "store", false) != -1)
 	{
-		//g_pStore = (GetFeatureStatus(FeatureType_Native, "Store_GetClientCredits") == FeatureStatus_Available);
+		g_pStore = (GetFeatureStatus(FeatureType_Native, "Store_GetClientCredits") == FeatureStatus_Available);
 	}
 }
 

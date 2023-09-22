@@ -1,8 +1,6 @@
 const int g_const_midnight_timestamp=1654185600;
 const int SQL_Inject_Str_Num = 16;
-//char SQL_Inject_List[SQL_Inject_Str_Num][64]={"`","/","\'","=",",",";","%","insert","select","update","create","exec","delete","declare","master","truncate"};
-
-/*
+char SQL_Inject_List[SQL_Inject_Str_Num][64]={"`","/","\'","=",",",";","%","insert","select","update","create","exec","delete","declare","master","truncate"};
 bool IsValidHuman(int client)
 {
 	if(IsClientInGame(client))
@@ -41,27 +39,22 @@ bool IsInSameTeam(int client1,int client2)
 	if(GetClientTeam(client1)==GetClientTeam(client2))	return true;
 	return false;
 }
-
 int Max(int a,int b)
 {
 	return a>=b?a:b;
 }
-
 int Min(int a,int b)
 {
 	return a<=b?a:b;
 }
-
 float fMax(float a,float b)
 {
 	return a>=b?a:b;
 }
-
 float fMin(float a,float b)
 {
 	return a<=b?a:b;
 }
-
 Action SetClientTeam(int client,int team)
 {
 	if(!IsClientInGame(client))	return Plugin_Handled;
@@ -70,7 +63,6 @@ Action SetClientTeam(int client,int team)
 	if (team == 3) FakeClientCommand(client, "jointeam blue");
 	return Plugin_Handled;
 }
-
 bool DiffTimeTransform1(char buffer[PLATFORM_MAX_PATH],int timestamp1,int timestamp2,int total)
 {
 	int day,hour,minute;
@@ -89,7 +81,6 @@ bool DiffTimeTransform1(char buffer[PLATFORM_MAX_PATH],int timestamp1,int timest
 		return true;
 	}
 }
-
 int IsClientVIP(int client)
 {
 	if(client<=0||client>=65)	return -1;
@@ -101,7 +92,6 @@ int IsClientVIP(int client)
 	}
 	return 0;
 }
-
 void KillTimerSafe(Handle& timer) {
 	if (!timer||timer==INVALID_HANDLE) return;
 	KillTimer(timer);
@@ -153,7 +143,6 @@ void IPNumToIPV4(int ipnum,char[] ipadr,int maxlen)
 	if(z<0) z+=256;
 	Format(ipadr,maxlen,"%d.%d.%d.%d",w,x,y,z);
 }
-
 int IPV4ToIPNum(char[] ipadr,int maxlen)
 {
 	char ipsection_buffer[4][10];
@@ -164,4 +153,3 @@ int IPV4ToIPNum(char[] ipadr,int maxlen)
 	int z = StringToInt(ipsection_buffer[3]);
 	int ret = 16777216*w+65536*x+256*y+z;
 }
-*/
