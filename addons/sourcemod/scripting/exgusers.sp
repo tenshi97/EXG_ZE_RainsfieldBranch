@@ -1,35 +1,31 @@
-/*
-#############################################
-#											#
-#											#
-#											#
-#			Rainsfield						#
-#											#
-#											#
-#											#
-#			is								#
-#											#
-#											#
-#											#
-#			watching						#
-#											#
-#											#
-#											#
-#			you								#
-#											#
-#											#
-#											#
-#											#
-#############################################
-*/
-bool       g_pStore = false;
-SERVER_LOG g_current_server;
+#pragma semicolon 1
+#pragma newdecls required
+
+//////////////////////////////
+//    PLUGIN DEFINITION     //
+//////////////////////////////
+#define PLUGIN_NAME         "EXG_CSGO_Users"
+#define PLUGIN_AUTHOR       "Rainsfield&WackoD&ExgNullable"
+#define PLUGIN_DESCRIPTION  "EXG CSGO SERVER USER SYSTEM"
+#define PLUGIN_VERSION      "1.0"
+#define PLUGIN_URL          "https://zegod.cn"
+
+public Plugin myinfo =
+{
+	name 		= PLUGIN_NAME,
+	author 		= PLUGIN_AUTHOR,
+	description = PLUGIN_DESCRIPTION,
+	version 	= PLUGIN_VERSION,
+	url 		= PLUGIN_URL
+};
+
+//////////////////////////////
+//          INCLUDES        //
+//////////////////////////////
 #include <clientprefs>
 #include <cstrike>
 #include <sdkhooks>
 #include <sdktools>
-//#include <json>
-//#include <outputinfo>
 #include <csgopwapi>
 #include <exg_group_tag>
 #include <herolevel>
@@ -42,8 +38,9 @@ SERVER_LOG g_current_server;
 #include <store>
 #include <timers>
 #include <weddings>
-#pragma semicolon 1
-#pragma newdecls required
+//#include <json>
+//#include <outputinfo>
+
 #include "exgusers/users.h"
 #include "exgusers/adminlog.h"
 #include "exgusers/announcement.h"
@@ -58,18 +55,14 @@ SERVER_LOG g_current_server;
 #include "exgusers/storeplus.h"
 #include "exgusers/timer.h"
 #include "exgusers/uadmin.h"
+
+//////////////////////////////
+//          DEFINE          //
+//////////////////////////////
+bool g_pStore = false;
+SERVER_LOG g_current_server;
 const int TIME_PERMANENT = 2000000000;
-int       pay_limit[65]  = { 0 };
-
-public Plugin myinfo =
-{
-	name        = " EXG_CSGO_Users",
-	author      = "Rainsfield&WackoD&ExgNullable",
-	description = "EXG CSGO SERVER USER SYSTEM",
-	version     = "1.0",
-	url         = "https://zegod.cn"
-
-};
+int pay_limit[65] = {0};
 
 public void OnLibraryAdded(const char[] name)
 {

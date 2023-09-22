@@ -1,28 +1,44 @@
+#pragma semicolon 1
+#pragma newdecls required
+#pragma dynamic 131072 
+
+//////////////////////////////
+//    PLUGIN DEFINITION     //
+//////////////////////////////
+#define PLUGIN_NAME         "EXGBHOP_CHECK"
+#define PLUGIN_AUTHOR       "Rainsfield&WackoD&EXGNullable"
+#define PLUGIN_DESCRIPTION  "For Server MACRO CHECK USE"
+#define PLUGIN_VERSION      "1.0"
+#define PLUGIN_URL          "https://zegod.cn"
+
+public Plugin myinfo =
+{
+	name 		= PLUGIN_NAME,
+	author 		= PLUGIN_AUTHOR,
+	description = PLUGIN_DESCRIPTION,
+	version 	= PLUGIN_VERSION,
+	url 		= PLUGIN_URL
+};
+
+//////////////////////////////
+//          INCLUDES        //
+//////////////////////////////
 #include <sourcemod>
 #include <sdktools>
 #include <rainsfield>
 
+//////////////////////////////
+//          DEFINE          //
+//////////////////////////////
 float afPlayerAverageSpeed[65];
 float afPlayerAverageJumps[65];
-
 int aiPlayerJumps[65];
 int aiPlayerLastJumps[65][30];
 int aiPlayerLastPos[65];
-
 float afPlayerAveragePerfJumps[65];
-
 bool bHoldingJump[65];
 bool bLastOnGround[65];
 bool SuspectTag[65];
-
-public Plugin myinfo =
-{
-	name = " EXG BHOP CHECK",
-	author = "Rainsfield&WackoD&EXGNullab",
-	description = "For Server MACRO CHECK USE",
-	version = "1.0",
-	url = "https://zegod.cn"
-};
 
 void ArrayReset()
 {
@@ -83,10 +99,12 @@ public void OnPluginStart()
 	RegAdminCmd("sm_bhc",	Command_BhopCheck,				ADMFLAG_GENERIC);
 	RegAdminCmd("sm_bhcl",	Command_BhopCheck_SuspectList,	ADMFLAG_GENERIC);
 }
+
 public void OnMapStart()
 {
 	ArrayReset();
 }
+
 public void OnPlayerJump(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(GetEventInt(event,"userid"));
@@ -107,6 +125,7 @@ public void OnPlayerJump(Event event, const char[] name, bool dontBroadcast)
 
 
 }
+
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon)
 {
 	if(!IsClientInGame(client))	return Plugin_Continue;
@@ -138,6 +157,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 	}
 	return Plugin_Continue;
 }
+
 Action Command_BhopCheck_SuspectList(int client,int args)
 {
 	char name[64];

@@ -1,6 +1,29 @@
+#pragma semicolon 1
+#pragma newdecls required
+#pragma dynamic 131072 
 
+//////////////////////////////
+//    PLUGIN DEFINITION     //
+//////////////////////////////
+#define PLUGIN_NAME         "EXG_Zombie_Escape_MISC"
+#define PLUGIN_AUTHOR       "Rainsfield&WackoD&EXGNullable"
+#define PLUGIN_DESCRIPTION  "EXG ZombieEscape Rainsfield's Branch Plugins Miscellous"
+#define PLUGIN_VERSION      "1.0"
+#define PLUGIN_URL          "https://zegod.cn"
+
+public Plugin myinfo =
+{
+	name 		= PLUGIN_NAME,
+	author 		= PLUGIN_AUTHOR,
+	description = PLUGIN_DESCRIPTION,
+	version 	= PLUGIN_VERSION,
+	url 		= PLUGIN_URL
+};
+
+//////////////////////////////
+//          INCLUDES        //
+//////////////////////////////
 #include <sdkhooks>
-//#include <json>
 #include <outputinfo>
 #include <zombiereloaded>
 #include <store>
@@ -12,21 +35,19 @@
 #include <mostactive>
 #include <sourcecomms>
 #include <smlib2>
-#pragma semicolon 1
-#pragma newdecls required
+//#include <json>
+
 #include "zescape/entwatchedit.h"
 #include "zescape/weaponedit.h"
 #include "zescape/zelevel.h"
 #include "zescape/leaderspr.h"
 #include "zescape/basic_func.h"
+
+//////////////////////////////
+//          DEFINE          //
+//////////////////////////////
 bool g_pStore;
-public Plugin myinfo = {
-	name = " EXG_Zombie_Escape_MISC",
-	author = "Rainsfield&WackoD&EXGNullable",
-	description = "EXG ZombieEscape Rainsfield's Branch Plugins Miscellous",
-	version = "1.0",
-	url = "https://zegod.cn"
-};
+
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 
@@ -78,17 +99,18 @@ public void OnMapStart()
 	LevelOnMapStart();
 	LeaderSpriteOnMapStart();
 }
+
 public void OnEntityCreated(int entity, const char[] classname)
 {
 	EWEditOnEntityCreated(entity, classname);
 	LevelOnEntityCreated(entity,classname);
 }
 
-
 public void OnRoundStart(Event event, const char[] name, bool dontBroadcast)
 {
 	LeaderSpriteOnRoundStart();
 }
+
 public void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
 {
 	LevelOnRoundEnd();
@@ -99,10 +121,12 @@ public void OnClientDisconnect(int client)
 	EWEditOnClientDisconnect(client);
 	WeaponEditOnClientDisconnect(client);
 }
+
 public void OnClientPostAdminCheck(int client)
 {
 
 }
+
 public Action OnClientSayCommand(int client, const char[] command, const char[] sArgs)
 {
 	if(client<=0||client>64)	return Plugin_Continue;
