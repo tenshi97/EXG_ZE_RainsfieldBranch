@@ -3,454 +3,577 @@
 	"EW_Tag"
 	{
 		"en" 	"[EntWatch]"
+		"chi" 	"[地图神器]"
 	}
 	"Welcome"
 	{
 		"en" 	"The current map is supported by this plugin."
+		"chi"	"当前地图支持本插件"
 	}
 	"Use"
 	{
 		"en" 	"used"
+		"chi"	"使用了神器"
+	}
+	"Use First"
+	{
+		"en" 	"used first ability"
+		"chi"	"使用的第一能力"
+	}
+	"Use Second"
+	{
+		"en" 	"used second ability"
+		"chi"	"使用的第二能力"
 	}
 	"Pickup"
 	{
 		"en" 	"has picked up"
+		"chi"	"捡起了神器"
 	}
 	"Drop"
 	{
 		"en" 	"has dropped"
+		"chi"	"丢掉了神器"
 	}
 	"Death"
 	{
 		"en" 	"has died with"
+		"chi"	"死亡时带着神器"
 	}
 	"Death and drop"
 	{
 		"en" 	"has died and dropped"
+		"chi"	"死亡时带着神器"
 	}
 	"Disconnect"
 	{
 		"en" 	"disconnected with"
+		"chi"	"离开游戏时带着神器"
 	}
 	"Disconnect and drop"
 	{
 		"en" 	"disconnected and dropped"
+		"chi"	"离开游戏时带着神器"
 	}
 	"Enabled"
 	{
 		"en" 	"Enabled"
+		"chi"	"已启用"
 	}
 	"Disabled"
 	{
 		"en" 	"Disabled"
+		"chi"	"已禁用"
 	}
 	"Hud"
 	{
 		"en" 	"The HUD is now"
+		"chi"	"神器面板"
 	}
 	"Hud Position"
 	{
 		"en" 	"HUD Position"
+		"chi"	"神器面板位置"
 	}
 	"Hud Color"
 	{
 		"en" 	"HUD Color"
+		"chi"	"神器面板颜色"
 	}
 	"Wrong"
 	{
 		"en" 	"Wrong"
+		"chi"	"错误的"
 	}
 	"Saved"
 	{
 		"en" 	"Saved"
+		"chi"	"已保存"
 	}
 	"Usage"
 	{
 		"en" 	"Usage"
+		"chi"	"用法"
 	}
 	"Restricted"
 	{
 		"en" 	"restricted"
+		"chi"	"封禁玩家"
 	}
 	"Unrestricted"
 	{
 		"en" 	"unrestricted"
+		"chi"	"解除封禁玩家"
 	}
 	"Duration"
 	{
 		"en" 	"Duration"
+		"chi"	"时间"
 	}
 	"EBan Duration for"
 	{
 		"en" 	"EBan Duration for"
+		"chi"	"EBan时间"
 	}
 	"EBan Reason for"
 	{
 		"en" 	"EBan Reason for"
+		"chi"	"EBan原因"
 	}
 	"Temporary"
 	{
 		"en" 	"Temporary"
+		"chi"	"暂时"
 	}
 	"Permanently"
 	{
 		"en" 	"Permanently"
+		"chi"	"永久"
 	}
 	"For Minutes"
 	{
 		"#format"	"{1:i}"
 		"en" 	"for {1} minutes"
+		"chi" 	"持续 {1} 分钟"
 	}
 	"Issued"
 	{
 		"en" 	"Issued"
+		"chi"	"到期时间"
 	}
 	"Reason"
 	{
 		"en" 	"Reason"
+		"chi"	"原因"
 	}
 	"Currently Eban"
 	{
 		"en" 	"Currently e-banned"
+		"chi"	"正处于EBan"
 	}
 	"Player"
 	{
 		"en" 	"Player"
+		"chi"	"玩家"
 	}
 	"Admin"
 	{
 		"en" 	"Admin"
+		"chi"	"EBan管理员"
 	}
 	"No EBans"
 	{
 		"en" 	"No EBans"
+		"chi"	"无EBan玩家"
 	}
 	"No owner"
 	{
 		"en" 	"No owner"
+		"chi"	"无拥有者"
 	}
 	"No Receivers"
 	{
 		"en" 	"No Receivers"
+		"chi"	"无接收者"
 	}
 	"No Players"
 	{
 		"en" 	"No Players"
+		"chi"	"无已离开的玩家"
 	}
 	"Already EBanned"
 	{
 		"en" 	"Already EBanned"
+		"chi"	"已封禁神器权限"
 	}
 	"Already UnEBanned"
 	{
 		"en" 	"Already UnEBanned"
+		"chi"	"已解封神器权限"
 	}
 	"Restricted By"
 	{
 		"en" 	"restricted by"
+		"chi"	"受限制的"
 	}
 	"Invalid item name"
 	{
 		"en" 	"Invalid item name"
+		"chi"	"项目名称无效"
 	}
 	"Has a Restrict"
 	{
 		"en" 	"has a restrict"
+		"chi"	"有一个限制"
 	}
 	"Transfered all items"
 	{
 		"en" 	"transfered all items from"
+		"chi"	"转移玩家神器"
 	}
 	"Transfered"
 	{
 		"en" 	"transfered"
+		"chi"	"转移神器"
 	}
 	"Differs team"
 	{
 		"en" 	"The receiver team differs from the target team"
+		"chi"	"接收方团队与目标团队不同"
 	}
 	"Already owns"
 	{
 		"en" 	"The receiver already owns this item"
+		"chi"	"接收者已拥有此项目"
 	}
 	"Target has no items"
 	{
 		"en" 	"Target has no items"
+		"chi"	"目标没有项目"
 	}
 	"EW to"
 	{
 		"en" 	"to"
+		"chi"	"到"
 	}
 	"Item targets"
 	{
 		"en" 	"Item targets"
+		"chi"	"项目目标"
 	}
 	"Item to Spawn"
 	{
 		"en" 	"Item to Spawn"
+		"chi"	"要生成的项目"
 	}
 	"Player is not valid anymore"
 	{
 		"en" 	"Player is not valid anymore"
+		"chi"	"非法的玩家"
 	}
 	"Receiver is not valid anymore"
 	{
 		"en" 	"Receiver is not valid anymore"
+		"chi"	"接收方不再有效"
 	}
 	"The player must be in one of the teams"
 	{
 		"en" 	"The player must be in one of the teams"
+		"chi"	"玩家必须在其中一方阵营"
 	}
 	"PT configuration not found"
 	{
 		"en" 	"The item has no corresponding configuration"
+		"chi"	"该项没有相应的配置"
 	}
 	"PT configuration Error"
 	{
 		"en" 	"Point_Template not found"
+		"chi"	"找不到Point_Template"
 	}
 	"Item not available"
 	{
 		"en" 	"Item is no longer available"
+		"chi"	"项目不再可用"
 	}
 	"EntWatch Commands"
 	{
-		"en" 	"EntWatch Commands"
+		"en" 	"EntWatch"
+		"chi"	"神器管理"
 	}
 	"EntWatch Commands Title"
 	{
-		"en" 	"[EntWatch] Commands"
+		"en" 	"[EntWatch] Menu"
+		"chi"	"神器管理菜单"
 	}
 	"List of Items"
 	{
 		"en" 	"List of Items"
+		"chi"	"在线神器"
 	}
 	"EBan a Player"
 	{
 		"en" 	"EBan a Player"
+		"chi"	"封禁玩家"
 	}
 	"List of EBan"
 	{
 		"en" 	"List of EBan"
+		"chi"	"查看封禁玩家"
 	}
 	"Spawn an Item"
 	{
 		"en" 	"Spawn an Item"
+		"chi"	"生成项目"
 	}
 	"Restrict Player"
 	{
 		"en" 	"Restrict player"
+		"chi"	"玩家列表"
 	}
 	"EBan Info"
 	{
 		"en" 	"EBan Info"
+		"chi"	"封禁信息"
 	}
 	"Transfer Item"
 	{
 		"en" 	"Transfer Item"
+		"chi"	"转移神器"
 	}
 	"UnEBan a Player"
 	{
 		"en" 	"UnEBan a Player"
+		"chi"	"解封神器权限玩家"
 	}
 	"Receiver of the Item"
 	{
 		"en" 	"Receiver of the Item"
+		"chi"	"转移神器"
 	}
 	"Item Info"
 	{
 		"en" 	"Item Info"
+		"chi"	"神器信息"
 	}
 	"Owner"
 	{
 		"en" 	"Owner"
+		"chi"	"拥有者"
 	}
 	"Mode"
 	{
 		"en" 	"Mode"
+		"chi"	"模式"
 	}
 	"CoolDown"
 	{
 		"en" 	"CoolDown"
+		"chi"	"CD型"
 	}
 	"Max Uses"
 	{
 		"en" 	"Max Uses"
+		"chi"	"最大次数型"
 	}
 	"Mode Default"
 	{
 		"en" 	"Spam protection only"
+		"chi"	"仅提示型"
 	}
 	"Mode 2"
 	{
 		"en" 	"Cooldowns"
+		"chi"	"CD型"
 	}
 	"Mode 3"
 	{
 		"en" 	"Limited uses"
+		"chi"	"有限次数型"
 	}
 	"Mode 4"
 	{
 		"en" 	"Limited uses with cooldowns"
+		"chi"	"有限次数+CD型"
 	}
 	"Mode 5"
 	{
 		"en" 	"Cooldowns after multiple uses"
+		"chi"	"多次使用次数+CD型"
 	}
 	"Minutes"
 	{
 		"en" 	"Minutes"
+		"chi"	"分"
 	}
 	"Hour"
 	{
 		"en" 	"Hour"
+		"chi"	"时"
 	}
 	"Day"
 	{
 		"en" 	"Day"
+		"chi"	"天"
 	}
 	"Week"
 	{
 		"en" 	"Week"
+		"chi"	"周"
 	}
 	"Month"
 	{
 		"en" 	"Month"
+		"chi"	"月"
 	}
 	"Item misuse"
 	{
 		"en" 	"Item misuse"
+		"chi"	"神器误用"
 	}
 	"Trolling on purpose"
 	{
 		"en" 	"Trolling on purpose"
+		"chi"	"故意使用神器"
 	}
 	"Throwing item away"
 	{
 		"en" 	"Throwing item away"
+		"chi"	"乱丢神器"
 	}
 	"Not using an item"
 	{
 		"en" 	"Not using an item"
+		"chi"	"未及时使用神器"
 	}
 	"Trimming team"
 	{
 		"en" 	"Trimming team"
+		"chi"	"卖队友"
 	}
 	"Spamming an item"
 	{
 		"en" 	"Spamming an item"
+		"chi"	"发送垃圾消息"
 	}
 	"Not listening to leader"
 	{
 		"en" 	"Not listening to leader"
+		"chi"	"未听从指挥"
 	}
 	"Other"
 	{
 		"en" 	"Other"
+		"chi"	"其他"
 	}
 	"Expires"
 	{
 		"en" 	"Expires"
+		"chi"	"到期"
 	}
 	"On Map Change"
 	{
 		"en" 	"On Map Change"
+		"chi"	"地图更换时"
 	}
 	"Never"
 	{
 		"en" 	"Never"
+		"chi"	"从未"
 	}
 	"Spawn Item"
 	{
 		"en" 	"spawn item"
+		"chi"	"重生项目"
 	}
 	"On Player"
 	{
 		"en" 	"on player"
+		"chi"	"在玩家上"
 	}
 	"List to Spawn"
 	{
 		"en" 	"List to Spawn"
+		"chi"	"要生成的列表"
 	}
 	"Strip Weapon"
 	{
 		"en" 	"Strip Weapon"
+		"chi"	"Stp武器"
 	}
 	"Not Strip Weapon"
 	{
 		"en" 	"Not Strip Weapon"
+		"chi"	"无Stp武器"
 	}
 	"Recipient of a New Item"
 	{
 		"en" 	"Recipient of a New Item"
+		"chi"	"新项目的收件人"
 	}
 	"No Items for Spawn"
 	{
 		"en" 	"No Items for Spawn"
+		"chi"	"没有要生成的项目"
 	}
 	"Is not restricted"
 	{
 		"en" 	"is not restricted"
+		"chi"	"不受限制"
 	}
 	"Status restricted"
 	{
 		"en" 	"You are currently restricted"
+		"chi"	"您当前受到限制"
 	}
 	"Status unrestricted"
 	{
 		"en" 	"You are currently unrestricted"
+		"chi"	"您当前不受限制"
 	}
 	"Default"
 	{
 		"en" 	"Default"
+		"chi"	"默认"
 	}
 	"Hud Names"
 	{
 		"en" 	"Names in HUD are"
+		"chi"	"神器面板中的名称为"
 	}
 	"Offline EBan"
 	{
 		"en" 	"Offine EBan"
+		"chi"	"已离开的玩家"
 	}
 	"Offline Restricted"
 	{
 		"en" 	"offline restricted"
+		"chi"	"封禁神器权限且离线"
 	}
 	"List of Disconnected Players"
 	{
 		"en" 	"List of Disconnected Players"
+		"chi"	"查看离开的玩家"
 	}
 	"Minutes Ago"
 	{
 		"en" 	"minutes ago"
+		"chi"	"分钟前"
 	}
 	"Info Offline Player"
 	{
 		"en" 	"Info Offline Player"
+		"chi"	"离线的玩家"
 	}
 	"Came out"
 	{
 		"en" 	"Came out"
+		"chi"	"出来了"
 	}
 	"Last Item"
 	{
 		"en" 	"Last Item"
+		"chi"	"最后的项目"
 	}
 	"Not have permission pEBan"
 	{
 		"en" 	"You do not have permission to permanently EBan"
+		"chi"	"你没有永久EBan玩家的权限"
 	}
 	"Not have permission lEBan"
 	{
 		"en" 	"You do not have permission to EBan longer than 12 hours"
+		"chi"	"你没有删除EBan超过12小时玩家的权限"
 	}
 	"Not have permission rEBan"
 	{
 		"en" 	"You do not have permission to remove permanent EBans"
+		"chi"	"你没有删除永久EBan玩家的权限"
 	}
 	"Use Priority"
 	{
 		"en" 	"Force use function"
+		"chi"	"强制使用功能"
 	}
 }
