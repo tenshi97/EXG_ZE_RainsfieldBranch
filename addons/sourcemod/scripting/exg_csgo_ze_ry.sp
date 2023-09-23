@@ -41,25 +41,6 @@ public Plugin myinfo =
 #include <weddings>
 //#include <json>
 
-#include "zescape/basic_func.h"
-#include "zescape/event.h"
-#include "zescape/db.h"
-#include "zescape/map_adm.h"
-#include "zescape/map_info.h"
-#include "zescape/map_room.h"
-#include "zescape/nominate.h"
-#include "zescape/rtv.h"
-#include "zescape/round.h"
-#include "zescape/fly.h"
-#include "zescape/trigger_output.h"
-#include "zescape/voice_chat.h"
-#include "zescape/spec.h"
-#include "zescape/time.h"
-#include "zescape/mission.h"
-#include "zescape/quest.h"
-#include "zescape/hd.h"
-//#include "zescape/entwatchedit.h"
-
 //////////////////////////////
 //          DEFINE          //
 //////////////////////////////
@@ -227,3 +208,22 @@ public void EXGZE_OnLevelSet(any level[sizeof(LEVEL_LOG)])
 	MissionOnLevelSet(level);
 	QuestOnLevelSet(level);
 }
+
+#include "zescape/basic_func.h"
+#include "zescape/event.h"
+#include "zescape/db.h"
+#include "zescape/map_adm.h"
+#include "zescape/map_info.h"
+#include "zescape/map_room.h"
+#include "zescape/nominate.h"
+#include "zescape/rtv.h"
+#include "zescape/round.h"
+#include "zescape/fly.h"
+#include "zescape/trigger_output.h"
+#include "zescape/voice_chat.h"
+#include "zescape/spec.h"
+#include "zescape/time.h"
+#include "zescape/mission.h"
+#include "zescape/quest.h"
+#include "zescape/hd.h"
+//#include "zescape/entwatchedit.h"

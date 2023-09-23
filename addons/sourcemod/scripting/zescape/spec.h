@@ -54,11 +54,10 @@ Action SpecCommand(int client,int args)
 				PrintToChat(client," \x04[观察系统] \x07不能观察自己!");
 				return Plugin_Handled;
 			}
-
+			ForcePlayerSuicide(client);
 			if (GetClientTeam(client) != 1)
 			{
 				ChangeClientTeam(client, 1);
-				ForcePlayerSuicide(client);
 			}
 			DataPack dp = new DataPack();
 			dp.WriteCell(client);
@@ -85,6 +84,7 @@ int SpecMenuHandler(Menu menu, MenuAction action, int client, int param) {
 			PrintToChat(client," \x04[观察系统] \x07不能观察自己!");
 			return;
 		}
+		ForcePlayerSuicide(client);
 		if (GetClientTeam(client) != 1)
 		{
 			ChangeClientTeam(client, 1);

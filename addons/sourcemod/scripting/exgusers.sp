@@ -4,29 +4,26 @@
 //////////////////////////////
 //    PLUGIN DEFINITION     //
 //////////////////////////////
-#define PLUGIN_NAME         "EXG_CSGO_Users"
-#define PLUGIN_AUTHOR       "Rainsfield&WackoD&ExgNullable"
-#define PLUGIN_DESCRIPTION  "EXG CSGO SERVER USER SYSTEM"
-#define PLUGIN_VERSION      "1.0"
-#define PLUGIN_URL          "https://zegod.cn"
-
+#define PLUGIN_NAME        "EXG_CSGO_Users"
+#define PLUGIN_AUTHOR      "Rainsfield&WackoD&ExgNullable"
+#define PLUGIN_DESCRIPTION "EXG CSGO SERVER USER SYSTEM"
+#define PLUGIN_VERSION     "1.0"
+#define PLUGIN_URL         "https://zegod.cn"
 public Plugin myinfo =
 {
-	name 		= PLUGIN_NAME,
-	author 		= PLUGIN_AUTHOR,
+	name        = PLUGIN_NAME,
+	author      = PLUGIN_AUTHOR,
 	description = PLUGIN_DESCRIPTION,
-	version 	= PLUGIN_VERSION,
-	url 		= PLUGIN_URL
+	version     = PLUGIN_VERSION,
+	url         = PLUGIN_URL
 };
 
 //////////////////////////////
 //          INCLUDES        //
 //////////////////////////////
 #include <clientprefs>
-#include <cstrike>
-#include <sdkhooks>
-#include <sdktools>
 #include <csgopwapi>
+#include <cstrike>
 #include <exg_group_tag>
 #include <herolevel>
 #include <leader>
@@ -34,6 +31,8 @@ public Plugin myinfo =
 #include <nextmap>
 #include <outputinfo>
 #include <rainsfield>
+#include <sdkhooks>
+#include <sdktools>
 #include <server_redirect>
 #include <store>
 #include <timers>
@@ -41,28 +40,13 @@ public Plugin myinfo =
 //#include <json>
 //#include <outputinfo>
 
-#include "exgusers/users.h"
-#include "exgusers/adminlog.h"
-#include "exgusers/announcement.h"
-#include "exgusers/basic_func.h"
-#include "exgusers/db.h"
-#include "exgusers/monitor.h"
-#include "exgusers/nametag.h"
-#include "exgusers/nomban.h"
-#include "exgusers/profitban.h"
-#include "exgusers/say.h"
-#include "exgusers/server.h"
-#include "exgusers/storeplus.h"
-#include "exgusers/timer.h"
-#include "exgusers/uadmin.h"
-
 //////////////////////////////
 //          DEFINE          //
 //////////////////////////////
-bool g_pStore = false;
+bool       g_pStore = false;
 SERVER_LOG g_current_server;
-const int TIME_PERMANENT = 2000000000;
-int pay_limit[65] = {0};
+const int  TIME_PERMANENT = 2000000000;
+int        pay_limit[65]  = { 0 };
 
 public void OnLibraryAdded(const char[] name)
 {
@@ -135,3 +119,18 @@ public void RY_Daily_TimerCheck_Update(int start_time, int new_time, int days_de
 {
 	ClearPayLimit();
 }
+
+#include "exgusers/users.h"
+#include "exgusers/adminlog.h"
+#include "exgusers/announcement.h"
+#include "exgusers/basic_func.h"
+#include "exgusers/db.h"
+#include "exgusers/monitor.h"
+#include "exgusers/nametag.h"
+#include "exgusers/nomban.h"
+#include "exgusers/profitban.h"
+#include "exgusers/say.h"
+#include "exgusers/server.h"
+#include "exgusers/storeplus.h"
+#include "exgusers/timer.h"
+#include "exgusers/uadmin.h"

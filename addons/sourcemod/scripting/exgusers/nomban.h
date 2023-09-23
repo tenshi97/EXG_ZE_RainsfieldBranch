@@ -111,7 +111,7 @@ void RemoveNomBanLog(int client,int adminclient)
 	char pName[64];
 	char adminName[64];
 	GetClientName(client, pName, sizeof(pName));
-	GetClientName(adminclient, adminName,s izeof(adminName));
+	GetClientName(adminclient, adminName,sizeof(adminName));
 	PrintToChatAll(" \x05[订图封禁] \x01玩家 \x07%s \x01被管理员 \x07%s \x01解除订图封禁", pName, adminName);
 	g_Users[client].nomban = 0;
 	g_Users[client].nomban_expiretime = 0;
