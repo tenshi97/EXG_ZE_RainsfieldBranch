@@ -164,45 +164,41 @@ int CrateRewardNum[]=
 }
 int MissionRewardLevels[] =
 {
-	10,25,40,50,60,75,90,100,110,125,140,150
+	10,20,30,40,50,60,70,80,90,100
 };
 int MissionRewardCredits[] =
 {
-	1000,2000,2000,2000,2000,3000,3000,3000,3000,4000,4000,4000
+	2000,2000,3000,3000,4000,4000,4000,5000,5000,10000
 };
 int MissionRewardCrates[] =
 {
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	0,0,0,0,0,0,0,0,0,0
 };
 char MissionRewardItems[][] =
 {
 	"none",//10
-	"uid_mvp_sound_s6mvp1",//25
-	"none",//40
-	"uid_model_kagamine",//50
-	"none",//60
-	"uid_mvp_sound_s6mvp2",//75
+	"uid_mvp_s7mvp1",//20
+	"none",//30
+	"uid_mvp_s7mvp2",//40
+	"uid_model_alice",//50
+	"uid_mvp_sound_s7mvp3",//60
+	"none",//70
+	"uid_mvp_sound_s7mvp4",//80
 	"none",//90
-	"none",//100
-	"none",//110
-	"uid_mvp_sound_s6mvp3",//125
-	"uid_mvp_sound_s6mvp4",//140
-	"uid_model_hqs_mls"//150
+	"uid_model_cheshire"//100
 };
 char MissionRewardInfos[][] =
 {
-	"LV10:积分*1000",
-	"LV25:MVP音乐:踊/积分*2000",
-	"LV40:积分*2000",
-	"LV50:人物模型-镜音铃/积分*2000",
-	"LV60:积分*2000",
-	"LV75:MVP音乐:Nevada/积分*3000",
-	"LV90:积分*3000",
-	"积分*3000",
-	"LV110:积分*3000",
-	"LV125:MVP音乐:欢乐斗地主/积分*4000",
-	"LV140:MVP音乐:TICKING AWAY/积分*4000",
-	"LV150:人物模型-花骑士魔理沙/积分*4000"
+	"LV10:积分*2000",
+	"LV20:积分*2000/MVP音乐:Vagrant",
+	"LV30:积分*3000",
+	"LV40:积分*3000/MVP音乐:Timebomb",
+	"LV50:积分*4000/人物模型:爱丽丝",
+	"LV60:积分*4000/MVP音乐:Fallen",
+	"LV70:积分*4000",
+	"LV80:积分*5000/MVP音乐:1,000,000 times",
+	"LV90:积分*5000",
+	"LV100:积分*10000/人物模型:柴郡"
 };
 char Dragon_Map[][] = 
 {
@@ -1031,8 +1027,8 @@ void MissionMenuBuild(int client)
 	}
 	Format(buffer,sizeof(buffer),"赛季活动\n%s\n%s\nLV.%d/%d\nEXP:%d/%d 今日通关经验:%d/%d",Current_Mission.cnname,Current_Mission.name,playermission_list[client].lvl,Current_Mission.max_level,playermission_list[client].exp,Current_Mission.level_exp,playermission_list[client].dexp,dexp_max);
 	menu.SetTitle(buffer);
-	menu.AddItem("","日常任务[10月10日8点作战结束]");
-	menu.AddItem("","周常任务[10月10日8点作战结束]");
+	menu.AddItem("","日常任务[11月18日8点作战结束]");
+	menu.AddItem("","周常任务[11月18日8点作战结束]");
 	menu.AddItem("","奖励兑换");
 	menu.AddItem("","神秘商店[暂未开放]",ITEMDRAW_DISABLED);
 	menu.AddItem("","挑战任务[暂未开放]",ITEMDRAW_DISABLED);
@@ -1347,7 +1343,7 @@ void GrantExp(int client,int exp)
 		{
 			playermission_list[client].exp=0;
 			playermission_list[client].csave+=5;
-			PrintToChat(client," \x05[任务系统]\x01您在\x09%s\x01中溢出的经验已转换为5个急救包",Current_Mission.cnname);		
+			//PrintToChat(client," \x05[任务系统]\x01您在\x09%s\x01中溢出的经验已转换为5个急救包",Current_Mission.cnname);		
 		}
 	}
 	UpdatePlayerMissionInfo(client);
