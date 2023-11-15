@@ -220,8 +220,8 @@ PlayerMissionInfo playermission_list[65];
 PlayerMissionInfo nullpmi;
 Missions Current_Mission;
 LEVEL_LOG Mission_Current_Level;
-int g_Daily_Task_Exp_Factor = 1;
-int g_Weekly_Task_Exp_Factor = 1;
+int g_Daily_Task_Exp_Factor = 2;
+int g_Weekly_Task_Exp_Factor = 2;
 int round_starttime;
 int round_endtime;
 const int mission_lowest_playernum = 20;
@@ -1001,6 +1001,7 @@ Action MissionMenuCommand(int client,int args)
 		return Plugin_Handled;
 	}
 	MissionMenuBuild(client);
+	PrintToConsole(client, "当前任务经验倍率为 %d 倍", g_Weekly_Task_Exp_Factor );
 	return Plugin_Handled;
 }
 
