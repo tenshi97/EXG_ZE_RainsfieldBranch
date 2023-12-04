@@ -112,7 +112,7 @@ public void OnPlayerJump(Event event, const char[] name, bool dontBroadcast)
 	GetEntPropVector(client,Prop_Data,"m_vecVelocity",player_velocity);
 	player_velocity[2]=0.0;			//Let the Velocity Z Component be zero
 	float player_speed = GetVectorLength(player_velocity);
-	afPlayerAverageJumps[client] = (afPlayerAverageJumps[client]*9.0 + float(aiPlayerJumps[client]))/10.0
+	afPlayerAverageJumps[client] = (afPlayerAverageJumps[client]*9.0 + float(aiPlayerJumps[client]))/10.0;
 	afPlayerAverageSpeed[client]=(player_speed+9.0*afPlayerAverageSpeed[client])/(10.0);
 	aiPlayerLastJumps[client][aiPlayerLastPos[client]] = aiPlayerJumps[client];
 	aiPlayerLastPos[client]++;

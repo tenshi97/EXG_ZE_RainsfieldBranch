@@ -323,7 +323,17 @@ Action Command_CPPay(int client,int args)
 	PrintToChat(client," \x05[积分转账] \x01找不到您的CP!可能您是一条单身狗,或您的CP不在线!")
 	return Plugin_Handled;
 }
-
+bool Pay_IsAdmin(int client)
+{
+	if(GetUserFlagBits(client) & ADMFLAG_GENERIC)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
 Action Command_Pay(int client,int args)
 {
 	if(GetTime()<=Store_GetClientDataProtect(client))
@@ -373,7 +383,7 @@ Action Command_Pay(int client,int args)
 		PrintToChat(client," \x05[积分转账] \x01你没有那么多积分,别想啦!");
 		return Plugin_Handled;
 	}
-	if(pay_credits+g_Users_sp[client].pay_daily>10000)
+	if(pay_credits+g_Users_sp[client].pay_daily>10000&&(!Pay_IsAdmin(receiver)))
 	{
 		PrintToChat(client," \x05[积分转账] \x01你的每日转账上限不足以满足此次积分转账!");
 		return Plugin_Handled;
@@ -391,7 +401,10 @@ Action Command_Pay(int client,int args)
 	Format(reason,sizeof(reason),"普通转账[接受][%d-->%d]",sender_uid,receiver_uid);
 	Store_SetClientCredits(receiver,credits_receiver+RoundToFloor(pay_credits*0.9),reason);
 	PrintToChatAll(" \x05[积分转账] \x01 \x05%s \x01向 \x05%s \x01转账了\x07%d \x01积分,这其中恐怕存在什么交易!",sender_name,receiver_name,RoundToFloor(pay_credits*0.9));
-	g_Users_sp[client].pay_daily+=pay_credits;
+	if(!Pay_IsAdmin(receiver))
+	{
+		g_Users_sp[client].pay_daily+=pay_credits;
+	}
 	StorePlus_PlayerDataProtect[client] = GetTime()+60;
 	UpdateUserInfo(client);
 	return Plugin_Handled;
