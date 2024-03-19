@@ -96,23 +96,43 @@ Action Command_Gift(int client,int args)
 		PrintToChat(client," \x05[商店系统] \x01存在多个ID包含关键字的用户!");
 		return Plugin_Handled;
 	}
-	if(credits<target_count*credits_give)
+	bool includeSelf = false;
+	for(int i=0;i<target_count;i++){
+		int target = target_list[i];
+		if(target == client){
+			includeSelf = true;
+			break;
+		}
+	}
+	int realCount = target_count;
+	if(includeSelf){
+		realCount -= 1;
+	}
+	int need = realCount*credits_give;
+	if(credits<need)
 	{
-		PrintToChat(client," \x05[商店系统] \x01你的积分不够发放!");
+		PrintToChat(client," \x05[商店系统] \x01你的积分不够发放! 需要 %d", need);
 		return Plugin_Handled;
 	}
 	int receiver_credits;
 	char sender_name[64];
 	GetClientName(client,sender_name,64);
 	char receiver_name[64];
+	Store_SetClientCredits(client,credits-need,"sm_gift 赠出");
 	for(int i=0;i<target_count;i++)
 	{
-		receiver_credits = Store_GetClientCredits(target_list[i]);
-		GetClientName(target_list[i],receiver_name,64);
-		Store_SetClientCredits(target_list[i],receiver_credits+credits_give,"赠送");
-		PrintToChatAll(" \x05[商店系统] \x01玩家\x07%s\x01赠送给\x07%s %d\x01积分",sender_name,receiver_name,credits_give);
+		int target = target_list[i];
+		if(target == client){
+			// 商店的现有的缺陷设计 不适合快速的对一个玩家进行加减，数据库会执行两次
+			PrintToChat(client," \x05[商店系统] \x01 发放跳过你自己");
+		}else{
+			GetClientName(target,receiver_name,64);
+			receiver_credits = Store_GetClientCredits(target);
+			Store_SetClientCredits(target,receiver_credits+credits_give,"来自gift赠送");
+			PrintToChatAll(" \x05[商店系统] \x01玩家\x07%s\x01赠送给\x07%s %d\x01积分",sender_name,receiver_name,credits_give);
+		}
 	}
-	Store_SetClientCredits(client,credits-target_count*credits_give,"赠出");
+	PrintToChat(client," \x05[商店系统] \x01 GIFT: 你扣掉了 %d 积分，发给了 %d 人",need ,realCount);
 	return Plugin_Handled;
 }
 
